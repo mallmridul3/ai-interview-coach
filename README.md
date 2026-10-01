@@ -2,20 +2,24 @@
 
 An intelligent, full-stack 1-on-1 Voice & Video Mock Interview Studio powered by Google Gemini. Evaluates not only what candidates say (STAR structure, technical accuracy, conciseness) but also how they present themselves (posture, eye contact, facial composure, speech pace, and filler words) with dynamic cross-turn adaptive learning.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmallmridul3%2Fai-interview-coach&env=GEMINI_API_KEY&envDescription=Google%20Gemini%20API%20Key)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mallmridul3/ai-interview-coach)
 
 ---
 
-## 🚀 Key Features
+## ⚡ 1-Click Deploy to Vercel (Fast & Recommended)
 
-* **1-on-1 Voice & Video Call Studio**: Direct camera and microphone feed, live audio waveform visualizer, interactive posture silhouette HUD, and 5 distinct interviewer personas with natural pre-synthesized speech.
-* **Multimodal Body Language & Posture Analysis**: Real-time vision evaluation detecting camera eye contact, spinal alignment, facial composure, and fidgeting.
-* **Adaptive AI Learning Engine**: Dynamically adapts subsequent interview questions to probe previous gaps, references past projects, and tracks cross-turn score progression.
-* **Executive Hiring Debrief**: Comprehensive multi-turn scorecard with radar charts, STAR breakdown, executive presence metrics, and 1-click export to PDF or Google Workspace (Drive, Sheets, Gmail).
+Click the button above or follow these 3 quick steps:
+👉 **[Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmallmridul3%2Fai-interview-coach&env=GEMINI_API_KEY&envDescription=Google%20Gemini%20API%20Key)**
+
+1. Sign in to [Vercel](https://vercel.com).
+2. Import repository `mallmridul3/ai-interview-coach` (or use the link above).
+3. Under **Environment Variables**, add `GEMINI_API_KEY` with your Google Gemini API key.
+4. Click **Deploy** — your app is live in seconds with serverless API functions and automatic CDN caching!
 
 ---
 
-## 🛠️ Deploy to Render (Free 24/7 Hosting)
+## 🛠️ Deploy to Render (Alternative)
 
 Click the button above or visit:
 👉 **[Deploy on Render](https://render.com/deploy?repo=https://github.com/mallmridul3/ai-interview-coach)**
