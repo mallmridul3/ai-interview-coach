@@ -204,3 +204,33 @@ export interface CandidateLearningMemory {
   lastActive: string;
 }
 
+export interface HiringStage {
+  id: string;
+  stageNumber: number;
+  name: string;
+  levelType: 'Online Assessment' | 'Phone Screen' | 'Technical Round' | 'System Design' | 'Behavioral & Culture' | 'Bar Raiser / Executive';
+  format: string;
+  durationMinutes: number;
+  interviewerProfile: string;
+  coreCompetencies: string[];
+  description: string;
+  typicalQuestions: string[];
+  tipsForSuccess: string[];
+  recommendedPersonaId?: string;
+  recommendedTrack?: InterviewTrack;
+}
+
+export interface CompanyHiringPipeline {
+  companyName: string;
+  normalizedName: string;
+  tagline?: string;
+  industry: string;
+  overview: string;
+  totalStages: number;
+  stages: HiringStage[];
+  cultureHighlights: string[];
+  evaluationPhilosophy: string;
+  typicalTimeline: string;
+}
+
+

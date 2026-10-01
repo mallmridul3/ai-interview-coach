@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "origin": "failed-assert",
+  "expected": "text \"Save Your Interview History\"",
+  "observed": "no element matched {\"text\":\"Save Your Interview History\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e69",
+        "source": {
+          "file": "src/components/SessionHistoryView.tsx",
+          "line": 196,
+          "column": 8
+        }
+      },
+      "action": "click"
+    }
+  ],
+  "id": "1790857174597-click-a03d6f1b",
+  "createdAt": 1790857174597,
+  "seen": 1,
+  "lastSeenAt": 1790857174597
+}

@@ -1091,6 +1091,74 @@ Provide a realistic, helpful, in-character interviewer response.
   }
 });
 
+// 2b-2. AI-Powered Company Hiring Process & Stage Pipeline Lookup
+app.post("/api/hiring-process/lookup", async (req, res) => {
+  const { companyName = "Tech Leader", roleTitle = "Software Engineer" } = req.body;
+
+  try {
+    const prompt = `You are a Principal Technical Recruiter and Head of Talent Acquisition with comprehensive insider knowledge of real-world hiring processes, interview loops, bar raiser standards, and technical screens across every global tech company, financial firm, consulting enterprise, and high-growth startup.
+
+Analyze the authentic hiring process specifically for:
+Company: "${companyName}"
+Role / Post: "${roleTitle}"
+
+Provide an authentic, highly detailed, real-world multi-stage hiring pipeline reflecting exactly how this specific company interviews and evaluates candidates. 
+For example:
+- If Amazon: include Online Assessment, Phone Screen, Coding Loop, System Design Loop, and Bar Raiser with 16 Leadership Principles.
+- If Google: include Recruiter Screen, Technical Screen, Coding Onsite 1 & 2, System Design, and Googleyness & Leadership.
+- If Meta: include CoderPad Technical Screen, Ninja Coding rounds, Pirate System Design, and Jedi Behavioral.
+- If Stripe: include Real-IDE screen, Integration & Bug Squash, Payment Ledger System Design, and Operating Principles.
+- If another company or startup: accurately reflect their real-world stages, format, duration, core values, typical questions, and evaluation philosophy.
+
+Return ONLY valid JSON matching this schema:
+{
+  "companyName": "${companyName}",
+  "normalizedName": "${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}",
+  "tagline": "Short compelling summary of company engineering / hiring standard",
+  "industry": "Industry domain",
+  "overview": "2-3 sentences explaining their distinct hiring philosophy and how they evaluate candidates",
+  "totalStages": 4,
+  "cultureHighlights": ["Core value 1", "Core value 2", "Core value 3", "Core value 4"],
+  "evaluationPhilosophy": "1-2 sentences on what decides a hire vs no-hire at this company",
+  "typicalTimeline": "e.g. 3 to 5 weeks from initial screen to offer",
+  "stages": [
+    {
+      "id": "co-s1",
+      "stageNumber": 1,
+      "name": "Stage 1: ...",
+      "levelType": "Phone Screen",
+      "format": "e.g. 45-Minute 1-on-1",
+      "durationMinutes": 45,
+      "interviewerProfile": "e.g. Senior Software Engineer",
+      "coreCompetencies": ["Competency 1", "Competency 2", "Competency 3"],
+      "description": "Clear description of what happens in this round",
+      "typicalQuestions": ["Question 1", "Question 2"],
+      "tipsForSuccess": ["Tip 1", "Tip 2"],
+      "recommendedPersonaId": "alex-mentor",
+      "recommendedTrack": "Technical & Problem Solving"
+    }
+  ]
+}`;
+
+    const response = await callGeminiWithRetry({
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const pipeline = JSON.parse(response.text || "{}");
+    if (!pipeline.stages || pipeline.stages.length === 0) {
+      throw new Error("No stages generated");
+    }
+
+    res.json({ pipeline });
+  } catch (error: any) {
+    console.warn("Dynamic hiring process lookup failed with Gemini:", error?.message);
+    res.status(500).json({ error: "Failed to generate dynamic hiring process" });
+  }
+});
+
 // 2c. Multimodal Video & Body Language Analysis with Gemini Vision
 app.post("/api/interview/analyze-body-language", async (req, res) => {
   const { imageBase64, question = "", durationSeconds = 60 } = req.body;

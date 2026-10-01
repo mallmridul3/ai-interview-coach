@@ -1,0 +1,18 @@
+{
+  "intents": {
+    "flow:drive-user-navigates-to-the-10-behavioral-question-ban": {
+      "declaredAt": 1790856468296,
+      "id": "flow:drive-user-navigates-to-the-10-behavioral-question-ban",
+      "state": "declared",
+      "statement": "User navigates to the 10 Behavioral question bank from the top navigation",
+      "status": "proposed",
+      "subject": "drive-user-navigates-to-the-10-behaviora",
+      "surface": {
+        "flow": "drive-user-navigates-to-the-10-behavioral-question-ban"
+      },
+      "updatedAt": 1790856468300
+    }
+  },
+  "subject": "drive-user-navigates-to-the-10-behaviora",
+  "version": 1
+}

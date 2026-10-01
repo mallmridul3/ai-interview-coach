@@ -12,14 +12,15 @@ import {
   ShieldCheck,
   User as UserIcon,
   LogOut,
-  LogIn
+  LogIn,
+  Building2
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
 
 interface HeaderProps {
-  currentTab: 'mock' | 'behavioral' | 'drills' | 'history';
-  onSelectTab: (tab: 'mock' | 'behavioral' | 'drills' | 'history') => void;
+  currentTab: 'mock' | 'behavioral' | 'drills' | 'history' | 'hiring-process';
+  onSelectTab: (tab: 'mock' | 'behavioral' | 'drills' | 'history' | 'hiring-process') => void;
   voiceEnabled: boolean;
   onToggleVoice: () => void;
   savedSessionsCount: number;
@@ -82,6 +83,19 @@ export const Header: React.FC<HeaderProps> = ({
               {isInterviewActive && (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1" />
               )}
+            </button>
+
+            <button
+              id="tab-hiring-process"
+              onClick={() => onSelectTab('hiring-process')}
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer ${
+                currentTab === 'hiring-process'
+                  ? 'bg-zinc-900 text-white shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+              }`}
+            >
+              <Building2 className="w-4 h-4 text-sky-500" />
+              <span>Hiring Process</span>
             </button>
 
             <button

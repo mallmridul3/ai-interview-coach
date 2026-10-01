@@ -1,0 +1,29 @@
+{
+  "entries": [
+    {
+      "id": "flow:drive-user-navigates-to-the-10-behavioral-question-ban",
+      "statement": "User navigates to the 10 Behavioral question bank from the top navigati…",
+      "status": "proposed",
+      "subject": "drive-user-navigates-to-the-10-behaviora"
+    },
+    {
+      "id": "inline:candidate-clicks-the-star-story-vault-tab-to-vie-ce81e8d8",
+      "statement": "Candidate clicks the STAR Story Vault tab to view their saved stories",
+      "status": "proposed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:candidate-switches-back-to-the-10-core-behaviora-476097f4",
+      "statement": "Candidate switches back to the 10 Core Behavioral Questions tab",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:user-navigates-to-the-10-behavioral-question-ban-d28bcbae",
+      "statement": "User navigates to the 10 Behavioral question bank from the top navigati…",
+      "status": "proposed",
+      "subject": "unsorted"
+    }
+  ],
+  "version": 1
+}

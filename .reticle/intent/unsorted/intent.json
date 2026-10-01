@@ -1,0 +1,55 @@
+{
+  "intents": {
+    "inline:candidate-clicks-the-star-story-vault-tab-to-vie-ce81e8d8": {
+      "binding": {
+        "contains": "Your Master STAR Stories",
+        "kind": "text"
+      },
+      "declaredAt": 1790856101126,
+      "id": "inline:candidate-clicks-the-star-story-vault-tab-to-vie-ce81e8d8",
+      "state": "bound",
+      "statement": "Candidate clicks the STAR Story Vault tab to view their saved stories",
+      "status": "proposed",
+      "subject": "unsorted",
+      "updatedAt": 1790856101146
+    },
+    "inline:candidate-switches-back-to-the-10-core-behaviora-476097f4": {
+      "binding": {
+        "contains": "Why Hiring Committees Ask This:",
+        "kind": "text"
+      },
+      "declaredAt": 1790856118869,
+      "id": "inline:candidate-switches-back-to-the-10-core-behaviora-476097f4",
+      "provenBy": {
+        "at": 1790856118993,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1790856118993"
+      },
+      "state": "proved",
+      "statement": "Candidate switches back to the 10 Core Behavioral Questions tab",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/BehavioralQuestionsView.tsx"
+        ]
+      },
+      "updatedAt": 1790856119013
+    },
+    "inline:user-navigates-to-the-10-behavioral-question-ban-d28bcbae": {
+      "binding": {
+        "contains": "STAR Stories",
+        "kind": "text"
+      },
+      "declaredAt": 1790856078362,
+      "id": "inline:user-navigates-to-the-10-behavioral-question-ban-d28bcbae",
+      "state": "bound",
+      "statement": "User navigates to the 10 Behavioral question bank from the top navigation",
+      "status": "proposed",
+      "subject": "unsorted",
+      "updatedAt": 1790856078379
+    }
+  },
+  "subject": "unsorted",
+  "version": 1
+}

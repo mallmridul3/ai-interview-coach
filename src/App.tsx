@@ -10,6 +10,7 @@ import { BehavioralQuestionsView } from './components/BehavioralQuestionsView';
 import { WorkspaceExportModal } from './components/WorkspaceExportModal';
 import { VoiceSettingsModal } from './components/VoiceSettingsModal';
 import { PostInterviewAuthModal } from './components/PostInterviewAuthModal';
+import { HiringProcessView } from './components/HiringProcessView';
 import { 
   RoleSetup, 
   InterviewTurn, 
@@ -19,7 +20,9 @@ import {
   DeliveryMetrics,
   ExecutivePresenceEvaluation,
   TurnClarification,
-  UserProfile
+  UserProfile,
+  CompanyHiringPipeline,
+  HiringStage
 } from './types';
 import { INTERVIEWER_PERSONAS } from './data/mockData';
 import { initAuth, getAccessToken } from './utils/firebaseAuth';
@@ -27,7 +30,7 @@ import { stopSpeaking, preloadSpeech } from './utils/speechUtils';
 import { recordTurnInMemory, recordSessionCompletedInMemory, loadCandidateMemory } from './utils/candidateMemory';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'mock' | 'behavioral' | 'drills' | 'history'>('mock');
+  const [currentTab, setCurrentTab] = useState<'mock' | 'hiring-process' | 'behavioral' | 'drills' | 'history'>('mock');
   const [interviewState, setInterviewState] = useState<'setup' | 'active' | 'report'>('setup');
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 
@@ -210,6 +213,53 @@ export default function App() {
       alert(`Could not start interview: ${err?.message || 'Please verify your internet connection'}`);
     } finally {
       setIsLoadingQuestions(false);
+    }
+  };
+
+  // 1b. Practice a specific company stage from the Hiring Process Pipeline
+  const handlePracticeHiringStage = (
+    pipeline: CompanyHiringPipeline,
+    stage: HiringStage,
+    roleTitle: string
+  ) => {
+    const matchedPersona = 
+      INTERVIEWER_PERSONAS.find((p) => p.id === stage.recommendedPersonaId) || 
+      (stage.levelType === 'Bar Raiser / Executive' ? INTERVIEWER_PERSONAS[1] : INTERVIEWER_PERSONAS[0]);
+
+    const stageSetup: RoleSetup = {
+      roleTitle: roleTitle || 'Software Development Engineer',
+      level: 'Senior',
+      track: stage.recommendedTrack || 'Technical & Behavioral Mix',
+      targetCompany: pipeline.companyName,
+      questionCount: Math.min(Math.max(stage.typicalQuestions.length, 3), 4),
+      interviewerPersonaId: matchedPersona.id,
+      jobDescription: `Target Company: ${pipeline.companyName}\nStage: ${stage.name}\nLevel Format: ${stage.format}\nEvaluation Criteria: ${stage.coreCompetencies.join(', ')}\nCompany Philosophy: ${pipeline.evaluationPhilosophy}`,
+    };
+
+    const newTurns: InterviewTurn[] = stage.typicalQuestions.map((q, idx) => ({
+      id: `turn-stage-${idx}-${Date.now()}`,
+      question: {
+        id: `q-stage-${idx}-${Date.now()}`,
+        question: q,
+        category: stage.name,
+        competencyFocus: stage.coreCompetencies.slice(0, 2).join(' & ') || 'Company Alignment',
+        whyItMatters: `${pipeline.companyName} specifically evaluates this in ${stage.name}. Focus on ${stage.coreCompetencies.join(', ')}.`,
+        hintOrFocusPoints: stage.tipsForSuccess.slice(0, 3),
+      },
+      userAnswer: '',
+      durationSeconds: 0,
+    }));
+
+    setCurrentSetup(stageSetup);
+    setTurns(newTurns);
+    setCurrentTurnIndex(0);
+    setFinalReport(null);
+    setIsSavedSession(false);
+    setInterviewState('active');
+    setCurrentTab('mock');
+
+    if (newTurns[0]?.question?.question) {
+      preloadSpeech(newTurns[0].question.question);
     }
   };
 
@@ -683,6 +733,10 @@ export default function App() {
               />
             )}
           </>
+        ) : currentTab === 'hiring-process' ? (
+          <HiringProcessView
+            onPracticeStage={handlePracticeHiringStage}
+          />
         ) : currentTab === 'behavioral' ? (
           <BehavioralQuestionsView
             onPracticeQuestion={handlePracticeBehavioralQuestion}

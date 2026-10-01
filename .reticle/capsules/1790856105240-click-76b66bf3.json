@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "origin": "failed-assert",
+  "expected": "text \"?\"",
+  "observed": "no element matched {\"text\":\"Your Master STAR Stories\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e37",
+        "source": {
+          "file": "src/components/BehavioralQuestionsView.tsx",
+          "line": 333,
+          "column": 12
+        }
+      },
+      "action": "click"
+    }
+  ],
+  "id": "1790856105240-click-76b66bf3",
+  "createdAt": 1790856105240,
+  "seen": 1,
+  "lastSeenAt": 1790856105240
+}
