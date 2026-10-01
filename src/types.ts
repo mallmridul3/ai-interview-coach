@@ -231,6 +231,7 @@ export interface CompanyHiringPipeline {
   cultureHighlights: string[];
   evaluationPhilosophy: string;
   typicalTimeline: string;
+  popularRoles?: string[];
 }
 
 

@@ -25,7 +25,8 @@ import {
   POPULAR_COMPANIES, 
   POPULAR_ROLES, 
   findCompanyPipeline, 
-  generateFallbackPipeline 
+  generateFallbackPipeline,
+  getCompanyRoles
 } from '../data/companyHiringData';
 
 interface HiringProcessViewProps {
@@ -35,20 +36,36 @@ interface HiringProcessViewProps {
 export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
   onPracticeStage,
 }) => {
+  const initialPipeline = findCompanyPipeline('Amazon') || PRESET_COMPANY_PIPELINES[0];
   const [companyInput, setCompanyInput] = useState('Amazon');
-  const [roleInput, setRoleInput] = useState('Software Development Engineer (SDE II)');
+  const [roleInput, setRoleInput] = useState(
+    () => (initialPipeline.popularRoles && initialPipeline.popularRoles[0]) || 'Software Development Engineer I (SDE I)'
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   // Active pipeline & selected stage
-  const [activePipeline, setActivePipeline] = useState<CompanyHiringPipeline>(
-    () => findCompanyPipeline('Amazon') || PRESET_COMPANY_PIPELINES[0]
-  );
+  const [activePipeline, setActivePipeline] = useState<CompanyHiringPipeline>(initialPipeline);
   const [selectedStageId, setSelectedStageId] = useState<string>(
-    () => (findCompanyPipeline('Amazon') || PRESET_COMPANY_PIPELINES[0]).stages[0]?.id || ''
+    () => initialPipeline.stages[0]?.id || ''
   );
 
   const selectedStage = 
     activePipeline.stages.find((s) => s.id === selectedStageId) || activePipeline.stages[0];
+
+  const currentCompanyRoles =
+    activePipeline.popularRoles && activePipeline.popularRoles.length > 0
+      ? activePipeline.popularRoles
+      : getCompanyRoles(activePipeline.companyName, activePipeline.industry);
+
+  // Select company directly and update role list seamlessly
+  const selectCompany = (co: string) => {
+    setCompanyInput(co);
+    const localMatch = findCompanyPipeline(co);
+    const rolesForCompany = localMatch?.popularRoles || getCompanyRoles(co);
+    const defaultRole = rolesForCompany[0] || 'Software Engineer';
+    setRoleInput(defaultRole);
+    handleSearchCompany(co, defaultRole);
+  };
 
   // Handle Search / Fetch
   const handleSearchCompany = async (targetCo = companyInput, targetRole = roleInput) => {
@@ -60,6 +77,10 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
     if (localMatch) {
       setActivePipeline(localMatch);
       setSelectedStageId(localMatch.stages[0]?.id || '');
+      const availableRoles = localMatch.popularRoles || getCompanyRoles(localMatch.companyName, localMatch.industry);
+      if (!availableRoles.includes(targetRole) && availableRoles.length > 0) {
+        setRoleInput(availableRoles[0]);
+      }
       return;
     }
 
@@ -78,8 +99,15 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
       if (res.ok) {
         const data = await res.json();
         if (data?.pipeline?.stages?.length > 0) {
-          setActivePipeline(data.pipeline);
-          setSelectedStageId(data.pipeline.stages[0].id);
+          const pipeline: CompanyHiringPipeline = data.pipeline;
+          if (!pipeline.popularRoles || pipeline.popularRoles.length === 0) {
+            pipeline.popularRoles = getCompanyRoles(pipeline.companyName, pipeline.industry);
+          }
+          setActivePipeline(pipeline);
+          setSelectedStageId(pipeline.stages[0].id);
+          if (pipeline.popularRoles && !pipeline.popularRoles.includes(targetRole) && pipeline.popularRoles.length > 0) {
+            setRoleInput(pipeline.popularRoles[0]);
+          }
           return;
         }
       }
@@ -89,6 +117,9 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
       const fallback = generateFallbackPipeline(cleanCompany, targetRole);
       setActivePipeline(fallback);
       setSelectedStageId(fallback.stages[0]?.id || '');
+      if (fallback.popularRoles && !fallback.popularRoles.includes(targetRole) && fallback.popularRoles.length > 0) {
+        setRoleInput(fallback.popularRoles[0]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -168,10 +199,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                       <button
                         key={co}
                         type="button"
-                        onClick={() => {
-                          setCompanyInput(co);
-                          handleSearchCompany(co, roleInput);
-                        }}
+                        onClick={() => selectCompany(co)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center space-x-1.5 ${
                           isSelected
                             ? 'bg-zinc-900 text-white shadow-xs scale-102 ring-2 ring-zinc-900 ring-offset-1'
@@ -209,11 +237,16 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                 />
               </div>
 
-              {/* Popular Role Chips (Clean & Spacious) */}
+              {/* Dynamic Company-Specific Role Chips */}
               <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Common Roles:</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+                    Roles at {activePipeline.companyName}:
+                  </span>
+                  <span className="text-[10px] text-zinc-400 font-medium">Click to select authentic leveled role</span>
+                </div>
                 <div className="flex flex-wrap gap-2">
-                  {POPULAR_ROLES.map((r) => {
+                  {currentCompanyRoles.map((r) => {
                     const isSelected = roleInput === r;
                     return (
                       <button

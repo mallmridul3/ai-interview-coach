@@ -1,5 +1,115 @@
 import { CompanyHiringPipeline } from '../types';
 
+export const COMPANY_SPECIFIC_ROLES: Record<string, string[]> = {
+  Amazon: [
+    'Software Development Engineer I (SDE I)',
+    'Software Development Engineer II (SDE II)',
+    'Senior SDE (SDE III / L6)',
+    'Principal Engineer (L7)',
+    'Software Development Manager (SDM / EM)',
+    'Technical Program Manager (TPM)',
+    'Product Manager - Technical (PMT)',
+    'Applied Scientist (AWS & GenAI)',
+    'Solutions Architect (AWS Enterprise)',
+  ],
+  Google: [
+    'Software Engineer (L3 - Early Career)',
+    'Software Engineer (L4 - Mid-Level)',
+    'Senior Software Engineer (L5)',
+    'Staff Software Engineer (L6)',
+    'Engineering Manager (L6/L7)',
+    'Product Manager (APM / L4 / L5)',
+    'Site Reliability Engineer (SRE)',
+    'Research Scientist (Google DeepMind)',
+    'Developer Relations Engineer',
+  ],
+  Meta: [
+    'Software Engineer (E3 - Entry)',
+    'Software Engineer (E4 - Mid-Level)',
+    'Senior Software Engineer (E5)',
+    'Staff Software Engineer (E6)',
+    'Production Engineer (Systems & Infrastructure)',
+    'Engineering Manager (M1/M2)',
+    'Product Manager (Rotational / L5)',
+    'AI Research Scientist (FAIR)',
+    'Data Engineer (Core Analytics)',
+  ],
+  Microsoft: [
+    'Software Engineer (Level 59-60)',
+    'Software Engineer II (Level 61-62)',
+    'Senior Software Engineer (Level 63-64)',
+    'Principal Software Engineer (Level 65+)',
+    'Product Manager (Level 61-64)',
+    'Cloud Solution Architect (Azure)',
+    'AI / Copilot Applied Scientist',
+    'Partner Software Architect',
+  ],
+  Apple: [
+    'ICT2 / ICT3 Software Engineer',
+    'ICT4 Senior Software Engineer',
+    'ICT5 Staff / Lead Software Engineer',
+    'Engineering Project Manager (EPM)',
+    'iOS & macOS Core Frameworks Engineer',
+    'Machine Learning & Siri Core Engineer',
+    'Silicon Firmware & Embedded Systems Engineer',
+    'Interactive Media & Core OS Engineer',
+  ],
+  Netflix: [
+    'Senior Software Engineer (L5 - Core Bar)',
+    'Staff Software Engineer',
+    'Engineering Manager (Streaming Platforms)',
+    'Distributed Systems & Edge CDN Architect',
+    'Data Platform & Analytics Engineer',
+    'UI & Edge Experience Engineer',
+    'Product Manager (Algorithms & Discovery)',
+  ],
+  Stripe: [
+    'Software Engineer (L1 / L2)',
+    'Software Engineer (L3 - Senior)',
+    'Staff Software Engineer (L4)',
+    'Infrastructure & Core Ledger Architect',
+    'Engineering Manager (Payments Infrastructure)',
+    'Product Manager (Billing, Connect & Banking)',
+    'Security & Risk Intelligence Engineer',
+    'Developer Platform & API Engineer',
+  ],
+  Uber: [
+    'Software Engineer I / II',
+    'Senior Software Engineer (5A / 5B)',
+    'Staff Software Engineer (Level 6)',
+    'Marketplace & Dispatch Algorithms Engineer',
+    'Autonomous Mobility & Maps Engineer',
+    'Engineering Manager (Driver & Rider Tech)',
+    'Product Manager (Pricing & Marketplace)',
+  ],
+  Nvidia: [
+    'CUDA Systems Software Engineer',
+    'Deep Learning Frameworks Engineer',
+    'GPU Architecture & Performance Engineer',
+    'AI Infrastructure & Megatron-LM Scaling Engineer',
+    'Senior Linux Kernel & Driver Developer',
+    'Autonomous Vehicles (DRIVE OS) Engineer',
+    'TensorRT & LLM Inference Optimization Engineer',
+  ],
+  Airbnb: [
+    'Software Engineer (L3 / L4)',
+    'Senior Software Engineer (L5)',
+    'Staff Software Engineer (L6)',
+    'Trust & Safety Machine Learning Engineer',
+    'Search, Ranking & Dynamic Pricing Engineer',
+    'Guest & Host Experience Frontend Engineer',
+    'Engineering Manager',
+  ],
+  'Goldman Sachs': [
+    'Technology Analyst (Full Stack Development)',
+    'Associate (Quantitative Engineering)',
+    'Vice President (VP - Core Engineering)',
+    'Low-Latency Algorithmic Execution Developer',
+    'Risk & Pricing Models Systems Engineer',
+    'Financial Data Platform Architect',
+  ],
+};
+
 export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
   {
     companyName: 'Amazon',
@@ -18,6 +128,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Candidates are evaluated on whether they raise the average performance of the current team ("Raise the Bar"). A strong technical candidate who fails Leadership Principles will be rejected.',
     typicalTimeline: '3 to 6 weeks from Online Assessment to final Loop debrief',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Amazon'],
     stages: [
       {
         id: 'amz-s1',
@@ -148,6 +259,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Google hires for long-term athlete capability rather than specific framework familiarity. Strong computer science fundamentals and algorithmic problem-solving adaptability are prioritized.',
     typicalTimeline: '4 to 8 weeks including Hiring Committee review and team matching',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Google'],
     stages: [
       {
         id: 'goog-s1',
@@ -273,6 +385,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Speed matters. Meta expects engineers to write working, optimal code for 2 algorithm problems in a 45-minute window with minimal friction.',
     typicalTimeline: '3 to 5 weeks',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Meta'],
     stages: [
       {
         id: 'meta-s1',
@@ -376,6 +489,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Microsoft values clean code architecture, maintainability, and candidates who communicate transparently when exploring problem spaces.',
     typicalTimeline: '3 to 5 weeks',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Microsoft'],
     stages: [
       {
         id: 'msft-s1',
@@ -478,6 +592,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Netflix does not hire junior engineers; they evaluate for mature senior judgement, business context awareness, and independent execution.',
     typicalTimeline: '3 to 5 weeks',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Netflix'],
     stages: [
       {
         id: 'nflx-s1',
@@ -576,6 +691,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Can you write maintainable, tested code in a real development environment with real documentation and real bugs?',
     typicalTimeline: '3 to 5 weeks',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Stripe'],
     stages: [
       {
         id: 'strp-s1',
@@ -674,6 +790,7 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
     ],
     evaluationPhilosophy: 'Apple values deep domain mastery over generic algorithm memorization. Can you explain every layer of the stack you touch?',
     typicalTimeline: '4 to 6 weeks',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Apple'],
     stages: [
       {
         id: 'appl-s1',
@@ -783,6 +900,77 @@ export const POPULAR_ROLES = [
   'DevOps / Site Reliability Engineer (SRE)'
 ];
 
+export function getCompanyRoles(companyName?: string, industry?: string): string[] {
+  if (!companyName) return POPULAR_ROLES;
+  const clean = companyName.trim().toLowerCase();
+
+  // Check exact key or match in COMPANY_SPECIFIC_ROLES
+  for (const [key, roles] of Object.entries(COMPANY_SPECIFIC_ROLES)) {
+    if (key.toLowerCase() === clean || clean.includes(key.toLowerCase()) || key.toLowerCase().includes(clean)) {
+      return roles;
+    }
+  }
+
+  // Check preset pipelines
+  const preset = PRESET_COMPANY_PIPELINES.find(
+    (p) => p.normalizedName === clean || p.companyName.toLowerCase().includes(clean) || clean.includes(p.normalizedName)
+  );
+  if (preset && preset.popularRoles && preset.popularRoles.length > 0) {
+    return preset.popularRoles;
+  }
+
+  // Industry-specific smart fallbacks
+  const ind = (industry || '').toLowerCase();
+  if (ind.includes('financ') || ind.includes('bank') || ind.includes('quant') || ind.includes('trading')) {
+    return [
+      'Quantitative Software Engineer',
+      'Vice President (VP - Core Engineering)',
+      'Low-Latency C++ Execution Developer',
+      'Algorithmic Trading Systems Engineer',
+      'Financial Data Platform Architect',
+      'Risk & Pricing Modeler',
+    ];
+  }
+  if (ind.includes('health') || ind.includes('bio') || ind.includes('medic')) {
+    return [
+      'Bioinformatics Software Engineer',
+      'HealthTech Systems Architect',
+      'Senior Clinical Data Platform Engineer',
+      'Regulatory & HIPAA Compliance Engineer',
+      'Staff Machine Learning Engineer (Healthcare)',
+    ];
+  }
+  if (ind.includes('cyber') || ind.includes('security')) {
+    return [
+      'Security Operations & Incident Response Engineer',
+      'Application Security Architect (AppSec)',
+      'Threat Intelligence & Vulnerability Researcher',
+      'Cloud Infrastructure Security Engineer (DevSecOps)',
+      'Staff Cryptography & Identity Engineer',
+    ];
+  }
+  if (ind.includes('hardware') || ind.includes('semiconductor') || ind.includes('chip') || ind.includes('embedded')) {
+    return [
+      'Embedded Firmware Engineer',
+      'ASIC / FPGA Verification Engineer',
+      'Hardware-Software Integration Architect',
+      'DSP & Low-Level Driver Systems Engineer',
+      'Principal Silicon Systems Engineer',
+    ];
+  }
+
+  // Standard tech enterprise roles customized with the company name
+  return [
+    `Software Engineer (${companyName})`,
+    `Senior Software Engineer (${companyName})`,
+    `Staff Engineer / Technical Lead`,
+    `Engineering Manager (${companyName})`,
+    `Cloud Infrastructure & DevOps Engineer`,
+    `Data Platform & AI Engineer`,
+    `Product Manager (${companyName})`,
+  ];
+}
+
 export function findCompanyPipeline(query: string): CompanyHiringPipeline | undefined {
   if (!query) return undefined;
   const clean = query.trim().toLowerCase();
@@ -798,6 +986,7 @@ export function generateFallbackPipeline(companyName: string, roleTitle = 'Softw
     normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
     tagline: `Comprehensive hiring process & bar evaluation at ${company}`,
     industry: 'Technology & Enterprise Scale',
+    popularRoles: getCompanyRoles(company, 'Technology & Enterprise Scale'),
     overview: `${company} evaluates candidates across technical depth, domain architecture, and cultural ownership. The process assesses both practical problem solving and alignment with organizational values.`,
     totalStages: 4,
     cultureHighlights: [

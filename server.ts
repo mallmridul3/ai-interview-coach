@@ -14,12 +14,14 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 app.use(express.json({ limit: "5mb" }));
 
 // Normalize URL for Vercel serverless functions where /api prefix might be stripped by rewrites
-app.use((req, _res, next) => {
-  if (req.url && !req.url.startsWith("/api") && !req.url.startsWith("/assets")) {
-    req.url = `/api${req.url.startsWith("/") ? "" : "/"}${req.url}`;
-  }
-  next();
-});
+if (process.env.VERCEL === "1") {
+  app.use((req, _res, next) => {
+    if (req.url && !req.url.startsWith("/api") && !req.url.startsWith("/assets")) {
+      req.url = `/api${req.url.startsWith("/") ? "" : "/"}${req.url}`;
+    }
+    next();
+  });
+}
 
 // Server-side Gemini initialization with required telemetry header
 const ai = new GoogleGenAI({
@@ -1615,6 +1617,59 @@ Include:
         ],
       },
     });
+  }
+});
+
+// 6. Look up or dynamically generate Company Hiring Process & Specific Roles
+app.post("/api/hiring-process/lookup", async (req, res) => {
+  const { companyName, roleTitle = "Software Engineer" } = req.body;
+  if (!companyName) {
+    return res.status(400).json({ error: "companyName is required" });
+  }
+
+  try {
+    const prompt = `Generate a realistic, comprehensive, multi-stage hiring process pipeline for the company: "${companyName}" and role: "${roleTitle}".
+Return JSON adhering strictly to:
+{
+  "companyName": "${companyName}",
+  "normalizedName": "${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}",
+  "tagline": "string (company mission or hiring motto)",
+  "industry": "string",
+  "overview": "string (detailed breakdown of their hiring style, format, and loop structure)",
+  "totalStages": 4 or 5,
+  "cultureHighlights": ["string", "string", "string", "string"],
+  "evaluationPhilosophy": "string (what makes candidate pass or fail the hiring bar)",
+  "typicalTimeline": "string (e.g. 3 to 5 weeks from initial screen to offer)",
+  "popularRoles": ["array of 6-8 authentic, company-specific job titles and levels commonly hired at ${companyName}"],
+  "stages": [
+    {
+      "id": "stage-id-string",
+      "stageNumber": 1,
+      "name": "Stage 1: ...",
+      "levelType": "Online Assessment" | "Phone Screen" | "Technical Round" | "System Design" | "Behavioral & Culture" | "Bar Raiser / Executive",
+      "format": "string",
+      "durationMinutes": 45,
+      "interviewerProfile": "string",
+      "coreCompetencies": ["string", "string"],
+      "description": "string",
+      "typicalQuestions": ["string", "string"],
+      "tipsForSuccess": ["string", "string"]
+    }
+  ]
+}`;
+
+    const response = await callGeminiWithRetry({
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const pipeline = JSON.parse(response.text || "{}");
+    res.json({ pipeline });
+  } catch (err: any) {
+    console.error("Error looking up company hiring process:", err);
+    res.status(500).json({ error: "Failed to generate company hiring pipeline" });
   }
 });
 
