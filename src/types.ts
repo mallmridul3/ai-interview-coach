@@ -143,9 +143,24 @@ export interface SessionFinalReport {
   executivePresenceSummary?: ExecutivePresenceEvaluation;
 }
 
+export type UserRole = 'admin' | 'client' | 'guest';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'client';
+  photoURL?: string;
+  createdAt?: string;
+}
+
 export interface SavedInterviewSession {
   id: string;
   createdAt: string;
+  userId?: string;
+  userEmail?: string;
+  userRole?: 'admin' | 'client';
+  candidateName?: string;
   roleTitle: string;
   level: ExperienceLevel;
   track: InterviewTrack;

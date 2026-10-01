@@ -11,7 +11,11 @@ import {
   Target,
   BarChart3,
   ExternalLink,
-  Calendar
+  Calendar,
+  ShieldCheck,
+  User as UserIcon,
+  Filter,
+  LogIn
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -22,7 +26,7 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
-import { SavedInterviewSession } from '../types';
+import { SavedInterviewSession, UserProfile } from '../types';
 
 interface SessionHistoryViewProps {
   sessions: SavedInterviewSession[];
@@ -30,6 +34,8 @@ interface SessionHistoryViewProps {
   onClearAll: () => void;
   onStartNewMock: () => void;
   onLoadSessionInReport?: (session: SavedInterviewSession) => void;
+  currentUser?: UserProfile | null;
+  onOpenAuthModal?: () => void;
 }
 
 export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
@@ -38,8 +44,26 @@ export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
   onClearAll,
   onStartNewMock,
   onLoadSessionInReport,
+  currentUser,
+  onOpenAuthModal,
 }) => {
   const [selectedSession, setSelectedSession] = useState<SavedInterviewSession | null>(null);
+  const [candidateFilter, setCandidateFilter] = useState<string>('all');
+
+  const isAdmin = currentUser?.role === 'admin';
+  const isClient = currentUser?.role === 'client';
+
+  // Role-based session visibility
+  const visibleSessions = sessions.filter((s) => {
+    if (isAdmin) {
+      if (candidateFilter === 'all') return true;
+      return (s.userEmail || 'guest') === candidateFilter;
+    }
+    if (isClient && currentUser?.email) {
+      return !s.userEmail || s.userEmail === currentUser.email || s.userId === currentUser.id;
+    }
+    return true; // Guest mode sees local session records
+  });
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-emerald-700 bg-emerald-50 border-emerald-200';
@@ -63,18 +87,23 @@ export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
     }
   };
 
+  // Unique candidates list for Admin dropdown
+  const uniqueCandidates = Array.from(
+    new Set(sessions.map((s) => s.userEmail || 'guest'))
+  );
+
   // KPIs
-  const totalSessions = sessions.length;
+  const totalSessions = visibleSessions.length;
   const avgScore = totalSessions > 0
-    ? Math.round(sessions.reduce((acc, s) => acc + s.overallScore, 0) / totalSessions)
+    ? Math.round(visibleSessions.reduce((acc, s) => acc + s.overallScore, 0) / totalSessions)
     : 0;
   const highestScore = totalSessions > 0
-    ? Math.max(...sessions.map((s) => s.overallScore))
+    ? Math.max(...visibleSessions.map((s) => s.overallScore))
     : 0;
-  const totalQuestions = sessions.reduce((acc, s) => acc + (s.turns?.length || 0), 0);
+  const totalQuestions = visibleSessions.reduce((acc, s) => acc + (s.turns?.length || 0), 0);
 
   // Chronological chart data
-  const chartData = [...sessions]
+  const chartData = [...visibleSessions]
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     .map((s, idx) => ({
       name: `#${idx + 1}`,
@@ -100,7 +129,7 @@ export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
           </p>
         </div>
 
-        {sessions.length > 0 && (
+        {visibleSessions.length > 0 && (
           <div className="flex items-center space-x-2">
             <button
               type="button"
@@ -113,8 +142,84 @@ export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
         )}
       </div>
 
+      {/* Role State Banner */}
+      {isAdmin ? (
+        <div className="mb-6 p-4 rounded-xl bg-amber-50/90 border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-800 flex items-center justify-center font-bold shrink-0">
+              <ShieldCheck className="w-5 h-5 text-amber-700" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-amber-950 text-sm">Administrator Console</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-amber-200/80 text-amber-900 rounded-full">
+                  Owner: mallmridul3
+                </span>
+              </div>
+              <p className="text-xs text-amber-800/80 mt-0.5">
+                Global Candidate Oversight mode: inspecting all candidate submissions and practice trajectories.
+              </p>
+            </div>
+          </div>
+
+          {uniqueCandidates.length > 1 && (
+            <div className="flex items-center space-x-2 self-start sm:self-center">
+              <Filter className="w-3.5 h-3.5 text-amber-700" />
+              <select
+                value={candidateFilter}
+                onChange={(e) => setCandidateFilter(e.target.value)}
+                className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-amber-300 bg-white text-amber-950 focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              >
+                <option value="all">All Candidates ({sessions.length})</option>
+                {uniqueCandidates.map((c) => (
+                  <option key={c} value={c}>
+                    {c} ({sessions.filter((s) => (s.userEmail || 'guest') === c).length})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      ) : isClient ? (
+        <div className="mb-6 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center space-x-3 shadow-xs">
+          <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
+            <UserIcon className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="font-bold text-emerald-950 text-xs sm:text-sm">Candidate Portfolio: {currentUser?.name || currentUser?.email}</span>
+            <p className="text-xs text-emerald-800/80 mt-0.5">
+              Personal practice history and competency trajectory synced with your candidate profile ({currentUser?.email}).
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-6 p-4 rounded-xl bg-blue-50/80 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0">
+              <UserIcon className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="font-bold text-blue-950 text-xs sm:text-sm">Guest Session Storage</span>
+              <p className="text-xs text-blue-800/80 mt-0.5">
+                Scorecards saved in this browser. Log in or create an account to sync your history across devices.
+              </p>
+            </div>
+          </div>
+          {onOpenAuthModal && (
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Log In / Sign Up</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* KPI Overview Cards */}
-      {sessions.length > 0 && (
+      {visibleSessions.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs">
             <div className="flex items-center justify-between text-zinc-400 mb-1">
@@ -218,9 +323,29 @@ export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
             <span>Start Your First Mock Interview</span>
           </button>
         </div>
+      ) : visibleSessions.length === 0 ? (
+        <div className="text-center py-16 px-4 bg-white border border-zinc-200 rounded-xl shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-4 text-zinc-400">
+            <History className="w-6 h-6" />
+          </div>
+          <h2 className="text-lg font-bold text-zinc-900 mb-1">
+            {candidateFilter !== 'all' ? `No Records for ${candidateFilter}` : 'No Saved Sessions for this Account'}
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 max-w-sm mx-auto mb-6">
+            Complete a mock interview round to save your hiring scorecard and question transcripts.
+          </p>
+          <button
+            type="button"
+            onClick={onStartNewMock}
+            className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs inline-flex items-center space-x-2 transition-all cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            <span>Start Your First Mock Interview</span>
+          </button>
+        </div>
       ) : (
         <div className="space-y-3">
-          {sessions.map((session) => (
+          {visibleSessions.map((session) => (
             <div
               key={session.id}
               className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-zinc-300 transition-all"
@@ -242,6 +367,11 @@ export const SessionHistoryView: React.FC<SessionHistoryViewProps> = ({
                     {session.finalReport?.hiringRecommendation && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-sm bg-emerald-100 text-emerald-800">
                         {session.finalReport.hiringRecommendation}
+                      </span>
+                    )}
+                    {(isAdmin || session.userEmail) && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 border border-purple-200/60">
+                        Candidate: {session.userEmail || session.candidateName || 'Guest'}
                       </span>
                     )}
                   </div>

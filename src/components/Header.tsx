@@ -8,9 +8,14 @@ import {
   VolumeX, 
   ListChecks,
   HardDrive,
-  Sliders
+  Sliders,
+  ShieldCheck,
+  User as UserIcon,
+  LogOut,
+  LogIn
 } from 'lucide-react';
 import { User } from 'firebase/auth';
+import { UserProfile } from '../types';
 
 interface HeaderProps {
   currentTab: 'mock' | 'behavioral' | 'drills' | 'history';
@@ -20,8 +25,11 @@ interface HeaderProps {
   savedSessionsCount: number;
   isInterviewActive: boolean;
   user: User | null;
+  currentUser?: UserProfile | null;
   onOpenWorkspaceModal?: () => void;
   onOpenVoiceSettings?: () => void;
+  onOpenAuthModal?: () => void;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,8 +40,11 @@ export const Header: React.FC<HeaderProps> = ({
   savedSessionsCount,
   isInterviewActive,
   user,
+  currentUser,
   onOpenWorkspaceModal,
   onOpenVoiceSettings,
+  onOpenAuthModal,
+  onLogout,
 }) => {
   return (
     <header className="border-b border-zinc-200 bg-white sticky top-0 z-30">
@@ -119,8 +130,59 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Right Action Items: Google Workspace & Voice Toggle */}
+          {/* Right Action Items: User Role, Google Workspace & Voice Toggle */}
           <div className="flex items-center space-x-2">
+            {/* User Account / Role Badge */}
+            {currentUser ? (
+              <div className="flex items-center space-x-1.5">
+                <div 
+                  id="user-role-badge"
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border ${
+                    currentUser.role === 'admin'
+                      ? 'bg-amber-50 text-amber-900 border-amber-300 shadow-xs'
+                      : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                  }`}
+                  title={currentUser.role === 'admin' ? 'System Administrator (Owner: mallmridul3)' : `Candidate: ${currentUser.email}`}
+                >
+                  {currentUser.role === 'admin' ? (
+                    <>
+                      <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                      <span className="font-bold">Admin: mallmridul3</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserIcon className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="truncate max-w-[110px]">{currentUser.name || currentUser.email}</span>
+                    </>
+                  )}
+                </div>
+
+                {onLogout && (
+                  <button
+                    type="button"
+                    id="sign-out-btn"
+                    onClick={onLogout}
+                    title="Sign Out"
+                    className="p-1.5 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              onOpenAuthModal && (
+                <button
+                  type="button"
+                  id="open-auth-btn"
+                  onClick={onOpenAuthModal}
+                  className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+              )
+            )}
+
             {/* Google Workspace Button */}
             {onOpenWorkspaceModal && (
               <button

@@ -9,6 +9,7 @@ import { SessionHistoryView } from './components/SessionHistoryView';
 import { BehavioralQuestionsView } from './components/BehavioralQuestionsView';
 import { WorkspaceExportModal } from './components/WorkspaceExportModal';
 import { VoiceSettingsModal } from './components/VoiceSettingsModal';
+import { PostInterviewAuthModal } from './components/PostInterviewAuthModal';
 import { 
   RoleSetup, 
   InterviewTurn, 
@@ -17,7 +18,8 @@ import {
   InterviewerPersona,
   DeliveryMetrics,
   ExecutivePresenceEvaluation,
-  TurnClarification
+  TurnClarification,
+  UserProfile
 } from './types';
 import { INTERVIEWER_PERSONAS } from './data/mockData';
 import { initAuth, getAccessToken } from './utils/firebaseAuth';
@@ -41,11 +43,35 @@ export default function App() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isGeneratingFinalReport, setIsGeneratingFinalReport] = useState(false);
 
+  // User Profile & Authentication State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    try {
+      const stored = localStorage.getItem('ai_interview_coach_auth_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   // Google Workspace Auth State
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
   const [isVoiceSettingsOpen, setIsVoiceSettingsOpen] = useState(false);
+
+  // Persist current user profile
+  useEffect(() => {
+    try {
+      if (currentUser) {
+        localStorage.setItem('ai_interview_coach_auth_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('ai_interview_coach_auth_user');
+      }
+    } catch (e) {
+      console.error('Failed to sync auth user to localStorage:', e);
+    }
+  }, [currentUser]);
 
   // Saved sessions persistence
   const [savedSessions, setSavedSessions] = useState<SavedInterviewSession[]>(() => {
@@ -71,6 +97,18 @@ export default function App() {
       (authedUser, token) => {
         setUser(authedUser);
         setAccessToken(token);
+        // Sync candidate profile if not currently logged in as admin
+        setCurrentUser((prev) => {
+          if (prev?.role === 'admin') return prev;
+          return {
+            id: authedUser.uid || `google-${Date.now()}`,
+            email: authedUser.email || 'candidate@google.com',
+            name: authedUser.displayName || authedUser.email?.split('@')[0] || 'Candidate',
+            role: 'client',
+            photoURL: authedUser.photoURL || undefined,
+            createdAt: new Date().toISOString(),
+          };
+        });
       },
       () => {
         setUser(null);
@@ -81,6 +119,41 @@ export default function App() {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // Handle Login / Sign Up success from PostInterviewAuthModal or Header
+  const handleLoginSuccess = (profile: UserProfile) => {
+    setCurrentUser(profile);
+    setIsAuthModalOpen(false);
+
+    // If on report screen and session not saved yet, save it under candidate's identity
+    if (interviewState === 'report' && currentSetup && finalReport && !isSavedSession) {
+      const newSaved: SavedInterviewSession = {
+        id: `session-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        userId: profile.id,
+        userEmail: profile.email,
+        userRole: profile.role,
+        candidateName: profile.name,
+        roleTitle: currentSetup.roleTitle,
+        level: currentSetup.level,
+        track: currentSetup.track,
+        targetCompany: currentSetup.targetCompany,
+        personaName: activePersona.name,
+        personaId: activePersona.id,
+        overallScore: finalReport.overallScore,
+        turns,
+        finalReport,
+      };
+
+      recordSessionCompletedInMemory();
+      setSavedSessions((prev) => [newSaved, ...prev]);
+      setIsSavedSession(true);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
 
   // Find persona
   const activePersona: InterviewerPersona = 
@@ -375,6 +448,11 @@ export default function App() {
       const data = await response.json();
       setFinalReport(data.report);
       setInterviewState('report');
+
+      // Prompt to login/signup to save history if candidate is not signed in
+      if (!currentUser) {
+        setIsAuthModalOpen(true);
+      }
     } catch (err: any) {
       console.error('Error generating final report:', err);
       const fallbackAvg = Math.round(
@@ -452,6 +530,11 @@ export default function App() {
 
       setFinalReport(fallbackReport);
       setInterviewState('report');
+
+      // Prompt to login/signup to save history if candidate is not signed in
+      if (!currentUser) {
+        setIsAuthModalOpen(true);
+      }
     } finally {
       setIsGeneratingFinalReport(false);
     }
@@ -464,6 +547,10 @@ export default function App() {
     const newSaved: SavedInterviewSession = {
       id: `session-${Date.now()}`,
       createdAt: new Date().toISOString(),
+      userId: currentUser?.id,
+      userEmail: currentUser?.email,
+      userRole: currentUser?.role,
+      candidateName: currentUser?.name,
       roleTitle: currentSetup.roleTitle,
       level: currentSetup.level,
       track: currentSetup.track,
@@ -536,8 +623,11 @@ export default function App() {
         savedSessionsCount={savedSessions.length}
         isInterviewActive={interviewState === 'active'}
         user={user}
+        currentUser={currentUser}
         onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
         onOpenVoiceSettings={() => setIsVoiceSettingsOpen(true)}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -588,6 +678,8 @@ export default function App() {
                 onSaveSession={handleSaveSession}
                 isSaved={isSavedSession}
                 onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+                onOpenAuthModal={() => setIsAuthModalOpen(true)}
+                currentUser={currentUser}
               />
             )}
           </>
@@ -604,6 +696,8 @@ export default function App() {
             onClearAll={handleClearAllHistory}
             onStartNewMock={handleStartNewMock}
             onLoadSessionInReport={handleLoadSessionInReport}
+            currentUser={currentUser}
+            onOpenAuthModal={() => setIsAuthModalOpen(true)}
           />
         )}
       </main>
@@ -668,6 +762,15 @@ export default function App() {
       <VoiceSettingsModal
         isOpen={isVoiceSettingsOpen}
         onClose={() => setIsVoiceSettingsOpen(false)}
+      />
+
+      {/* Post-Interview & Header Authentication Modal */}
+      <PostInterviewAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+        currentUser={currentUser}
+        score={finalReport?.overallScore}
       />
     </div>
   );

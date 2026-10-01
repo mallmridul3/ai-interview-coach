@@ -20,7 +20,8 @@ import {
   Eye,
   Activity,
   Gauge,
-  Lightbulb
+  Lightbulb,
+  LogIn
 } from 'lucide-react';
 import {
   Radar,
@@ -31,7 +32,7 @@ import {
   ResponsiveContainer,
   Tooltip
 } from 'recharts';
-import { SessionFinalReport, InterviewTurn, RoleSetup } from '../types';
+import { SessionFinalReport, InterviewTurn, RoleSetup, UserProfile } from '../types';
 
 interface FinalReportViewProps {
   report: SessionFinalReport;
@@ -41,6 +42,8 @@ interface FinalReportViewProps {
   onSaveSession: () => void;
   isSaved: boolean;
   onOpenWorkspaceModal?: () => void;
+  onOpenAuthModal?: () => void;
+  currentUser?: UserProfile | null;
 }
 
 export const FinalReportView: React.FC<FinalReportViewProps> = ({
@@ -51,6 +54,8 @@ export const FinalReportView: React.FC<FinalReportViewProps> = ({
   onSaveSession,
   isSaved,
   onOpenWorkspaceModal,
+  onOpenAuthModal,
+  currentUser,
 }) => {
   const [copiedReport, setCopiedReport] = useState(false);
   const [expandedTurnId, setExpandedTurnId] = useState<string | null>(null);
@@ -578,6 +583,17 @@ ${report.actionablePrepPlan.map((p, i) => `${i + 1}. ${p}`).join('\n')}
             <Download className="w-3.5 h-3.5" />
             <span>{isSaved ? 'Saved to History' : 'Save to History'}</span>
           </button>
+
+          {!currentUser && onOpenAuthModal && (
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="px-3.5 py-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+            >
+              <LogIn className="w-3.5 h-3.5 text-amber-700" />
+              <span>Login to Sync</span>
+            </button>
+          )}
 
           {onOpenWorkspaceModal && (
             <button
