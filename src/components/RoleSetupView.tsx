@@ -330,24 +330,24 @@ export const RoleSetupView: React.FC<RoleSetupViewProps> = ({ onStartInterview, 
 
       {/* Quick Presets */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Popular Role Presets</span>
-          <span className="text-xs text-zinc-400">Click to autofill</span>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-600">Popular Role Presets</span>
+          <span className="text-xs text-zinc-400 font-medium">Click to autofill</span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {PRESET_ROLES.map((preset) => (
             <button
               key={preset.title}
               type="button"
               onClick={() => handleApplyPreset(preset)}
-              className={`p-2.5 rounded-lg border text-left text-xs transition-all ${
+              className={`p-3.5 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                 roleTitle === preset.title && level === preset.level
-                  ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
-                  : 'border-zinc-200 bg-white hover:border-zinc-300 text-zinc-800 hover:bg-zinc-50'
+                  ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm ring-2 ring-zinc-900 ring-offset-1'
+                  : 'border-zinc-200 bg-white hover:border-zinc-300 text-zinc-800 hover:bg-zinc-50 shadow-2xs'
               }`}
             >
-              <div className="font-medium truncate">{preset.title}</div>
-              <div className={`text-[10px] mt-0.5 truncate ${roleTitle === preset.title ? 'text-zinc-300' : 'text-zinc-500'}`}>
+              <div className="font-semibold truncate">{preset.title}</div>
+              <div className={`text-[11px] mt-1 truncate ${roleTitle === preset.title ? 'text-zinc-300' : 'text-zinc-500 font-medium'}`}>
                 {preset.company}
               </div>
             </button>
@@ -355,13 +355,13 @@ export const RoleSetupView: React.FC<RoleSetupViewProps> = ({ onStartInterview, 
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border border-zinc-200 rounded-xl shadow-xs overflow-hidden">
-        <div className="p-6 sm:p-8 space-y-7">
+      <form onSubmit={handleSubmit} className="bg-white border border-zinc-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="p-6 sm:p-8 space-y-8">
           {/* Role & Company Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="role-title" className="block text-xs font-semibold text-zinc-800 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
-                <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
+              <label htmlFor="role-title" className="block text-xs font-bold text-zinc-800 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-zinc-600" />
                 <span>Target Role / Job Title</span>
               </label>
               <input
@@ -371,13 +371,13 @@ export const RoleSetupView: React.FC<RoleSetupViewProps> = ({ onStartInterview, 
                 value={roleTitle}
                 onChange={(e) => setRoleTitle(e.target.value)}
                 placeholder="e.g. Senior Backend Engineer, Product Manager"
-                className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                className="w-full px-4 py-3 bg-zinc-50/80 border border-zinc-300 rounded-xl text-sm sm:text-base text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all shadow-2xs font-medium"
               />
             </div>
 
             <div>
-              <label htmlFor="target-company" className="block text-xs font-semibold text-zinc-800 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
-                <Building2 className="w-3.5 h-3.5 text-zinc-500" />
+              <label htmlFor="target-company" className="block text-xs font-bold text-zinc-800 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                <Building2 className="w-3.5 h-3.5 text-zinc-600" />
                 <span>Target Company / Industry</span>
               </label>
               <input
@@ -386,7 +386,7 @@ export const RoleSetupView: React.FC<RoleSetupViewProps> = ({ onStartInterview, 
                 value={targetCompany}
                 onChange={(e) => setTargetCompany(e.target.value)}
                 placeholder="e.g. Stripe, Google, Series B AI Startup"
-                className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                className="w-full px-4 py-3 bg-zinc-50/80 border border-zinc-300 rounded-xl text-sm sm:text-base text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all shadow-2xs font-medium"
               />
             </div>
           </div>

@@ -10,11 +10,14 @@ import {
   ShieldCheck, 
   Award, 
   Lightbulb, 
-  HelpCircle, 
   ChevronRight,
   Flame,
   Layers,
-  BookOpen
+  BookOpen,
+  Briefcase,
+  Compass,
+  TrendingUp,
+  Target
 } from 'lucide-react';
 import { CompanyHiringPipeline, HiringStage } from '../types';
 import { 
@@ -107,153 +110,182 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-10 animate-in fade-in duration-200">
       {/* Header Banner */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-sky-50 text-sky-800 border border-sky-200/80 rounded-full text-xs font-semibold">
-          <Building2 className="w-3.5 h-3.5 text-sky-600" />
-          <span>Company-Specific Hiring Architecture</span>
+      <div className="text-center max-w-3xl mx-auto space-y-3.5">
+        <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-sky-50 text-sky-800 border border-sky-200/80 rounded-full text-xs font-semibold shadow-2xs">
+          <Compass className="w-3.5 h-3.5 text-sky-600" />
+          <span>Company-Specific Hiring Architecture &amp; Loops</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-zinc-900">
-          Targeted Company Hiring Process & Stages
+        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900">
+          Targeted Company Hiring Process
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
-          Every company has a unique hiring bar, structure, and philosophy. Search any company to break down their exact multi-round loop (such as Amazon&apos;s Bar Raiser &amp; 16 Leadership Principles), inspect expectations for each level, and practice that exact stage.
+        <p className="text-sm sm:text-base text-zinc-600 leading-relaxed max-w-2xl mx-auto">
+          Every top firm uses a tailored interview architecture. Select or enter any company to inspect their multi-level stages, leadership rubrics, and launch a realistic simulation of that exact round.
         </p>
       </div>
 
-      {/* Search & Configuration Bar */}
-      <div className="bg-white border border-zinc-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+      {/* Spacious, Elegant Search & Selection Hub */}
+      <div className="bg-white border border-zinc-200/90 rounded-2xl p-6 sm:p-8 shadow-sm space-y-7">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSearchCompany();
           }}
-          className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+          className="space-y-6"
         >
-          {/* Company Name */}
-          <div className="md:col-span-5 space-y-1.5">
-            <label className="block text-xs font-bold text-zinc-700">Company Name</label>
-            <div className="relative">
-              <Building2 className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={companyInput}
-                onChange={(e) => setCompanyInput(e.target.value)}
-                placeholder="e.g. Amazon, Google, Meta, Stripe..."
-                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-zinc-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-zinc-900 font-medium"
-                required
-              />
+          {/* Inputs Grid: 2 Generous Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {/* Target Company Input & Suggestions */}
+            <div className="space-y-3.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
+                  <Building2 className="w-4 h-4 text-zinc-700" />
+                  <span>Target Company</span>
+                </label>
+                <span className="text-[11px] text-zinc-400 font-medium">Type any company or choose below</span>
+              </div>
+              
+              <div className="relative">
+                <Building2 className="w-5 h-5 text-zinc-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="text"
+                  value={companyInput}
+                  onChange={(e) => setCompanyInput(e.target.value)}
+                  placeholder="e.g. Amazon, Google, Meta, Stripe..."
+                  className="w-full pl-11 pr-4 py-3 bg-zinc-50/70 hover:bg-zinc-50 text-sm sm:text-base border border-zinc-300 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 font-medium transition-all shadow-2xs"
+                  required
+                />
+              </div>
+
+              {/* Popular Company Chips (Clean & Spacious) */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Top Companies:</span>
+                <div className="flex flex-wrap gap-2">
+                  {POPULAR_COMPANIES.map((co) => {
+                    const isSelected = activePipeline.companyName.toLowerCase() === co.toLowerCase();
+                    return (
+                      <button
+                        key={co}
+                        type="button"
+                        onClick={() => {
+                          setCompanyInput(co);
+                          handleSearchCompany(co, roleInput);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center space-x-1.5 ${
+                          isSelected
+                            ? 'bg-zinc-900 text-white shadow-xs scale-102 ring-2 ring-zinc-900 ring-offset-1'
+                            : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200/60'
+                        }`}
+                      >
+                        <span>{co}</span>
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Target Role / Post Input & Suggestions */}
+            <div className="space-y-3.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
+                  <Briefcase className="w-4 h-4 text-zinc-700" />
+                  <span>Target Post / Role Title</span>
+                </label>
+                <span className="text-[11px] text-zinc-400 font-medium">Position you are interviewing for</span>
+              </div>
+
+              <div className="relative">
+                <User className="w-5 h-5 text-zinc-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="text"
+                  value={roleInput}
+                  onChange={(e) => setRoleInput(e.target.value)}
+                  placeholder="e.g. SDE II, Engineering Manager, Product Manager..."
+                  className="w-full pl-11 pr-4 py-3 bg-zinc-50/70 hover:bg-zinc-50 text-sm sm:text-base border border-zinc-300 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 font-medium transition-all shadow-2xs"
+                  required
+                />
+              </div>
+
+              {/* Popular Role Chips (Clean & Spacious) */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Common Roles:</span>
+                <div className="flex flex-wrap gap-2">
+                  {POPULAR_ROLES.map((r) => {
+                    const isSelected = roleInput === r;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRoleInput(r)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-zinc-800 text-white font-semibold shadow-xs ring-2 ring-zinc-800 ring-offset-1'
+                            : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border border-zinc-200'
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Post / Role Name */}
-          <div className="md:col-span-5 space-y-1.5">
-            <label className="block text-xs font-bold text-zinc-700">Target Post / Role Title</label>
-            <div className="relative">
-              <User className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={roleInput}
-                onChange={(e) => setRoleInput(e.target.value)}
-                placeholder="e.g. SDE II, Engineering Manager, Product Manager..."
-                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-zinc-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-zinc-900 font-medium"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Submit Search Button */}
-          <div className="md:col-span-2">
+          {/* Action Row */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-zinc-100">
+            <p className="text-xs text-zinc-500">
+              Analyzing hiring intelligence for <strong>{companyInput}</strong> &bull; <strong>{roleInput}</strong>
+            </p>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center space-x-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-6 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-sm font-semibold flex items-center justify-center space-x-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
-              <Search className="w-3.5 h-3.5" />
-              <span>{isLoading ? 'Analyzing...' : 'Analyze'}</span>
+              <Search className="w-4 h-4" />
+              <span>{isLoading ? 'Synthesizing Pipeline...' : 'Analyze Hiring Architecture'}</span>
             </button>
           </div>
         </form>
-
-        {/* Popular Company Suggestions */}
-        <div className="space-y-2 pt-2 border-t border-zinc-100">
-          <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            <span className="text-zinc-500 font-semibold mr-1">Popular Companies:</span>
-            {POPULAR_COMPANIES.map((co) => (
-              <button
-                key={co}
-                type="button"
-                onClick={() => {
-                  setCompanyInput(co);
-                  handleSearchCompany(co, roleInput);
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  activePipeline.companyName.toLowerCase() === co.toLowerCase()
-                    ? 'bg-zinc-900 text-white shadow-xs'
-                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-                }`}
-              >
-                {co}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 text-xs pt-1">
-            <span className="text-zinc-500 font-semibold mr-1">Target Roles:</span>
-            {POPULAR_ROLES.map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRoleInput(r)}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
-                  roleInput === r
-                    ? 'bg-zinc-800 text-white'
-                    : 'bg-zinc-50 text-zinc-600 hover:bg-zinc-100 border border-zinc-200'
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Company Pipeline Overview Card */}
-      <div className="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-700 text-white font-black text-xl flex items-center justify-center shadow-xs">
-                {activePipeline.companyName.charAt(0)}
+      <div className="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-7">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-6 border-b border-zinc-100">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 text-white font-black text-2xl flex items-center justify-center shadow-xs">
+              {activePipeline.companyName.charAt(0)}
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">
+                  {activePipeline.companyName}
+                </h2>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center space-x-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{activePipeline.totalStages} Levels of Hiring</span>
+                </span>
               </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">
-                    {activePipeline.companyName}
-                  </h2>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    {activePipeline.totalStages} Levels of Hiring
-                  </span>
-                </div>
-                <p className="text-xs text-zinc-500">{activePipeline.tagline || activePipeline.industry}</p>
-              </div>
+              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">{activePipeline.tagline || activePipeline.industry}</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 text-xs text-zinc-600 shrink-0">
-            <div className="flex items-center space-x-1.5 bg-zinc-50 px-3 py-1.5 rounded-lg border border-zinc-200">
-              <Clock className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Timeline: <strong>{activePipeline.typicalTimeline}</strong></span>
+          <div className="flex items-center space-x-3 text-xs text-zinc-700 shrink-0">
+            <div className="flex items-center space-x-2 bg-zinc-50 px-3.5 py-2 rounded-xl border border-zinc-200 shadow-2xs">
+              <Clock className="w-4 h-4 text-zinc-500" />
+              <span>Typical Timeline: <strong>{activePipeline.typicalTimeline}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Overview & Evaluation Philosophy */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-zinc-50/70 border border-zinc-200 space-y-1.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-1.5">
-              <Layers className="w-3.5 h-3.5 text-zinc-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="p-5 rounded-2xl bg-zinc-50/80 border border-zinc-200/90 space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
+              <Layers className="w-4 h-4 text-zinc-600" />
               <span>Hiring Process Overview</span>
             </h3>
             <p className="text-xs sm:text-sm text-zinc-700 leading-relaxed">
@@ -261,10 +293,10 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center space-x-1.5">
-              <Award className="w-3.5 h-3.5 text-amber-700" />
-              <span>Evaluation Philosophy & Bar</span>
+          <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200/90 space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center space-x-2">
+              <Award className="w-4 h-4 text-amber-700" />
+              <span>Evaluation Philosophy &amp; Bar</span>
             </h3>
             <p className="text-xs sm:text-sm text-amber-950 leading-relaxed font-medium">
               {activePipeline.evaluationPhilosophy}
@@ -274,19 +306,19 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
 
         {/* Culture & Principle Highlights */}
         {activePipeline.cultureHighlights?.length > 0 && (
-          <div className="space-y-2 pt-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700 flex items-center space-x-1.5">
-              <Flame className="w-3.5 h-3.5 text-amber-500" />
-              <span>Key Values & Criteria Tested Across Stages</span>
+          <div className="space-y-3 pt-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
+              <Flame className="w-4 h-4 text-amber-500" />
+              <span>Key Values &amp; Rubric Tested Across Stages</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {activePipeline.cultureHighlights.map((val, idx) => (
                 <div
                   key={idx}
-                  className="px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-200 text-xs text-zinc-800 flex items-start space-x-2"
+                  className="px-3.5 py-2.5 rounded-xl bg-zinc-50 hover:bg-zinc-100/70 border border-zinc-200 text-xs text-zinc-800 flex items-start space-x-2.5 transition-colors"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span className="leading-snug">{val}</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span className="leading-snug font-medium">{val}</span>
                 </div>
               ))}
             </div>
@@ -295,20 +327,22 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
       </div>
 
       {/* Multi-Level Interactive Pipeline Stages */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-zinc-900">
-              Interactive Stage Breakdown for {activePipeline.companyName}
-            </h2>
-            <p className="text-xs text-zinc-500">
-              Click any stage below to inspect its format, typical questions, and launch a targeted simulation.
-            </p>
+      <div className="space-y-5">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">
+            <Target className="w-4 h-4 text-zinc-600" />
+            <span>Interactive Level Breakdown</span>
           </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+            Hiring Stages for {activePipeline.companyName}
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
+            Click any stage below to inspect its format, interviewer role, typical questions, and launch a targeted simulation.
+          </p>
         </div>
 
         {/* Stage Tabs / Flow Rail */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
           {activePipeline.stages.map((stage) => {
             const isSelected = stage.id === selectedStage.id;
             return (
@@ -316,23 +350,23 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                 key={stage.id}
                 type="button"
                 onClick={() => setSelectedStageId(stage.id)}
-                className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
                   isSelected
-                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-md ring-2 ring-zinc-900 ring-offset-2'
-                    : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-300 shadow-xs'
+                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-md ring-2 ring-zinc-900 ring-offset-2 scale-102'
+                    : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-300 shadow-2xs'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                      isSelected ? 'bg-zinc-800 text-amber-300' : 'bg-zinc-100 text-zinc-600'
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                      isSelected ? 'bg-zinc-800 text-amber-300' : 'bg-zinc-100 text-zinc-700'
                     }`}>
                       Level {stage.stageNumber}
                     </span>
-                    <span className={`text-[10px] font-semibold flex items-center space-x-1 ${
-                      isSelected ? 'text-zinc-300' : 'text-zinc-400'
+                    <span className={`text-[11px] font-semibold flex items-center space-x-1 ${
+                      isSelected ? 'text-zinc-300' : 'text-zinc-500'
                     }`}>
-                      <Clock className="w-3 h-3" />
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{stage.durationMinutes}m</span>
                     </span>
                   </div>
@@ -344,8 +378,8 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                   </h3>
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-dashed border-zinc-200/40 flex items-center justify-between">
-                  <span className={`text-[10px] font-medium truncate max-w-[120px] ${
+                <div className="mt-3.5 pt-2.5 border-t border-dashed border-zinc-200/50 flex items-center justify-between">
+                  <span className={`text-[11px] font-medium truncate ${
                     isSelected ? 'text-zinc-300' : 'text-zinc-500'
                   }`}>
                     {stage.levelType}
@@ -360,110 +394,124 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
         </div>
       </div>
 
-      {/* Selected Stage Detail & Simulator Card */}
+      {/* Selected Stage Deep-Dive Card */}
       {selectedStage && (
-        <div className="bg-white border-2 border-zinc-900 rounded-2xl p-6 sm:p-8 shadow-lg space-y-6">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-6 border-b border-zinc-100">
-            <div className="space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${getLevelBadgeColor(selectedStage.levelType)}`}>
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm space-y-7 animate-in fade-in duration-200">
+          {/* Stage Header & Simulation CTA */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-6 border-b border-zinc-100">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${getLevelBadgeColor(selectedStage.levelType)}`}>
                   {selectedStage.levelType}
                 </span>
-                <span className="text-xs font-semibold text-zinc-500 flex items-center space-x-1">
-                  <Clock className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium text-zinc-500 bg-zinc-100 px-2.5 py-1 rounded-full">
+                  Level {selectedStage.stageNumber} of {activePipeline.totalStages}
+                </span>
+                <span className="text-xs font-medium text-zinc-500 bg-zinc-100 px-2.5 py-1 rounded-full flex items-center space-x-1">
+                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
                   <span>{selectedStage.durationMinutes} Minutes</span>
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900">
                 {selectedStage.name}
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-600">
-                Format: <strong>{selectedStage.format}</strong> &bull; Conducted by: <strong>{selectedStage.interviewerProfile}</strong>
+
+              <p className="text-xs sm:text-sm text-zinc-600 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>Format: <strong>{selectedStage.format}</strong></span>
+                <span className="text-zinc-300 hidden sm:inline">&bull;</span>
+                <span>Conducted by: <strong>{selectedStage.interviewerProfile}</strong></span>
               </p>
             </div>
 
-            {/* Action: Practice this specific round */}
+            {/* Launch Simulation CTA */}
             <div className="shrink-0">
               <button
                 type="button"
                 onClick={() => onPracticeStage(activePipeline, selectedStage, roleInput)}
-                className="px-5 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 shadow-md transition-all cursor-pointer hover:shadow-lg"
+                className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-sm font-bold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all cursor-pointer group"
               >
-                <Sparkles className="w-4 h-4 text-amber-300" />
                 <span>Simulate This Stage in Mock Interview</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800">
-              Round Focus & Expectations
-            </h3>
-            <p className="text-xs sm:text-sm text-zinc-700 leading-relaxed">
-              {selectedStage.description}
-            </p>
-          </div>
+          {/* Description & Competencies */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="md:col-span-7 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-1.5">
+                <BookOpen className="w-4 h-4 text-zinc-600" />
+                <span>Round Focus &amp; Expectations</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-700 leading-relaxed">
+                {selectedStage.description}
+              </p>
+            </div>
 
-          {/* Core Competencies Tested */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Competencies & Principles Scored in This Round</span>
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {selectedStage.coreCompetencies.map((comp, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200/80 text-xs font-semibold"
-                >
-                  {comp}
-                </span>
-              ))}
+            <div className="md:col-span-5 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Competencies &amp; Principles Scored</span>
+              </h3>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedStage.coreCompetencies.map((comp, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1.5 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/80 text-xs font-semibold"
+                  >
+                    {comp}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Typical Questions Asked */}
-          <div className="space-y-2 pt-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-1.5">
-              <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-              <span>Typical Questions Asked at {activePipeline.companyName} for This Stage</span>
-            </h3>
-            <div className="space-y-2">
-              {selectedStage.typicalQuestions.map((q, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs sm:text-sm text-zinc-900 flex items-start space-x-3"
-                >
-                  <span className="w-5 h-5 rounded-full bg-zinc-200 text-zinc-800 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <p className="font-medium leading-relaxed italic">&ldquo;{q}&rdquo;</p>
-                </div>
-              ))}
+          {selectedStage.typicalQuestions?.length > 0 && (
+            <div className="space-y-3.5 pt-2 border-t border-zinc-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
+                <Lightbulb className="w-4 h-4 text-amber-500" />
+                <span>Typical Questions Asked at {activePipeline.companyName} for This Stage</span>
+              </h3>
+              <div className="space-y-2.5">
+                {selectedStage.typicalQuestions.map((q, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-xl bg-zinc-50/90 border border-zinc-200/80 flex items-start space-x-3.5 shadow-2xs"
+                  >
+                    <span className="w-6 h-6 rounded-full bg-zinc-900 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <p className="text-xs sm:text-sm font-medium text-zinc-800 italic leading-relaxed">
+                      &ldquo;{q}&rdquo;
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Tips for Success */}
-          <div className="space-y-2 pt-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center space-x-1.5">
-              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
-              <span>Insider Preparation Tips & Bar Raiser Secrets</span>
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {selectedStage.tipsForSuccess.map((tip, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-xl bg-amber-50/60 border border-amber-200/70 text-xs text-amber-950 flex items-start space-x-2"
-                >
-                  <span className="text-amber-600 font-bold">&bull;</span>
-                  <span className="leading-relaxed">{tip}</span>
-                </div>
-              ))}
+          {selectedStage.tipsForSuccess?.length > 0 && (
+            <div className="space-y-3 pt-2 border-t border-zinc-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-sky-600" />
+                <span>Insider Preparation Tips &amp; Bar Raiser Secrets</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {selectedStage.tipsForSuccess.map((tip, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3.5 rounded-xl bg-sky-50/60 border border-sky-200/70 text-xs text-sky-950 flex items-start space-x-2.5"
+                  >
+                    <span className="text-sky-600 font-bold text-sm leading-none mt-0.5">&bull;</span>
+                    <span className="leading-relaxed font-medium">{tip}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
