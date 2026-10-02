@@ -16,7 +16,9 @@ app.use(express.json({ limit: "5mb" }));
 // Normalize URL for Vercel serverless functions where /api prefix might be stripped by rewrites
 if (process.env.VERCEL === "1") {
   app.use((req, _res, next) => {
-    if (req.url && !req.url.startsWith("/api") && !req.url.startsWith("/assets")) {
+    if (req.originalUrl && req.originalUrl.startsWith("/api") && req.url === "/api") {
+      req.url = req.originalUrl;
+    } else if (req.url && !req.url.startsWith("/api") && !req.url.startsWith("/assets")) {
       req.url = `/api${req.url.startsWith("/") ? "" : "/"}${req.url}`;
     }
     next();
@@ -1629,6 +1631,14 @@ app.post("/api/hiring-process/lookup", async (req, res) => {
 
   try {
     const prompt = `Generate a realistic, comprehensive, multi-stage hiring process pipeline for the company: "${companyName}" and role: "${roleTitle}".
+
+IMPORTANT INDUSTRY GUIDANCE:
+- If "${companyName}" is a bank, investment firm, hedge fund, or financial institution (e.g. JPMorgan, Goldman Sachs, Morgan Stanley, Barclays, Bank of America, Citigroup, Wells Fargo, Capital One, HSBC, HDFC, ICICI, etc.):
+  * Set industry to "Investment Banking, Capital Markets & Global Financial Services".
+  * Include authentic banking hiring stages: HackerRank + HireVue Video Screen, Technical Live Pair-Coding (concurrency, relational database transactions/ACID, OOP), Superday Systems Architecture (double-entry ledgering, idempotency, high-throughput money movement), and Managing Director Behavioral / Regulatory Ethics round.
+  * In popularRoles, strictly provide authentic banking titles: Technology Analyst (Software Engineering Program), Associate Software Engineer, Vice President (VP), Quantitative Developer, Low-Latency C++ / Java Systems Developer, Financial Data & Regulatory Architect, and Product Manager (Payments & Digital Banking).
+- If it is consulting, healthcare, semiconductor, or tech, tailor the culture, stages, and questions strictly to that industry.
+
 Return JSON adhering strictly to:
 {
   "companyName": "${companyName}",

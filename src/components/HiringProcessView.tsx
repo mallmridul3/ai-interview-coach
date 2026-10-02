@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Search, 
@@ -17,7 +17,8 @@ import {
   Briefcase,
   Compass,
   TrendingUp,
-  Target
+  Target,
+  Landmark
 } from 'lucide-react';
 import { CompanyHiringPipeline, HiringStage } from '../types';
 import { 
@@ -42,6 +43,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
     () => (initialPipeline.popularRoles && initialPipeline.popularRoles[0]) || 'Software Development Engineer I (SDE I)'
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'tech' | 'banks' | 'fintech'>('all');
 
   // Active pipeline & selected stage
   const [activePipeline, setActivePipeline] = useState<CompanyHiringPipeline>(initialPipeline);
@@ -57,11 +59,49 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
       ? activePipeline.popularRoles
       : getCompanyRoles(activePipeline.companyName, activePipeline.industry);
 
+  // Immediate debounced auto-updating pipeline & roles as user types any company
+  useEffect(() => {
+    const trimmed = companyInput.trim();
+    if (!trimmed) return;
+
+    if (trimmed.toLowerCase() === activePipeline.companyName.toLowerCase()) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      // 1. Check local rich preset first
+      const localMatch = findCompanyPipeline(trimmed);
+      if (localMatch) {
+        setActivePipeline(localMatch);
+        setSelectedStageId(localMatch.stages[0]?.id || '');
+        const availableRoles = localMatch.popularRoles || getCompanyRoles(localMatch.companyName, localMatch.industry);
+        if (!availableRoles.includes(roleInput) && availableRoles.length > 0) {
+          setRoleInput(availableRoles[0]);
+        }
+        return;
+      }
+
+      // 2. Immediate authentic industry pipeline (banking if bank, consulting, healthcare, tech, etc.)
+      const instantPipeline = generateFallbackPipeline(trimmed, roleInput);
+      setActivePipeline(instantPipeline);
+      setSelectedStageId(instantPipeline.stages[0]?.id || '');
+      if (instantPipeline.popularRoles && !instantPipeline.popularRoles.includes(roleInput) && instantPipeline.popularRoles.length > 0) {
+        setRoleInput(instantPipeline.popularRoles[0]);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [companyInput]);
+
   // Select company directly and update role list seamlessly
   const selectCompany = (co: string) => {
     setCompanyInput(co);
     const localMatch = findCompanyPipeline(co);
-    const rolesForCompany = localMatch?.popularRoles || getCompanyRoles(co);
+    const fallback = generateFallbackPipeline(co, roleInput);
+    const pipeline = localMatch || fallback;
+    setActivePipeline(pipeline);
+    setSelectedStageId(pipeline.stages[0]?.id || '');
+    const rolesForCompany = pipeline.popularRoles || getCompanyRoles(co, pipeline.industry);
     const defaultRole = rolesForCompany[0] || 'Software Engineer';
     setRoleInput(defaultRole);
     handleSearchCompany(co, defaultRole);
@@ -174,7 +214,32 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                   <Building2 className="w-4 h-4 text-zinc-700" />
                   <span>Target Company</span>
                 </label>
-                <span className="text-[11px] text-zinc-400 font-medium">Type any company or choose below</span>
+                <div className="flex items-center space-x-1.5">
+                  {isLoading ? (
+                    <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 animate-pulse">
+                      <Sparkles className="w-3 h-3 text-sky-600 animate-spin" />
+                      <span>Synthesizing Deep Pipeline...</span>
+                    </span>
+                  ) : (
+                    <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
+                      activePipeline.industry.includes('Bank') || activePipeline.industry.includes('Capital Markets')
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                        : 'bg-zinc-100 text-zinc-800 border-zinc-200'
+                    }`}>
+                      {activePipeline.industry.includes('Bank') || activePipeline.industry.includes('Capital Markets') ? (
+                        <>
+                          <Landmark className="w-3 h-3 text-emerald-600" />
+                          <span>Verified Banking &amp; Financial Pipeline</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                          <span>Verified Hiring Architecture</span>
+                        </>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
               
               <div className="relative">
@@ -183,18 +248,75 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                   type="text"
                   value={companyInput}
                   onChange={(e) => setCompanyInput(e.target.value)}
-                  placeholder="e.g. Amazon, Google, Meta, Stripe..."
+                  onBlur={() => {
+                    if (companyInput.trim()) {
+                      handleSearchCompany(companyInput, roleInput);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearchCompany(companyInput, roleInput);
+                    }
+                  }}
+                  placeholder="e.g. JPMorgan Chase, Barclays, Google, Amazon..."
                   className="w-full pl-11 pr-4 py-3 bg-zinc-50/70 hover:bg-zinc-50 text-sm sm:text-base border border-zinc-300 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 font-medium transition-all shadow-2xs"
                   required
                 />
               </div>
 
-              {/* Popular Company Chips (Clean & Spacious) */}
-              <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Top Companies:</span>
+              {/* Popular Company Chips with Category Tabs */}
+              <div className="space-y-2 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-1.5">
+                  <div className="flex items-center space-x-1">
+                    <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mr-1">Browse:</span>
+                    {[
+                      { id: 'all', label: 'All' },
+                      { id: 'tech', label: 'Tech Giants' },
+                      { id: 'banks', label: 'Global Banks & Finance' },
+                      { id: 'fintech', label: 'Fintech' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id as any)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                          selectedCategory === cat.id
+                            ? 'bg-zinc-900 text-white shadow-2xs'
+                            : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex flex-wrap gap-2">
-                  {POPULAR_COMPANIES.map((co) => {
+                  {POPULAR_COMPANIES.filter((co) => {
+                    const isBank = [
+                      'jpmorgan chase',
+                      'goldman sachs',
+                      'morgan stanley',
+                      'bank of america',
+                      'barclays',
+                      'capital one',
+                    ].includes(co.toLowerCase());
+                    if (selectedCategory === 'banks') return isBank;
+                    const isFintech = ['stripe', 'uber'].includes(co.toLowerCase());
+                    if (selectedCategory === 'fintech') return isFintech;
+                    if (selectedCategory === 'tech') return !isBank && !isFintech;
+                    return true;
+                  }).map((co) => {
                     const isSelected = activePipeline.companyName.toLowerCase() === co.toLowerCase();
+                    const isBankCo = [
+                      'jpmorgan chase',
+                      'goldman sachs',
+                      'morgan stanley',
+                      'bank of america',
+                      'barclays',
+                      'capital one',
+                    ].includes(co.toLowerCase());
                     return (
                       <button
                         key={co}
@@ -203,6 +325,8 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center space-x-1.5 ${
                           isSelected
                             ? 'bg-zinc-900 text-white shadow-xs scale-102 ring-2 ring-zinc-900 ring-offset-1'
+                            : isBankCo
+                            ? 'bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-900 border border-emerald-200/80'
                             : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200/60'
                         }`}
                       >

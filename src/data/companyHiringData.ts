@@ -108,6 +108,56 @@ export const COMPANY_SPECIFIC_ROLES: Record<string, string[]> = {
     'Risk & Pricing Models Systems Engineer',
     'Financial Data Platform Architect',
   ],
+  'JPMorgan Chase': [
+    'Software Engineer Program (SEP Analyst)',
+    'Associate Software Engineer (Core Banking & Payments)',
+    'Vice President (VP - Corporate & Investment Bank Tech)',
+    'Quantitative Research / Analytics Engineer',
+    'Low-Latency C++ Electronic Trading Developer',
+    'Cloud & Microservices Architect (Chase Digital)',
+    'Cybersecurity & Fraud Risk Detection Engineer',
+    'Product Manager (Consumer & Community Banking)',
+  ],
+  'Morgan Stanley': [
+    'Technology Analyst (Enterprise Engineering)',
+    'Senior Manager / Associate (Wealth Management Tech)',
+    'Vice President (Institutional Securities Technology)',
+    'Algorithmic Trading & Fixed Income Systems Engineer',
+    'High-Throughput Java & Distributed Cache Architect',
+    'Core Infrastructure & Reliability Engineer',
+  ],
+  'Bank of America': [
+    'Global Technology Analyst (Full Stack Development)',
+    'Senior Tech Associate (Merrill Wealth & CashPro)',
+    'Vice President (Global Markets Technology)',
+    'High-Throughput Payments & Ledger Architect',
+    'Risk & Regulatory Reporting Systems Engineer',
+    'Enterprise Cloud & Data Platform Developer',
+  ],
+  Barclays: [
+    'Technology Developer (Barclays Investment Bank)',
+    'Associate (Corporate & Sustainable Banking Tech)',
+    'Vice President (Markets & Execution Technology)',
+    'Low-Latency Java / C++ Settlement Developer',
+    'Digital Banking & Payments Microservices Engineer',
+    'Risk, Compliance & Fraud Architecture Engineer',
+  ],
+  'Capital One': [
+    'Associate Software Engineer (TDP Program)',
+    'Senior Software Engineer (Cloud Card & Payments)',
+    'Lead Software Engineer (Real-Time Fraud Detection)',
+    'Principal Distributed Systems Architect',
+    'Director of Software Engineering',
+    'Machine Learning & Credit Modeling Engineer',
+    'Product Manager (Financial Products)',
+  ],
+  Citigroup: [
+    'Technology Analyst (Citi Treasury & Trade Solutions)',
+    'Assistant Vice President (AVP - Institutional Clients Group)',
+    'Vice President (VP - Markets Quantitative Engineering)',
+    'Global Payments & Real-Time Settlement Architect',
+    'Risk Analytics & Regulatory Data Engineer',
+  ],
 };
 
 export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
@@ -874,6 +924,212 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
       },
     ],
   },
+  {
+    companyName: 'JPMorgan Chase & Co.',
+    normalizedName: 'jpmorganchase',
+    tagline: 'Global Leader in Financial Technology, Quantitative Trading & Large-Scale Payment Infrastructure',
+    industry: 'Investment Banking, Global Capital Markets & Consumer Payments',
+    overview: 'JPMorgan Chase processes over $10 trillion in daily financial transactions. The engineering hiring architecture evaluates high-throughput data reliability, multithreaded concurrency (Java, C++, Python), database transaction integrity (ACID, double-entry ledgering), and rigorous ethical accountability. The process moves from HackerRank/HireVue screening into the high-stakes Superday loop.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Client First & Fiduciary Responsibility (Treat customer money and confidential records with zero compromise)',
+      'Operational Resilience (Architect systems with zero-downtime, idempotency, and automated disaster failover)',
+      'Cross-Team Partnership (Communicate cleanly across algorithmic trading desks, risk officers, and compliance)',
+      'Regulatory Governance & Auditability (Embed strict audit logging and security into every software release)'
+    ],
+    evaluationPhilosophy: 'JPMorgan values engineers who balance rapid feature delivery with bulletproof transactional consistency. In financial engineering, an unhandled race condition can cause millions in financial losses or regulatory sanctions. Candidates who articulate locking strategies, transaction isolation, and disaster recovery pass the bar.',
+    typicalTimeline: '3 to 5 weeks from HackerRank/HireVue to Superday offer debrief',
+    popularRoles: COMPANY_SPECIFIC_ROLES['JPMorgan Chase'],
+    stages: [
+      {
+        id: 'jpm-s1',
+        stageNumber: 1,
+        name: 'Stage 1: HackerRank Coding Challenge & HireVue Video Screen',
+        levelType: 'Online Assessment',
+        format: '60-Minute Timed Platform (2 Coding Questions) + 3 Recorded Video Prompts',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Evaluation Platform & Talent Acquisition Calibration',
+        coreCompetencies: ['Data Structures & Algorithms', 'Time Complexity Optimization', 'Communication Clarity', 'Fiduciary Ethics'],
+        description: 'Automated assessment testing core algorithmic efficiency (arrays, hashmaps, sliding window) followed by asynchronous HireVue behavioral questions evaluating past accountability and adherence to standards.',
+        typicalQuestions: [
+          'Given an array of customer transaction amounts and timestamps, detect anomalous rapid withdrawals exceeding a rolling-window limit.',
+          'HireVue Prompt: Describe a situation where you had to adhere strictly to a policy, security requirement, or compliance standard even when taking a shortcut would have saved time.'
+        ],
+        tipsForSuccess: [
+          'Ensure all edge test cases pass with optimal O(n) or O(n log n) time complexity.',
+          'In HireVue, dress professionally, look directly into the camera lens, and structure answers tightly with the STAR framework.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix',
+      },
+      {
+        id: 'jpm-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen & Live Code Pair',
+        levelType: 'Technical Round',
+        format: '45-60 Minute Live Pair-Coding Session via CoderPad',
+        durationMinutes: 60,
+        interviewerProfile: 'Vice President (VP) / Lead Software Engineer from Line of Business',
+        coreCompetencies: ['Multithreading & Concurrency', 'OOP & Design Patterns', 'SQL & Transaction Isolation', 'Memory Management'],
+        description: 'Interactive pair programming evaluating code readability, synchronization, deadlock avoidance, and relational database trade-offs.',
+        typicalQuestions: [
+          'Implement a thread-safe in-memory order matching queue or LRU cache with concurrent read/write locks.',
+          'Explain the practical differences between optimistic locking and pessimistic locking, and how isolation levels (Read Committed vs Serializable) prevent dirty reads and phantom reads in banking databases.'
+        ],
+        tipsForSuccess: [
+          'Proactively discuss thread-safety guarantees (mutexes, atomics, condition variables).',
+          'Highlight boundary condition validation, error handling, and defensive programming practices.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'jpm-s3',
+        stageNumber: 3,
+        name: 'Stage 3: The Superday — Financial Systems Architecture & Transactional Resiliency',
+        levelType: 'System Design',
+        format: '60-Minute High-Scale Distributed Architecture Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Executive Director / Principal Enterprise Architect',
+        coreCompetencies: ['Double-Entry Ledger Design', 'Idempotency Keys', 'Event Sourcing & Kafka', 'Disaster Recovery & Multi-Region Consistency'],
+        description: 'Architecting mission-critical financial software handling heavy transactional volume with zero double-spending and zero message loss.',
+        typicalQuestions: [
+          'Design an end-to-end peer-to-peer money movement and settlement engine (like Zelle or Chase QuickPay) handling 25,000 TPS with strict idempotency under network partition.',
+          'How do you reconcile asynchronous payment states between third-party clearing rails (SWIFT, Fedwire, ACH) and internal ledger databases when network timeouts occur?'
+        ],
+        tipsForSuccess: [
+          'Always begin with data integrity: double-entry bookkeeping schemas, unique idempotency keys, and transactional outbox patterns.',
+          'Discuss distributed consensus and explain why eventual consistency must be paired with compensating transactions (Saga pattern).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'jpm-s4',
+        stageNumber: 4,
+        name: 'Stage 4: The Superday — Managing Director Behavioral, Risk & Ethical Governance Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Leadership & Values Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Managing Director (MD) / Head of Technology Division',
+        coreCompetencies: ['Regulatory Awareness & Ethics', 'Client Service Dedication', 'Crisis & Outage Management', 'Cross-Functional Collaboration'],
+        description: 'Final leadership evaluation assessing executive presence, fiduciary responsibility, resilience under pressure, and cross-functional leadership.',
+        typicalQuestions: [
+          'Tell me about a time you identified a critical flaw, security vulnerability, or data discrepancy in production. Walk me step-by-step through how you communicated the risk to leadership and remediated it.',
+          'Describe a scenario where business trading desks pressured engineering to release a feature immediately, but quality or compliance checks had not yet finished. How did you handle the conflict?'
+        ],
+        tipsForSuccess: [
+          'Exhibit unwavering personal accountability—never deflect blame onto junior peers or vendors.',
+          'Demonstrate deep respect for risk officers, compliance mandates, and customer data privacy.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Goldman Sachs',
+    normalizedName: 'goldmansachs',
+    tagline: 'Engineering Rigor Meets High-Stakes Financial Mastery & Algorithmic Excellence',
+    industry: 'Investment Banking, Global Markets & Quantitative Strats',
+    overview: 'Goldman Sachs considers engineering its core differentiator in Global Markets and Asset Management. The firm evaluates candidates on deep computer science fundamentals, algorithmic optimization, low-latency execution, mathematical and probabilistic reasoning, and a strong culture of partnership and client service.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Partnership & Teamwork (No single individual succeeds alone; solutions are peer-reviewed)',
+      'Client Service & Excellence (Relentless focus on quality and delivering flawless execution)',
+      'Integrity & Intellectual Honesty (Admit mistakes early, audit numbers rigorously)',
+      'Innovation & Meritocracy (Best ideas win regardless of seniority)'
+    ],
+    evaluationPhilosophy: 'Goldman Sachs looks for strong mathematical clarity, deep understanding of CPU cache and memory locality for trading systems, and candidates who communicate complex technical reasoning cleanly under pressure.',
+    typicalTimeline: '4 to 6 weeks from HackerRank to Superday committee debrief',
+    popularRoles: COMPANY_SPECIFIC_ROLES['Goldman Sachs'],
+    stages: [
+      {
+        id: 'gs-s1',
+        stageNumber: 1,
+        name: 'Stage 1: HackerRank Online Coding Assessment',
+        levelType: 'Online Assessment',
+        format: '90-Minute Timed Assessment (2 Advanced Coding Challenges + Math/Probability)',
+        durationMinutes: 90,
+        interviewerProfile: 'Automated Evaluation Platform',
+        coreCompetencies: ['Dynamic Programming', 'Graph Theory', 'Probability & Numerical Reasoning', 'Memory Complexity'],
+        description: 'Challenging technical assessment covering algorithmic problem solving, dynamic programming arrays, string algorithms, and numerical trade-offs.',
+        typicalQuestions: [
+          'Given a stream of limit orders with bids and asks, determine optimal matched volume while minimizing execution latency.',
+          'Calculate the expected value and variance of a portfolio transition under probabilistic drawdown constraints.'
+        ],
+        tipsForSuccess: [
+          'Focus on optimal Big-O algorithmic complexity and memory layout.',
+          'Write modular, self-documenting code with defensive input validation.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'gs-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen / Peer Deep Dive',
+        levelType: 'Technical Round',
+        format: '45-Minute Live Interactive Technical Conversation',
+        durationMinutes: 45,
+        interviewerProfile: 'Goldman Sachs Associate / Vice President Engineer',
+        coreCompetencies: ['Object-Oriented Design', 'Low-Latency Mechanics', 'Data Structures', 'Algorithmic Optimization'],
+        description: 'Live coding and CS fundamentals discussion examining memory management, garbage collection overhead (or C++ RAII), and data structures.',
+        typicalQuestions: [
+          'Implement a high-performance circular lock-free ring buffer for streaming market ticks.',
+          'Explain how memory cache lines, false sharing, and branch prediction affect high-frequency execution performance.'
+        ],
+        tipsForSuccess: [
+          'Demonstrate understanding of low-level CPU efficiency (stack vs heap, cache locality).',
+          'Communicate transparently when exploring problem spaces.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'gs-s3',
+        stageNumber: 3,
+        name: 'Stage 3: The Superday — Systems Architecture & Distributed Financial Engines',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Ledger & High-Throughput Engine Architecture',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior VP / Technology Fellow',
+        coreCompetencies: ['High-Throughput Architecture', 'Event Auditing', 'Fault Tolerance', 'Sub-Millisecond Latency'],
+        description: 'Comprehensive system design session modeling high-throughput trade execution pipelines or real-time portfolio risk computation.',
+        typicalQuestions: [
+          'Design a real-time risk calculation and VaR (Value at Risk) pipeline processing 50,000 market price updates per second with sub-100ms dashboard refreshes.',
+          'How do you design a financial audit ledger that guarantees non-repudiation and cryptographic integrity across multiple regulatory jurisdictions?'
+        ],
+        tipsForSuccess: [
+          'Break down functional vs non-functional requirements (throughput, P99 latency, fault tolerance).',
+          'Detail schema design, cache invalidation, and data partition strategies.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'gs-s4',
+        stageNumber: 4,
+        name: 'Stage 4: The Superday — Vice President / Managing Director Culture & Partnership Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Senior Leadership & Culture Alignment Evaluation',
+        durationMinutes: 45,
+        interviewerProfile: 'Managing Director / Business Unit Head',
+        coreCompetencies: ['Partnership & Teamwork', 'Client Dedication', 'Integrity & Ethics', 'Handling Ambiguity'],
+        description: 'Final behavioral debrief evaluating candidate alignment with Goldman Sachs core principles, intellectual maturity, and executive poise.',
+        typicalQuestions: [
+          'Tell me about a time you had to deliver difficult news to a major stakeholder or client when a software rollout encountered a defect.',
+          'How do you foster partnership and psychological safety in a high-pressure trading floor environment?'
+        ],
+        tipsForSuccess: [
+          'Highlight humility, team-first mentality, and pride in excellence.',
+          'Speak articulately about past projects and lessons learned.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
 ];
 
 export const POPULAR_COMPANIES = [
@@ -881,13 +1137,17 @@ export const POPULAR_COMPANIES = [
   'Google',
   'Meta',
   'Microsoft',
-  'Netflix',
   'Apple',
-  'Stripe',
-  'Uber',
+  'Netflix',
   'Nvidia',
-  'Airbnb',
-  'Goldman Sachs'
+  'JPMorgan Chase',
+  'Goldman Sachs',
+  'Morgan Stanley',
+  'Bank of America',
+  'Barclays',
+  'Capital One',
+  'Stripe',
+  'Uber'
 ];
 
 export const POPULAR_ROLES = [
@@ -900,18 +1160,201 @@ export const POPULAR_ROLES = [
   'DevOps / Site Reliability Engineer (SRE)'
 ];
 
+export const BANKING_ROLES = [
+  'Technology Analyst (Software Engineering Program)',
+  'Associate Software Engineer (Core Banking)',
+  'Vice President (VP - Architecture & Engineering)',
+  'Quantitative Developer (Trading & Pricing Models)',
+  'Low-Latency C++ / Java Systems Developer',
+  'Financial Data Platform & Regulatory Compliance Architect',
+  'Cloud Infrastructure & DevSecOps Engineer (Financial Cloud)',
+  'Product Manager (Payments, Digital Banking & Wealth)',
+];
+
+export function detectCompanyIndustry(name: string): {
+  industry: string;
+  category: 'banking' | 'tech' | 'consulting' | 'healthcare' | 'cybersecurity' | 'hardware' | 'general';
+} {
+  if (!name) return { industry: 'Technology & Enterprise Scale', category: 'tech' };
+  const n = name.trim().toLowerCase();
+
+  // 1. Banking, Finance, Quant, Trading, Payments
+  const bankKeywords = [
+    'bank', 'banking', 'chase', 'jpmorgan', 'jp morgan', 'morgan stanley', 'goldman', 'bofa', 
+    'barclays', 'citi', 'citigroup', 'citibank', 'wells fargo', 'capital one', 
+    'fidelity', 'blackrock', 'vanguard', 'deutsche', 'ubs', 'credit suisse', 'hsbc', 
+    'standard chartered', 'pnc', 'us bank', 'schwab', 'charles schwab', 'mellon', 'state street', 
+    'nomura', 'macquarie', 'rbc', 'td bank', 'scotiabank', 'bmo', 'santander', 
+    'bnp paribas', 'societe generale', 'ing', 'mizuho', 'hdfc', 'icici', 'kotak', 
+    'axis', 'sbi', 'quant', 'trading', 'hedge', 'citadel', 'two sigma', 'jane street', 
+    'de shaw', 'point72', 'jump trading', 'fintech', 'revolut', 'monzo', 'chime', 
+    'plaid', 'robinhood', 'coinbase', 'financial', 'wealth', 'capital', 'securities'
+  ];
+  if (bankKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Investment Banking, Capital Markets & Global Financial Services', category: 'banking' };
+  }
+
+  // 2. Consulting & Strategy
+  const consultKeywords = [
+    'mckinsey', 'bcg', 'boston consulting', 'bain', 'deloitte', 'pwc', 
+    'pricewaterhousecoopers', 'ey', 'ernst', 'kpmg', 'accenture', 'oliver wyman', 'kearney', 'consulting'
+  ];
+  if (consultKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Management, Technology & Strategy Consulting', category: 'consulting' };
+  }
+
+  // 3. Healthcare & Biotech
+  const healthKeywords = [
+    'health', 'pfizer', 'moderna', 'johnson', 'j&j', 'roche', 'novartis', 'merck', 
+    'astrazeneca', 'gilead', 'abbvie', 'amgen', 'unitedhealth', 'cvs', 'optum', 
+    'cigna', 'humana', 'medtronic', 'biogen', 'genentech', 'sanofi', 'bayer', 'epic systems'
+  ];
+  if (healthKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Healthcare, Life Sciences & Biomedical Systems', category: 'healthcare' };
+  }
+
+  // 4. Cybersecurity
+  const secKeywords = [
+    'cyber', 'security', 'palo alto', 'crowdstrike', 'fortinet', 'zscaler', 
+    'cloudflare', 'okta', 'checkpoint', 'sentinelone', 'splunk', 'fireeye', 'mandiant'
+  ];
+  if (secKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Enterprise Cybersecurity & Threat Intelligence', category: 'cybersecurity' };
+  }
+
+  // 5. Hardware & Semiconductor
+  const hwKeywords = [
+    'nvidia', 'amd', 'intel', 'qualcomm', 'broadcom', 'arm', 'tsmc', 'asml', 
+    'texas instruments', 'micron', 'nxp', 'applied materials', 'semiconductor', 'hardware', 'chip'
+  ];
+  if (hwKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Semiconductors, Accelerated Computing & Hardware Architecture', category: 'hardware' };
+  }
+
+  return { industry: 'Technology & Enterprise Scale', category: 'tech' };
+}
+
+export function generateBankingPipeline(companyName: string, roleTitle = 'Associate Software Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Global Bank';
+  const roles = getCompanyRoles(company, 'Investment Banking');
+
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `High-concurrency financial engineering, transactional resilience & fiduciary standards at ${company}`,
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    overview: `${company} operates under zero-tolerance tolerances for downtime, double-spending, and compliance failure. Their multi-stage engineering loop evaluates algorithmic problem solving under pressure, low-level concurrency (Java, C++, Python, SQL), ACID transaction guarantees, and uncompromising ethical stewardship.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Client First & Uncompromising Fiduciary Integrity',
+      'Zero-Downtime Resilience & Transactional Auditability',
+      'Strict Regulatory Compliance, Risk Mitigation & Data Privacy',
+      'High-Stakes Composure, Team Partnership & Ownership'
+    ],
+    evaluationPhilosophy: `${company} evaluates candidates for technical depth, fault-tolerant system design, and fiduciary maturity. In banking tech, an unhandled race condition can cause millions in financial losses or regulatory sanctions. Candidates who understand transaction isolation, idempotency, and disaster recovery pass the bar.`,
+    typicalTimeline: '3 to 5 weeks from initial screening / HireVue to final Superday committee decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Online Coding Challenge & HireVue Video Screen',
+        levelType: 'Online Assessment',
+        format: '60-Minute Timed HackerRank / CodeSignal + 3 Recorded Video Questions',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Platform & Talent Acquisition Calibration',
+        coreCompetencies: ['Data Structures & Algorithms', 'Big-O Efficiency', 'STAR Behavioral Clarity', 'Fiduciary Ethics'],
+        description: `Initial automated screening evaluating foundational data structures and asynchronous video answers. Tests speed, algorithmic accuracy under time constraints, and structured communication.`,
+        typicalQuestions: [
+          'Given an array of customer transaction amounts and timestamps, detect anomalous rapid withdrawals exceeding a rolling-window limit.',
+          'HireVue Prompt: Describe a situation where you had to adhere strictly to a policy, security requirement, or compliance standard even when taking a shortcut would have saved time.'
+        ],
+        tipsForSuccess: [
+          'Ensure all hidden edge test cases pass with optimal O(n) or O(n log n) time and space complexity.',
+          'For HireVue questions, speak clearly directly into the camera using the STAR method with concrete personal ownership.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix',
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen & Live Code Pair',
+        levelType: 'Technical Round',
+        format: '45-60 Minute Live Pair-Coding via CoderPad',
+        durationMinutes: 60,
+        interviewerProfile: 'Vice President (VP) / Senior Technical Lead from Banking Line of Business',
+        coreCompetencies: ['Multithreading & Concurrency', 'OOP & Design Patterns', 'SQL & Transaction Isolation', 'Memory Management'],
+        description: `Live interactive coding round probing low-level mechanics, synchronization, deadlock avoidance, and clean architectural design in languages such as Java, C++, Python, or C#.`,
+        typicalQuestions: [
+          'Implement a thread-safe in-memory order matching cache or LRU cache with concurrent read/write locks.',
+          'Explain the practical differences between optimistic locking and pessimistic locking, and how isolation levels (Read Committed vs Serializable) prevent dirty reads and phantom reads in banking databases.'
+        ],
+        tipsForSuccess: [
+          'Articulate thread-safety guarantees proactively (atomic operations, mutexes, condition variables).',
+          'Highlight error handling, boundary validation, and defensive programming practices.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: The Superday — Financial Systems Architecture & Transactional Resiliency',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Architecture & Data Integrity Round',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Architect / Executive Director',
+        coreCompetencies: ['Double-Entry Ledger Design', 'Idempotency Keys', 'Event Sourcing & Kafka Streams', 'Disaster Recovery & Multi-Region Consistency'],
+        description: `Designing mission-critical distributed financial systems capable of processing high-throughput transactions with zero data loss and sub-millisecond auditability.`,
+        typicalQuestions: [
+          `Design an end-to-end peer-to-peer money movement and settlement engine at ${company} handling 25,000 TPS with strict idempotency and zero double-spending under network partition.`,
+          'How do you handle asynchronous reconciliation when external payment rails (SWIFT, Fedwire, ACH) timeout or return indeterminate status codes?'
+        ],
+        tipsForSuccess: [
+          'Always start with data integrity: establish double-entry bookkeeping schemas, unique idempotency keys, and transactional outbox patterns.',
+          'Discuss distributed consensus and why eventual consistency must be paired with compensating transactions (Saga pattern).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: The Superday — Managing Director Behavioral, Risk & Ethical Governance Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Leadership & Values Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Managing Director (MD) / Head of Technology Division',
+        coreCompetencies: ['Regulatory Awareness & Ethics', 'Client Service Dedication', 'Crisis & Outage Management', 'Cross-Functional Collaboration'],
+        description: `Final leadership evaluation assessing executive presence, fiduciary responsibility, resilience under market volatility, and long-term team stewardship.`,
+        typicalQuestions: [
+          'Tell me about a time you identified a critical flaw, security vulnerability, or data discrepancy in production. Walk me step-by-step through how you communicated the risk to leadership and remediated it.',
+          'Describe a scenario where business trading desks pressured engineering to release a feature immediately, but quality or compliance checks had not yet finished. How did you handle the conflict?'
+        ],
+        tipsForSuccess: [
+          'Exhibit unwavering personal accountability—never deflect blame onto junior peers or third-party vendors.',
+          'Demonstrate respect for risk officers, compliance mandates, and customer data privacy.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  };
+}
+
 export function getCompanyRoles(companyName?: string, industry?: string): string[] {
   if (!companyName) return POPULAR_ROLES;
   const clean = companyName.trim().toLowerCase();
 
-  // Check exact key or match in COMPANY_SPECIFIC_ROLES
+  // 1. Check exact key or match in COMPANY_SPECIFIC_ROLES
   for (const [key, roles] of Object.entries(COMPANY_SPECIFIC_ROLES)) {
     if (key.toLowerCase() === clean || clean.includes(key.toLowerCase()) || key.toLowerCase().includes(clean)) {
       return roles;
     }
   }
 
-  // Check preset pipelines
+  // 2. Check preset pipelines
   const preset = PRESET_COMPANY_PIPELINES.find(
     (p) => p.normalizedName === clean || p.companyName.toLowerCase().includes(clean) || clean.includes(p.normalizedName)
   );
@@ -919,28 +1362,44 @@ export function getCompanyRoles(companyName?: string, industry?: string): string
     return preset.popularRoles;
   }
 
-  // Industry-specific smart fallbacks
-  const ind = (industry || '').toLowerCase();
-  if (ind.includes('financ') || ind.includes('bank') || ind.includes('quant') || ind.includes('trading')) {
+  // 3. Smart Industry Detection
+  const detected = detectCompanyIndustry(companyName);
+  const ind = (industry || detected.industry).toLowerCase();
+
+  if (detected.category === 'banking' || ind.includes('financ') || ind.includes('bank') || ind.includes('quant') || ind.includes('trading')) {
     return [
-      'Quantitative Software Engineer',
-      'Vice President (VP - Core Engineering)',
-      'Low-Latency C++ Execution Developer',
-      'Algorithmic Trading Systems Engineer',
-      'Financial Data Platform Architect',
-      'Risk & Pricing Modeler',
+      `Technology Analyst (Software Engineering)`,
+      `Associate Software Engineer (${companyName})`,
+      `Vice President (VP - Architecture & Engineering)`,
+      `Quantitative Developer (Pricing & Risk Modeling)`,
+      `Low-Latency C++ / Java Systems Developer`,
+      `Financial Data Platform & Regulatory Architect`,
+      `Cloud Infrastructure & DevSecOps Engineer`,
+      `Product Manager (Digital Banking & Payments)`,
     ];
   }
-  if (ind.includes('health') || ind.includes('bio') || ind.includes('medic')) {
+
+  if (detected.category === 'consulting' || ind.includes('consult')) {
+    return [
+      `Technology Consultant (${companyName})`,
+      `Senior Solution Architect (Enterprise Advisory)`,
+      `Digital Transformation Strategy Lead`,
+      `Cloud & Data Modernization Consultant`,
+      `Associate Partner / Engagement Director`,
+    ];
+  }
+
+  if (detected.category === 'healthcare' || ind.includes('health') || ind.includes('bio') || ind.includes('medic')) {
     return [
       'Bioinformatics Software Engineer',
-      'HealthTech Systems Architect',
+      `HealthTech Systems Architect (${companyName})`,
       'Senior Clinical Data Platform Engineer',
       'Regulatory & HIPAA Compliance Engineer',
       'Staff Machine Learning Engineer (Healthcare)',
     ];
   }
-  if (ind.includes('cyber') || ind.includes('security')) {
+
+  if (detected.category === 'cybersecurity' || ind.includes('cyber') || ind.includes('security')) {
     return [
       'Security Operations & Incident Response Engineer',
       'Application Security Architect (AppSec)',
@@ -949,7 +1408,8 @@ export function getCompanyRoles(companyName?: string, industry?: string): string
       'Staff Cryptography & Identity Engineer',
     ];
   }
-  if (ind.includes('hardware') || ind.includes('semiconductor') || ind.includes('chip') || ind.includes('embedded')) {
+
+  if (detected.category === 'hardware' || ind.includes('hardware') || ind.includes('semiconductor') || ind.includes('chip') || ind.includes('embedded')) {
     return [
       'Embedded Firmware Engineer',
       'ASIC / FPGA Verification Engineer',
@@ -973,20 +1433,54 @@ export function getCompanyRoles(companyName?: string, industry?: string): string
 
 export function findCompanyPipeline(query: string): CompanyHiringPipeline | undefined {
   if (!query) return undefined;
-  const clean = query.trim().toLowerCase();
+  const rawClean = query.trim().toLowerCase();
+  const clean = rawClean.replace(/[^a-z0-9]/g, '');
+
+  // Alias checks for convenience
+  if (rawClean.includes('jpmorgan') || rawClean.includes('chase') || rawClean.includes('jp morgan')) {
+    const found = PRESET_COMPANY_PIPELINES.find((p) => p.normalizedName.includes('jpmorgan'));
+    if (found) return found;
+  }
+  if (rawClean.includes('goldman')) {
+    const found = PRESET_COMPANY_PIPELINES.find((p) => p.normalizedName.includes('goldman'));
+    if (found) return found;
+  }
+  if (rawClean.includes('apple')) {
+    const found = PRESET_COMPANY_PIPELINES.find((p) => p.normalizedName.includes('apple'));
+    if (found) return found;
+  }
+  if (rawClean.includes('google')) {
+    const found = PRESET_COMPANY_PIPELINES.find((p) => p.normalizedName.includes('google'));
+    if (found) return found;
+  }
+  if (rawClean.includes('meta') || rawClean === 'facebook') {
+    const found = PRESET_COMPANY_PIPELINES.find((p) => p.normalizedName.includes('meta'));
+    if (found) return found;
+  }
+  if (rawClean.includes('amazon')) {
+    const found = PRESET_COMPANY_PIPELINES.find((p) => p.normalizedName.includes('amazon'));
+    if (found) return found;
+  }
+
   return PRESET_COMPANY_PIPELINES.find(
-    (p) => p.normalizedName === clean || p.companyName.toLowerCase().includes(clean) || clean.includes(p.normalizedName)
+    (p) => p.normalizedName === clean || p.companyName.toLowerCase().includes(rawClean) || rawClean.includes(p.companyName.toLowerCase()) || clean.includes(p.normalizedName)
   );
 }
 
 export function generateFallbackPipeline(companyName: string, roleTitle = 'Software Engineer'): CompanyHiringPipeline {
-  const company = companyName.trim() || 'Premier Tech Leader';
+  const company = companyName.trim() || 'Premier Global Enterprise';
+  const detected = detectCompanyIndustry(company);
+
+  if (detected.category === 'banking') {
+    return generateBankingPipeline(company, roleTitle);
+  }
+
   return {
     companyName: company,
     normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
     tagline: `Comprehensive hiring process & bar evaluation at ${company}`,
-    industry: 'Technology & Enterprise Scale',
-    popularRoles: getCompanyRoles(company, 'Technology & Enterprise Scale'),
+    industry: detected.industry,
+    popularRoles: getCompanyRoles(company, detected.industry),
     overview: `${company} evaluates candidates across technical depth, domain architecture, and cultural ownership. The process assesses both practical problem solving and alignment with organizational values.`,
     totalStages: 4,
     cultureHighlights: [
