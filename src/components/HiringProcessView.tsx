@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Building2, 
   Search, 
@@ -18,16 +18,21 @@ import {
   Compass,
   TrendingUp,
   Target,
-  Landmark
+  Landmark,
+  AlertCircle,
+  Check,
+  X
 } from 'lucide-react';
 import { CompanyHiringPipeline, HiringStage } from '../types';
 import { 
   PRESET_COMPANY_PIPELINES, 
   POPULAR_COMPANIES, 
   POPULAR_ROLES, 
+  ALL_SUPPORTED_COMPANIES,
   findCompanyPipeline, 
   generateFallbackPipeline,
-  getCompanyRoles
+  getCompanyRoles,
+  validateCompanyName
 } from '../data/companyHiringData';
 
 interface HiringProcessViewProps {
@@ -45,6 +50,14 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'tech' | 'banks' | 'fintech'>('all');
 
+  // Autocomplete dropdown & error validation state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [companyError, setCompanyError] = useState<string | null>(null);
+  const [suggestedCorrections, setSuggestedCorrections] = useState<string[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+
   // Active pipeline & selected stage
   const [activePipeline, setActivePipeline] = useState<CompanyHiringPipeline>(initialPipeline);
   const [selectedStageId, setSelectedStageId] = useState<string>(
@@ -59,43 +72,98 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
       ? activePipeline.popularRoles
       : getCompanyRoles(activePipeline.companyName, activePipeline.industry);
 
-  // Immediate debounced auto-updating pipeline & roles as user types any company
+  // Filter autocomplete companies based on input
+  const filteredCompanies = useMemo(() => {
+    const query = companyInput.trim().toLowerCase();
+    if (!query) {
+      return ALL_SUPPORTED_COMPANIES.slice(0, 8);
+    }
+    return ALL_SUPPORTED_COMPANIES.filter((c) => {
+      return (
+        c.name.toLowerCase().includes(query) ||
+        c.aliases.some((a) => a.toLowerCase().includes(query)) ||
+        c.industry.toLowerCase().includes(query)
+      );
+    }).slice(0, 8);
+  }, [companyInput]);
+
+  // Click-away listener to dismiss autocomplete dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        inputContainerRef.current && 
+        !inputContainerRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Immediate debounced auto-updating pipeline & validation as user types
   useEffect(() => {
     const trimmed = companyInput.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      setCompanyError(null);
+      setSuggestedCorrections([]);
+      return;
+    }
+
+    // Run instant validation check
+    const validation = validateCompanyName(trimmed);
+    if (!validation.isValid) {
+      setCompanyError(validation.error || `Unrecognized company "${trimmed}".`);
+      setSuggestedCorrections(validation.suggestions || []);
+    } else {
+      setCompanyError(null);
+      setSuggestedCorrections([]);
+    }
 
     if (trimmed.toLowerCase() === activePipeline.companyName.toLowerCase()) {
       return;
     }
 
     const timer = setTimeout(() => {
-      // 1. Check local rich preset first
-      const localMatch = findCompanyPipeline(trimmed);
-      if (localMatch) {
-        setActivePipeline(localMatch);
-        setSelectedStageId(localMatch.stages[0]?.id || '');
-        const availableRoles = localMatch.popularRoles || getCompanyRoles(localMatch.companyName, localMatch.industry);
-        if (!availableRoles.includes(roleInput) && availableRoles.length > 0) {
-          setRoleInput(availableRoles[0]);
+      // Only update pipeline if valid
+      if (validation.isValid) {
+        const targetName = validation.matchedName || trimmed;
+        // 1. Check local rich preset first
+        const localMatch = findCompanyPipeline(targetName) || findCompanyPipeline(trimmed);
+        if (localMatch) {
+          setActivePipeline(localMatch);
+          setSelectedStageId(localMatch.stages[0]?.id || '');
+          const availableRoles = localMatch.popularRoles || getCompanyRoles(localMatch.companyName, localMatch.industry);
+          if (!availableRoles.includes(roleInput) && availableRoles.length > 0) {
+            setRoleInput(availableRoles[0]);
+          }
+          return;
         }
-        return;
-      }
 
-      // 2. Immediate authentic industry pipeline (banking if bank, consulting, healthcare, tech, etc.)
-      const instantPipeline = generateFallbackPipeline(trimmed, roleInput);
-      setActivePipeline(instantPipeline);
-      setSelectedStageId(instantPipeline.stages[0]?.id || '');
-      if (instantPipeline.popularRoles && !instantPipeline.popularRoles.includes(roleInput) && instantPipeline.popularRoles.length > 0) {
-        setRoleInput(instantPipeline.popularRoles[0]);
+        // 2. Immediate authentic industry pipeline (banking if bank, consulting, healthcare, tech, etc.)
+        const instantPipeline = generateFallbackPipeline(trimmed, roleInput);
+        setActivePipeline(instantPipeline);
+        setSelectedStageId(instantPipeline.stages[0]?.id || '');
+        if (instantPipeline.popularRoles && !instantPipeline.popularRoles.includes(roleInput) && instantPipeline.popularRoles.length > 0) {
+          setRoleInput(instantPipeline.popularRoles[0]);
+        }
       }
     }, 280);
 
     return () => clearTimeout(timer);
   }, [companyInput]);
 
-  // Select company directly and update role list seamlessly
+  // Select company directly from dropdown or chips
   const selectCompany = (co: string) => {
     setCompanyInput(co);
+    setCompanyError(null);
+    setSuggestedCorrections([]);
+    setIsDropdownOpen(false);
+    setHighlightedIndex(-1);
+
     const localMatch = findCompanyPipeline(co);
     const fallback = generateFallbackPipeline(co, roleInput);
     const pipeline = localMatch || fallback;
@@ -112,8 +180,19 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
     const cleanCompany = targetCo.trim();
     if (!cleanCompany) return;
 
+    // Validate first
+    const validation = validateCompanyName(cleanCompany);
+    if (!validation.isValid) {
+      setCompanyError(validation.error || `Unrecognized company "${cleanCompany}".`);
+      setSuggestedCorrections(validation.suggestions || []);
+      return;
+    } else {
+      setCompanyError(null);
+      setSuggestedCorrections([]);
+    }
+
     // 1. Check local rich preset first
-    const localMatch = findCompanyPipeline(cleanCompany);
+    const localMatch = findCompanyPipeline(validation.matchedName || cleanCompany);
     if (localMatch) {
       setActivePipeline(localMatch);
       setSelectedStageId(localMatch.stages[0]?.id || '');
@@ -207,8 +286,8 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
         >
           {/* Inputs Grid: 2 Generous Columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {/* Target Company Input & Suggestions */}
-            <div className="space-y-3.5">
+            {/* Target Company Input, Autocomplete Dropdown & Under-Tab Error Alert */}
+            <div className="space-y-3.5" ref={inputContainerRef}>
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center space-x-2">
                   <Building2 className="w-4 h-4 text-zinc-700" />
@@ -219,6 +298,11 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                     <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 animate-pulse">
                       <Sparkles className="w-3 h-3 text-sky-600 animate-spin" />
                       <span>Synthesizing Deep Pipeline...</span>
+                    </span>
+                  ) : companyError ? (
+                    <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
+                      <AlertCircle className="w-3 h-3 text-rose-600" />
+                      <span>Verification Failed</span>
                     </span>
                   ) : (
                     <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
@@ -243,27 +327,176 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
               </div>
               
               <div className="relative">
-                <Building2 className="w-5 h-5 text-zinc-400 absolute left-3.5 top-3.5" />
+                <Building2 className="w-5 h-5 text-zinc-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type="text"
                   value={companyInput}
-                  onChange={(e) => setCompanyInput(e.target.value)}
+                  onChange={(e) => {
+                    setCompanyInput(e.target.value);
+                    setIsDropdownOpen(true);
+                    setHighlightedIndex(-1);
+                  }}
+                  onFocus={() => {
+                    setIsDropdownOpen(true);
+                  }}
                   onBlur={() => {
-                    if (companyInput.trim()) {
-                      handleSearchCompany(companyInput, roleInput);
-                    }
+                    // Dropdown click-away is handled by mousedown listener on inputContainerRef
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (isDropdownOpen && filteredCompanies.length > 0) {
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setHighlightedIndex((prev) => (prev + 1) % filteredCompanies.length);
+                        return;
+                      }
+                      if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setHighlightedIndex((prev) => (prev - 1 + filteredCompanies.length) % filteredCompanies.length);
+                        return;
+                      }
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (highlightedIndex >= 0 && highlightedIndex < filteredCompanies.length) {
+                          selectCompany(filteredCompanies[highlightedIndex].name);
+                          return;
+                        }
+                        setIsDropdownOpen(false);
+                        handleSearchCompany(companyInput, roleInput);
+                        return;
+                      }
+                      if (e.key === 'Escape') {
+                        setIsDropdownOpen(false);
+                        return;
+                      }
+                    } else if (e.key === 'Enter') {
                       e.preventDefault();
                       handleSearchCompany(companyInput, roleInput);
                     }
                   }}
-                  placeholder="e.g. JPMorgan Chase, Barclays, Google, Amazon..."
-                  className="w-full pl-11 pr-4 py-3 bg-zinc-50/70 hover:bg-zinc-50 text-sm sm:text-base border border-zinc-300 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 font-medium transition-all shadow-2xs"
+                  placeholder="e.g. JPMorgan Chase, Barclays, Google, Amazon, Nvidia..."
+                  className={`w-full pl-11 pr-4 py-3 text-sm sm:text-base border rounded-xl font-medium transition-all shadow-2xs ${
+                    companyError
+                      ? 'bg-rose-50/50 border-rose-300 focus:bg-white focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-zinc-900'
+                      : 'bg-zinc-50/70 hover:bg-zinc-50 border-zinc-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 text-zinc-900'
+                  }`}
                   required
+                  autoComplete="off"
                 />
+
+                {/* Autocomplete Dropdown List */}
+                {isDropdownOpen && filteredCompanies.length > 0 && (
+                  <div
+                    ref={dropdownRef}
+                    id="company-suggestions-dropdown"
+                    className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-zinc-200/90 rounded-2xl shadow-xl z-50 max-h-72 overflow-y-auto divide-y divide-zinc-100 animate-in fade-in zoom-in-95 duration-100"
+                  >
+                    <div className="px-3.5 py-2 bg-zinc-50/90 flex items-center justify-between text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
+                      <span>Suggested &amp; Verified Companies</span>
+                      <span className="text-[10px] text-zinc-400 font-normal">Use &uarr;&darr; or click</span>
+                    </div>
+
+                    <div className="p-1">
+                      {filteredCompanies.map((c, idx) => {
+                        const isHighlighted = idx === highlightedIndex;
+                        const isSelected = activePipeline.companyName.toLowerCase() === c.name.toLowerCase();
+
+                        return (
+                          <button
+                            key={c.name}
+                            type="button"
+                            onClick={() => selectCompany(c.name)}
+                            onMouseEnter={() => setHighlightedIndex(idx)}
+                            className={`w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition-colors cursor-pointer ${
+                              isHighlighted 
+                                ? 'bg-zinc-900 text-white' 
+                                : isSelected
+                                ? 'bg-zinc-100 text-zinc-900'
+                                : 'hover:bg-zinc-50 text-zinc-800'
+                            }`}
+                          >
+                            <div className="space-y-0.5 min-w-0 pr-3">
+                              <div className="flex items-center space-x-2">
+                                <span className={`text-sm font-semibold truncate ${
+                                  isHighlighted ? 'text-white' : 'text-zinc-900'
+                                }`}>
+                                  {c.name}
+                                </span>
+                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                                  isHighlighted
+                                    ? 'bg-zinc-800 text-zinc-200 border-zinc-700'
+                                    : c.category === 'banks'
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : c.category === 'fintech'
+                                    ? 'bg-sky-50 text-sky-800 border-sky-200'
+                                    : c.category === 'defense'
+                                    ? 'bg-purple-50 text-purple-800 border-purple-200'
+                                    : c.category === 'automotive'
+                                    ? 'bg-red-50 text-red-800 border-red-200'
+                                    : 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                                }`}>
+                                  {c.category === 'banks' ? 'Banking' : c.category === 'fintech' ? 'Fintech' : c.category === 'defense' ? 'Defense & AI' : c.category === 'automotive' ? 'Automotive' : 'Tech & Cloud'}
+                                </span>
+                              </div>
+                              <p className={`text-xs truncate ${
+                                isHighlighted ? 'text-zinc-300' : 'text-zinc-500'
+                              }`}>
+                                {c.tagline || c.industry}
+                              </p>
+                            </div>
+
+                            <div className="shrink-0">
+                              {isSelected ? (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500 text-white">
+                                  Active
+                                </span>
+                              ) : (
+                                <CheckCircle2 className={`w-4 h-4 ${
+                                  isHighlighted ? 'text-amber-300' : 'text-emerald-600 opacity-60'
+                                }`} />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Explicit Error Alert under the Company Tab if Unrecognized Name */}
+              {companyError && (
+                <div 
+                  id="company-input-error-alert"
+                  className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-2 animate-in fade-in duration-150 shadow-2xs"
+                >
+                  <div className="flex items-start space-x-2.5 text-rose-800">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    <div className="flex-1 text-xs sm:text-sm">
+                      <p className="font-semibold">{companyError}</p>
+                    </div>
+                  </div>
+
+                  {suggestedCorrections.length > 0 && (
+                    <div className="pl-6.5 space-y-1.5 pt-0.5">
+                      <p className="text-[11px] font-semibold text-rose-700">
+                        Choose from verified company hiring loops:
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestedCorrections.map((sug) => (
+                          <button
+                            key={sug}
+                            type="button"
+                            onClick={() => selectCompany(sug)}
+                            className="px-2.5 py-1 bg-white hover:bg-rose-100 text-rose-900 border border-rose-200 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs hover:scale-102"
+                          >
+                            + {sug}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Popular Company Chips with Category Tabs */}
               <div className="space-y-2 pt-1">
@@ -301,6 +534,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                       'bank of america',
                       'barclays',
                       'capital one',
+                      'citigroup',
                     ].includes(co.toLowerCase());
                     if (selectedCategory === 'banks') return isBank;
                     const isFintech = ['stripe', 'uber'].includes(co.toLowerCase());
@@ -316,6 +550,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                       'bank of america',
                       'barclays',
                       'capital one',
+                      'citigroup',
                     ].includes(co.toLowerCase());
                     return (
                       <button

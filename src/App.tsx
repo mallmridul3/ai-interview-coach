@@ -30,7 +30,7 @@ import { stopSpeaking, preloadSpeech } from './utils/speechUtils';
 import { recordTurnInMemory, recordSessionCompletedInMemory, loadCandidateMemory } from './utils/candidateMemory';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'mock' | 'hiring-process' | 'behavioral' | 'drills' | 'history'>('mock');
+  const [currentTab, setCurrentTab] = useState<'hiring-process' | 'mock' | 'behavioral' | 'drills' | 'history'>('hiring-process');
   const [interviewState, setInterviewState] = useState<'setup' | 'active' | 'report'>('setup');
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 

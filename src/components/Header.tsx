@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   MessageSquare, 
@@ -13,14 +13,19 @@ import {
   User as UserIcon,
   LogOut,
   LogIn,
-  Building2
+  Building2,
+  ChevronDown,
+  Menu,
+  Check
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
 
+export type TabKey = 'hiring-process' | 'mock' | 'behavioral' | 'drills' | 'history';
+
 interface HeaderProps {
-  currentTab: 'mock' | 'behavioral' | 'drills' | 'history' | 'hiring-process';
-  onSelectTab: (tab: 'mock' | 'behavioral' | 'drills' | 'history' | 'hiring-process') => void;
+  currentTab: TabKey;
+  onSelectTab: (tab: TabKey) => void;
   voiceEnabled: boolean;
   onToggleVoice: () => void;
   savedSessionsCount: number;
@@ -31,6 +36,16 @@ interface HeaderProps {
   onOpenVoiceSettings?: () => void;
   onOpenAuthModal?: () => void;
   onLogout?: () => void;
+}
+
+interface NavTabItem {
+  id: TabKey;
+  label: string;
+  badgeLabel?: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor: string;
+  elementId: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -47,8 +62,89 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuthModal,
   onLogout,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Tabs ordered with Hiring Process FIRST
+  const TABS: NavTabItem[] = [
+    {
+      id: 'hiring-process',
+      label: 'Hiring Process',
+      badgeLabel: 'Architecture & Loops',
+      description: 'Company-specific interview stages, leveled roles & authentic questions',
+      icon: Building2,
+      iconColor: 'text-sky-500',
+      elementId: 'tab-hiring-process',
+    },
+    {
+      id: 'mock',
+      label: 'Mock Interview',
+      description: 'Live interactive AI interview simulation with real-time STAR scoring',
+      icon: MessageSquare,
+      iconColor: 'text-emerald-500',
+      elementId: 'tab-mock-interview',
+    },
+    {
+      id: 'behavioral',
+      label: '10 Behavioral',
+      description: 'Amazon LP, STAR mastery framework & high-frequency behavioral questions',
+      icon: ListChecks,
+      iconColor: 'text-amber-500',
+      elementId: 'tab-behavioral-questions',
+    },
+    {
+      id: 'drills',
+      label: 'Practice Drills',
+      description: 'Rapid-fire timed drills to sharpen spontaneous problem solving',
+      icon: BookOpen,
+      iconColor: 'text-indigo-500',
+      elementId: 'tab-question-bank',
+    },
+    {
+      id: 'history',
+      label: 'Session History',
+      description: 'Detailed past transcripts, competency radar scores & executive reports',
+      icon: History,
+      iconColor: 'text-purple-500',
+      elementId: 'tab-session-history',
+    },
+  ];
+
+  const currentTabObj = TABS.find((t) => t.id === currentTab) || TABS[0];
+  const CurrentIcon = currentTabObj.icon;
+
+  // Click-away listener to close menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMenuOpen]);
+
+  const handleSelectTab = (tabId: TabKey) => {
+    onSelectTab(tabId);
+    setIsMenuOpen(false);
+  };
+
   return (
-    <header className="border-b border-zinc-200 bg-white sticky top-0 z-30">
+    <header className="border-b border-zinc-200 bg-white sticky top-0 z-30 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand */}
@@ -63,86 +159,143 @@ export const Header: React.FC<HeaderProps> = ({
                   Gemini 3.8
                 </span>
               </div>
-              <p className="text-xs text-zinc-500 hidden sm:block">Real-time STAR scoring, feedback & role simulation</p>
+              <p className="text-xs text-zinc-500 hidden sm:block">Real-time STAR scoring, feedback &amp; role simulation</p>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <nav className="flex items-center space-x-1 sm:space-x-1.5" aria-label="Main Navigation">
+          {/* Minimalist Navigation: Shows ONLY the Current Tab Name + Menu Trigger */}
+          <div className="relative" ref={menuRef}>
             <button
-              id="tab-mock-interview"
-              onClick={() => onSelectTab('mock')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                currentTab === 'mock'
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
-              }`}
+              id="header-nav-menu-btn"
+              type="button"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex items-center space-x-2.5 px-3.5 py-2 bg-zinc-50 hover:bg-zinc-100/90 border border-zinc-200/90 hover:border-zinc-300 rounded-xl transition-all cursor-pointer shadow-2xs group"
+              title="Click to view all sections menu"
+              aria-expanded={isMenuOpen}
+              aria-haspopup="true"
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>Mock Interview</span>
-              {isInterviewActive && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1" />
-              )}
+              <div className="flex items-center space-x-2">
+                <div className="p-1 rounded-md bg-white border border-zinc-200 shadow-2xs">
+                  <CurrentIcon className={`w-4 h-4 ${currentTabObj.iconColor}`} />
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-xs text-zinc-400 font-medium hidden md:inline">Current:</span>
+                  <span className="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight">
+                    {currentTabObj.label}
+                  </span>
+                </div>
+
+                {/* Status Badges */}
+                {currentTab === 'mock' && isInterviewActive && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" title="Live Interview in Progress" />
+                )}
+                {currentTab === 'history' && savedSessionsCount > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 bg-zinc-200 text-zinc-700 rounded-full ml-1">
+                    {savedSessionsCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Menu Chevron Indicator */}
+              <div className="flex items-center pl-1 border-l border-zinc-200 text-zinc-400 group-hover:text-zinc-700 transition-colors">
+                <Menu className="w-3.5 h-3.5 mr-0.5 hidden sm:block" />
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-zinc-900' : ''}`} />
+              </div>
             </button>
 
-            <button
-              id="tab-hiring-process"
-              onClick={() => onSelectTab('hiring-process')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                currentTab === 'hiring-process'
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
-              }`}
-            >
-              <Building2 className="w-4 h-4 text-sky-500" />
-              <span>Hiring Process</span>
-            </button>
+            {/* Comprehensive Dropdown Menu containing all options */}
+            {isMenuOpen && (
+              <div 
+                id="header-navigation-menu-dropdown"
+                className="absolute top-full right-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-72 sm:w-88 bg-white border border-zinc-200/90 rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150"
+              >
+                <div className="px-4 py-2.5 bg-zinc-50/80 border-b border-zinc-100 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Navigation Menu
+                  </span>
+                  <span className="text-[10px] text-zinc-400 font-medium">
+                    {TABS.length} Sections Available
+                  </span>
+                </div>
 
-            <button
-              id="tab-behavioral-questions"
-              onClick={() => onSelectTab('behavioral')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                currentTab === 'behavioral'
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
-              }`}
-            >
-              <ListChecks className="w-4 h-4 text-amber-500" />
-              <span>10 Behavioral</span>
-            </button>
+                <div className="p-1.5 space-y-1">
+                  {TABS.map((tab) => {
+                    const TabIcon = tab.icon;
+                    const isActive = currentTab === tab.id;
 
-            <button
-              id="tab-question-bank"
-              onClick={() => onSelectTab('drills')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                currentTab === 'drills'
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Practice Drills</span>
-              <span className="sm:hidden">Drills</span>
-            </button>
+                    return (
+                      <button
+                        key={tab.id}
+                        id={tab.elementId}
+                        type="button"
+                        onClick={() => handleSelectTab(tab.id)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-start space-x-3 cursor-pointer group ${
+                          isActive
+                            ? 'bg-zinc-900 text-white shadow-xs'
+                            : 'hover:bg-zinc-100/80 text-zinc-800'
+                        }`}
+                      >
+                        <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                          isActive 
+                            ? 'bg-zinc-800 text-white' 
+                            : 'bg-zinc-100 text-zinc-700 group-hover:bg-white border border-zinc-200/60'
+                        }`}>
+                          <TabIcon className={`w-4 h-4 ${isActive ? 'text-amber-300' : tab.iconColor}`} />
+                        </div>
 
-            <button
-              id="tab-session-history"
-              onClick={() => onSelectTab('history')}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                currentTab === 'history'
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
-              }`}
-            >
-              <History className="w-4 h-4" />
-              <span>History</span>
-              {savedSessionsCount > 0 && (
-                <span className="text-[11px] font-bold px-1.5 py-0.2 bg-zinc-200 text-zinc-700 rounded-full">
-                  {savedSessionsCount}
-                </span>
-              )}
-            </button>
-          </nav>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <span className={`text-xs sm:text-sm font-semibold truncate ${
+                              isActive ? 'text-white' : 'text-zinc-900'
+                            }`}>
+                              {tab.label}
+                            </span>
+
+                            {/* Live Badge for Mock */}
+                            {tab.id === 'mock' && isInterviewActive && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500 text-white animate-pulse">
+                                Live
+                              </span>
+                            )}
+
+                            {/* Saved count for History */}
+                            {tab.id === 'history' && savedSessionsCount > 0 && (
+                              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                                isActive ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-200 text-zinc-700'
+                              }`}>
+                                {savedSessionsCount}
+                              </span>
+                            )}
+
+                            {/* Hiring Process Priority Tag */}
+                            {tab.id === 'hiring-process' && (
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider ${
+                                isActive ? 'bg-sky-500/30 text-sky-200' : 'bg-sky-50 text-sky-700 border border-sky-200/60'
+                              }`}>
+                                Top
+                              </span>
+                            )}
+                          </div>
+
+                          <p className={`text-[11px] leading-snug line-clamp-2 mt-0.5 ${
+                            isActive ? 'text-zinc-300' : 'text-zinc-500'
+                          }`}>
+                            {tab.description}
+                          </p>
+                        </div>
+
+                        {isActive && (
+                          <div className="shrink-0 self-center pl-1 text-emerald-400">
+                            <Check className="w-4 h-4" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Right Action Items: User Role, Google Workspace & Voice Toggle */}
           <div className="flex items-center space-x-2">
@@ -249,7 +402,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="open-voice-settings-btn"
                   onClick={onOpenVoiceSettings}
-                  title="Configure natural AI interviewer voice, pacing & sample audio"
+                  title="Configure natural AI interviewer voice, pacing &amp; sample audio"
                   className="p-2 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 text-xs transition-colors cursor-pointer"
                 >
                   <Sliders className="w-3.5 h-3.5" />

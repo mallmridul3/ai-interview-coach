@@ -158,6 +158,28 @@ export const COMPANY_SPECIFIC_ROLES: Record<string, string[]> = {
     'Global Payments & Real-Time Settlement Architect',
     'Risk Analytics & Regulatory Data Engineer',
   ],
+  Salesforce: [
+    'Member of Technical Staff (MTS)',
+    'Senior Member of Technical Staff (SMTS)',
+    'Lead / Principal MTS',
+    'Enterprise Cloud Platform Architect',
+    'Product Manager (Agentforce & AI)',
+    'Engineering Manager (Data Cloud)',
+  ],
+  Palantir: [
+    'Forward Deployed Software Engineer (FDSE)',
+    'Software Engineer (Core Foundry / Gotham)',
+    'Deployment Strategist / Technical Lead',
+    'Data Platform & Graph Systems Engineer',
+    'Infrastructure & Security Operations Engineer',
+  ],
+  Tesla: [
+    'Autopilot & Computer Vision Software Engineer',
+    'Embedded Firmware & Low-Level Systems Engineer',
+    'Vehicle Software Architecture Engineer',
+    'Energy Platforms & Megapack Systems Engineer',
+    'Staff Distributed Systems Engineer',
+  ],
 };
 
 export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
@@ -1130,6 +1152,1219 @@ export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
       },
     ],
   },
+  {
+    companyName: 'Nvidia',
+    normalizedName: 'nvidia',
+    tagline: 'Accelerated computing, deep learning platforms & first-principles GPU architecture',
+    industry: 'Semiconductors, Accelerated Computing & Hardware Architecture',
+    overview: 'NVIDIA’s engineering evaluation centers on deep computer architecture fundamentals, extreme C++/CUDA performance, low-level concurrency, and first-principles reasoning under CEO Jensen Huang\'s high-velocity execution philosophy. Candidates are tested on their ability to reason about hardware limits, cache hierarchies, and massive-scale distributed training clusters.',
+    totalStages: 4,
+    cultureHighlights: [
+      'First-Principles Thinking (Break problems down to physics and hardware fundamentals)',
+      'High-Speed Execution (Speed of light execution; build prototypes rapidly)',
+      'Intellectual Honesty & Radical Candor (Zero tolerance for hand-waving or vague answers)',
+      'Continuous Innovation & Craftsmanship (Architect systems that push the boundary of accelerated computing)'
+    ],
+    evaluationPhilosophy: 'NVIDIA values depth over breadth. You must demonstrate mastery over system memory architectures, latency hiding, CUDA streams, thread divergence, and hardware bottlenecks.',
+    typicalTimeline: '3 to 5 weeks from initial screen to final loop',
+    popularRoles: [
+      'CUDA Systems Software Engineer',
+      'Deep Learning Frameworks Engineer',
+      'GPU Architecture & Performance Engineer',
+      'AI Infrastructure & Megatron-LM Scaling Engineer',
+      'Senior Linux Kernel & Driver Developer',
+      'Autonomous Vehicles (DRIVE OS) Engineer',
+      'TensorRT & LLM Inference Optimization Engineer',
+    ],
+    stages: [
+      {
+        id: 'nvda-s1',
+        stageNumber: 1,
+        name: 'Stage 1: Technical Screening & Computer Architecture',
+        levelType: 'Phone Screen',
+        format: '45-60 Minute Technical Phone Screen with Senior Systems Architect',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Systems Software Engineer',
+        coreCompetencies: ['C/C++ Deep Mechanics', 'Computer Architecture', 'Memory Hierarchies', 'Data Structures'],
+        description: 'Rigorous exploration of memory models, cache coherence, virtual memory, pointers, and algorithmic complexity.',
+        typicalQuestions: [
+          'Explain cache line bouncing in multicore processors and how false sharing degrades performance in high-throughput C++ applications.',
+          'Implement an aligned memory allocator in C++ ensuring 64-byte or 256-byte cache-line alignment.'
+        ],
+        tipsForSuccess: [
+          'Be prepared to explain assembly-level execution, compiler optimizations (SIMD/AVX), and volatile/atomic semantics.',
+          'Discuss hardware bottlenecks quantitatively.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'nvda-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Low-Level C++ / CUDA Systems & Kernel Concurrency',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding & Kernel Architecture Analysis',
+        durationMinutes: 60,
+        interviewerProfile: 'CUDA Compiler & Core Platform Lead',
+        coreCompetencies: ['CUDA Programming', 'GPU Thread Divergence', 'Shared Memory Optimization', 'Asynchronous Streams'],
+        description: 'Writing high-performance parallel kernels, optimizing memory bandwidth, and eliminating synchronization stalls.',
+        typicalQuestions: [
+          'Write a CUDA kernel to perform parallel reduction (sum/max) across an array of 10M floats using shared memory and warp shuffle intrinsics (__shfl_down_sync).',
+          'Explain bank conflicts in shared memory and how padding or strided access eliminates serialization.'
+        ],
+        tipsForSuccess: [
+          'Prioritize compute-to-memory ratio and arithmetic intensity (Roofline model).',
+          'Highlight asynchronous CUDA stream overlaps for host-to-device data transfers.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'nvda-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Distributed Acceleration & TensorRT / Megatron-LM Scaling',
+        levelType: 'System Design',
+        format: '60-Minute Distributed High-Scale Acceleration Architecture Round',
+        durationMinutes: 60,
+        interviewerProfile: 'Distinguished Engineer / AI Platform Architect',
+        coreCompetencies: ['Tensor & Pipeline Parallelism (Megatron-LM)', 'NVLink & InfiniBand Fabrics', 'Low-Precision FP8/FP16 Quantization', 'Fault-Tolerant Distributed Training'],
+        description: 'Architecting cluster-scale GPU training and low-latency inference pipelines handling thousands of H100/Blackwell nodes.',
+        typicalQuestions: [
+          'Design the communication topology for a 405B parameter LLM training cluster across 16,384 GPUs using 3D parallelism (Tensor, Pipeline, and ZeRO/FSDP Data Parallelism).',
+          'How does KV-cache paging (vLLM / TensorRT-LLM) reduce memory fragmentation and enable continuous batching?'
+        ],
+        tipsForSuccess: [
+          'Calculate inter-node bandwidth vs intra-node NVLink throughput mathematically.',
+          'Address straggler mitigation, gradient checkpointing, and checkpoint recovery.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'nvda-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Director Deep-Dive & First-Principles Engineering Leadership',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Engineering & Cultural Fit Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Engineering Director / Vice President',
+        coreCompetencies: ['First-Principles Problem Solving', 'Speed of Execution', 'Cross-Disciplinary Teamwork', 'Resilience'],
+        description: 'In-depth behavioral and philosophical interview on technical ownership, tackling unsolved computational problems, and thrives in high-pressure execution.',
+        typicalQuestions: [
+          'Tell me about a time you solved an impossible performance or architectural bottleneck by throwing out conventional assumptions and reasoning from first principles.',
+          'Describe a situation where an engineering roadmap failed to deliver expected speedups. How did you diagnose the root cause and course-correct?'
+        ],
+        tipsForSuccess: [
+          'Demonstrate passion for accelerated computing and how your work directly advances AI breakthroughs.',
+          'Be candid about past technical failures and what you learned from hardware profiling.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Morgan Stanley',
+    normalizedName: 'morganstanley',
+    tagline: 'Institutional securities, global algorithmic trading & real-time financial architecture',
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    overview: 'Morgan Stanley’s technology organization powers electronic trading, high-frequency market making, risk calculations, and enterprise wealth management. Their hiring process assesses strong software engineering fundamentals, multi-threaded Java / C++ concurrency, zero-data-loss relational database modeling, and institutional risk awareness.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Do the Right Thing (Highest ethical and fiduciary conduct)',
+      'Lead with Exceptional Ideas (Cutting-edge electronic execution & research)',
+      'Give Back & Foster Diversity (Team-oriented collaborative culture)',
+      'Commit to Diversity and Inclusion & Operational Excellence'
+    ],
+    evaluationPhilosophy: 'Engineers are expected to understand both software craftsmanship and financial mechanics. The loop stresses concurrency correctness, network latency awareness, and robust failover design.',
+    typicalTimeline: '3 to 5 weeks from initial screening to Superday decision',
+    popularRoles: [
+      'Technology Analyst (Enterprise Engineering)',
+      'Senior Manager / Associate (Wealth Management Tech)',
+      'Vice President (Institutional Securities Technology)',
+      'Algorithmic Trading & Fixed Income Systems Engineer',
+      'High-Throughput Java & Distributed Cache Architect',
+      'Core Infrastructure & Reliability Engineer',
+    ],
+    stages: [
+      {
+        id: 'ms-s1',
+        stageNumber: 1,
+        name: 'Stage 1: HackerRank Technical Assessment & Video Screen',
+        levelType: 'Online Assessment',
+        format: '75-Minute Timed HackerRank (2 Coding Problems + Core CS MCQs) + HireVue Video',
+        durationMinutes: 75,
+        interviewerProfile: 'Automated Platform Calibration',
+        coreCompetencies: ['Algorithmic Efficiency', 'Data Structures', 'Database & SQL Optimization', 'Communication'],
+        description: 'Assesses standard data structures (trees, heaps, dynamic programming) and core computer science fundamentals.',
+        typicalQuestions: [
+          'Given an order book transaction stream, implement an algorithm to calculate weighted moving volume and detect bid-ask arbitrage opportunities.',
+          'HireVue: Why Morgan Stanley, and how do you ensure zero ethical compromises when under pressure to hit milestones?'
+        ],
+        tipsForSuccess: [
+          'Double-check edge cases (empty streams, duplicate timestamps, integer overflow).',
+          'Articulate clear STAR answers during the video portion emphasizing teamwork.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix',
+      },
+      {
+        id: 'ms-s2',
+        stageNumber: 2,
+        name: 'Stage 2: CoderPad Live Pair-Coding & Concurrency Isolation',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Collaborative Coding Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Vice President / Lead Electronic Trading Developer',
+        coreCompetencies: ['Java / C++ Concurrency', 'Thread-Safe Collections', 'Locking & Volatile Semantics', 'Object-Oriented Design'],
+        description: 'Hands-on programming probing multithreaded correctness, race conditions, memory visibility, and clean API design.',
+        typicalQuestions: [
+          'Implement a thread-safe Circular Ring Buffer / Disruptor pattern in Java without synchronized blocks (using AtomicLong and volatile memory barriers).',
+          'Explain how garbage collection pauses impact low-latency trading engines and how to design zero-allocation architectures.'
+        ],
+        tipsForSuccess: [
+          'Write idiomatic code and explain synchronization primitives (ReadWriteLock, CAS operations, semaphores).',
+          'Discuss time and space complexity upfront before typing.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'ms-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Superday — Institutional Securities & Trading Systems Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Systems Architecture Round',
+        durationMinutes: 60,
+        interviewerProfile: 'Executive Director / Principal Enterprise Architect',
+        coreCompetencies: ['FIX Protocol & Gateway Architecture', 'Event Sourcing & Order Matching', 'Disaster Recovery (Active-Active)', 'Kafka & Distributed Logging'],
+        description: 'Architecting high-frequency, ultra-reliable financial market connectivity and pricing engines.',
+        typicalQuestions: [
+          'Design an institutional order routing and risk validation gateway handling 100,000 orders/second with p99 latency under 2 milliseconds.',
+          'How do you guarantee that a trade execution report is never duplicated even if a primary network gateway crashes midway through settlement?'
+        ],
+        tipsForSuccess: [
+          'Incorporate sequenced messaging, deterministic replay, and two-phase commit or transactional outbox patterns.',
+          'Discuss monitoring, heartbeat metrics, and regulatory audit logging.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'ms-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Superday — Executive Director & Risk Ethics Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Behavioral & Fiduciary Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Executive Director / Global Head of Application Technology',
+        coreCompetencies: ['Risk Mindset', 'Leadership & Partnership', 'Crisis Management', 'Long-Term Vision'],
+        description: 'Assesses executive poise, accountability, navigating difficult stakeholder conversations, and alignment with Morgan Stanley core values.',
+        typicalQuestions: [
+          'Describe a situation where a trading desk or product partner asked for an urgent workaround that bypassed standard CI/CD testing or compliance scans. How did you handle it?',
+          'Tell me about a high-severity production outage you managed. How did you communicate with executive stakeholders while guiding your team to resolution?'
+        ],
+        tipsForSuccess: [
+          'Demonstrate calm composure, clear structure, and respect for risk controllers.',
+          'Emphasize collaborative outcomes where all parties reached shared alignment.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Bank of America',
+    normalizedName: 'bankofamerica',
+    tagline: 'High-availability transaction ledgers, cash management & Merrill wealth systems',
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    overview: 'Bank of America\'s global technology division processes trillions in daily transactions across Merrill Lynch, CashPro, and Consumer Banking. Their engineering loops emphasize transactional resilience, high-throughput microservices, strict security, and operational excellence.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Deliver for Clients (Excellence in customer and commercial delivery)',
+      'Act Responsibly (Protecting customer data and maintaining absolute fiduciary vigilance)',
+      'Realize the Power of Our People (Inclusive and supportive collaborative culture)',
+      'Trust the Team (Accountability and shared victory)'
+    ],
+    evaluationPhilosophy: 'BofA seeks engineers who build fault-tolerant, horizontally scalable systems with zero data corruption. Clear communication, clean code, and deep knowledge of enterprise data architectures are paramount.',
+    typicalTimeline: '3 to 5 weeks from initial screen to Superday decision',
+    popularRoles: [
+      'Global Technology Analyst (Full Stack Development)',
+      'Senior Tech Associate (Merrill Wealth & CashPro)',
+      'Vice President (Global Markets Technology)',
+      'High-Throughput Payments & Ledger Architect',
+      'Risk & Regulatory Reporting Systems Engineer',
+      'Enterprise Cloud & Data Platform Developer',
+    ],
+    stages: [
+      {
+        id: 'bofa-s1',
+        stageNumber: 1,
+        name: 'Stage 1: Online Technical Assessment (HireVue / HackerRank)',
+        levelType: 'Online Assessment',
+        format: '60-Minute Assessment (Coding + Behavioral Questions)',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Evaluation Platform',
+        coreCompetencies: ['Algorithms & Data Structures', 'SQL Queries & ACID', 'Communication Clarity'],
+        description: 'Algorithmic problem solving combined with video questions assessing your background and customer-centric mindset.',
+        typicalQuestions: [
+          'Given a collection of credit transactions, calculate moving average customer balances and flag account overdrafts.',
+          'Write SQL to reconcile merchant settlement batches and identify unallocated funds across multi-currency tables.'
+        ],
+        tipsForSuccess: [
+          'Ensure algorithmic solutions account for boundary conditions and large dataset limits.',
+          'Answer video questions clearly using the STAR framework.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix',
+      },
+      {
+        id: 'bofa-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen & Java / Spring / C# Live Coding',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Technical Interview',
+        durationMinutes: 60,
+        interviewerProfile: 'Vice President / Lead Software Engineer',
+        coreCompetencies: ['Enterprise Java / Python / C#', 'REST / Microservices Design', 'Database Transactions & Locking', 'OOP Principles'],
+        description: 'Deep dive into object-oriented design, microservices communication, transactional isolation, and clean coding.',
+        typicalQuestions: [
+          'Design and implement a resilient payment processing interface with retry mechanisms, circuit breakers, and exponential backoff.',
+          'Explain the differences between optimistic locking and pessimistic locking in enterprise database transactions.'
+        ],
+        tipsForSuccess: [
+          'Demonstrate clear object-oriented architecture and adherence to SOLID principles.',
+          'Discuss logging, observability, and unit test coverage aloud.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'bofa-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Superday — CashPro High-Throughput Ledger & Resilient Settlement',
+        levelType: 'System Design',
+        format: '60-Minute System Architecture Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior VP / Enterprise Solutions Architect',
+        coreCompetencies: ['High-Throughput Ledger Architecture', 'Event-Driven Microservices', 'Idempotency & Replay', 'Active-Active Disaster Recovery'],
+        description: 'Designing distributed money movement, cash management, or Merrill wealth trading backbones.',
+        typicalQuestions: [
+          'Design an enterprise real-time wire payment platform handling $50B in daily transfers with sub-second acknowledgment, double-entry auditability, and zero data loss during regional cloud failover.',
+          'How do you manage schema evolution and backwards compatibility in event-driven microservices across hundreds of services?'
+        ],
+        tipsForSuccess: [
+          'Start with strict data integrity: schemas, idempotency keys, and transactional outbox patterns.',
+          'Define clear SLAs, latency budgets, and disaster recovery strategies (RPO = 0, RTO < 10s).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'bofa-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Superday — Managing Director Behavioral & Regulatory Risk Governance',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Leadership Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Managing Director / Technology Line of Business Executive',
+        coreCompetencies: ['Fiduciary Responsibility', 'Regulatory Stewardship', 'Crisis Management', 'Team Leadership'],
+        description: 'Senior leadership interview evaluating ethical courage, team leadership, stakeholder management, and continuous improvement.',
+        typicalQuestions: [
+          'Tell me about a time you noticed an overlooked risk or vulnerability in an existing process. How did you bring it to light and resolve it?',
+          'How do you balance rapid delivery of new digital banking capabilities with strict audit and regulatory standards?'
+        ],
+        tipsForSuccess: [
+          'Show deep respect for compliance, risk, and information security.',
+          'Highlight instances where you mentored junior engineers and fostered positive team culture.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Barclays',
+    normalizedName: 'barclays',
+    tagline: 'Investment banking technology, sustainable finance & high-speed markets settlement',
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    overview: 'Barclays Investment Bank and Consumer Banking teams develop world-class trading engines (BARX), payment networks, and digital banking platforms. Their interview loop evaluates algorithmic rigor, multithreaded systems engineering, distributed transactional integrity, and alignment with Barclays Barclays Values (Respect, Integrity, Service, Excellence, Stewardship).',
+    totalStages: 4,
+    cultureHighlights: [
+      'Respect (Value each individual and their contributions)',
+      'Integrity (Act with fairness, honesty, and transparency in everything we do)',
+      'Service (Put clients and customers at the center of what we deliver)',
+      'Excellence (Relentlessly pursue the highest quality and technical craftsmanship)',
+      'Stewardship (Leave things in better shape than we found them for future generations)'
+    ],
+    evaluationPhilosophy: 'Barclays looks for engineers who combine technical mastery with fiduciary maturity. Demonstrating how you safeguard financial integrity and collaborate across global teams will set you apart.',
+    typicalTimeline: '3 to 5 weeks from initial screen to Superday committee decision',
+    popularRoles: [
+      'Technology Developer (Barclays Investment Bank)',
+      'Associate (Corporate & Sustainable Banking Tech)',
+      'Vice President (Markets & Execution Technology)',
+      'Low-Latency Java / C++ Settlement Developer',
+      'Digital Banking & Payments Microservices Engineer',
+      'Risk, Compliance & Fraud Architecture Engineer',
+    ],
+    stages: [
+      {
+        id: 'barc-s1',
+        stageNumber: 1,
+        name: 'Stage 1: HackerRank Coding Challenge & HireVue Video Screen',
+        levelType: 'Online Assessment',
+        format: '60-Minute Timed HackerRank Assessment + Recorded HireVue Video',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Evaluation Platform',
+        coreCompetencies: ['Data Structures & Algorithms', 'Big-O Complexity', 'Barclays Values', 'Communication'],
+        description: 'Algorithmic assessment testing speed, algorithmic correctness, and behavioral answers aligned with Barclays RISE values.',
+        typicalQuestions: [
+          'Given an array of customer trade orders, find the longest contiguous subsequence where price volatility does not exceed a threshold.',
+          'HireVue: Describe a situation where you had to act with absolute integrity when nobody else was watching.'
+        ],
+        tipsForSuccess: [
+          'Ensure O(n log n) or O(n) algorithmic complexity for all test cases.',
+          'Speak clearly into the camera and map your stories directly to Barclays RISE principles.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix',
+      },
+      {
+        id: 'barc-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Live Pair Coding & Concurrency Control',
+        levelType: 'Technical Round',
+        format: '60-Minute Live CoderPad Session with Lead Engineer',
+        durationMinutes: 60,
+        interviewerProfile: 'Vice President / Markets Execution Tech Lead',
+        coreCompetencies: ['Java / C++ / Python Concurrency', 'Object-Oriented Design', 'Memory & Thread Synchronization', 'Defensive Programming'],
+        description: 'Live interactive coding round testing concurrent data structures, clean modular design, and robust error handling.',
+        typicalQuestions: [
+          'Design and implement a thread-safe in-memory order cache supporting concurrent updates and snapshot reads without blocking writer threads.',
+          'Explain the memory visibility guarantees of volatile variables and memory barriers in multicore architectures.'
+        ],
+        tipsForSuccess: [
+          'Explicitly address thread-safety, race conditions, and deadlock avoidance.',
+          'Write unit tests and edge cases before declaring your solution complete.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'barc-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Superday — Financial Infrastructure & Trade Settlement Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Whiteboard & Distributed Architecture Round',
+        durationMinutes: 60,
+        interviewerProfile: 'Director / Chief Architect',
+        coreCompetencies: ['Distributed Settlement Systems', 'Idempotent Message Processing', 'Event Sourcing & Kafka', 'Auditability & Disaster Recovery'],
+        description: 'Architecting high-volume clearing, trade booking, or payment rails capable of handling extreme market surges.',
+        typicalQuestions: [
+          'Design an FX trade clearing and settlement pipeline at Barclays capable of processing 50,000 trades/sec with guaranteed auditability and zero double-processing under network split.',
+          'How do you manage real-time fraud scoring without adding more than 15 milliseconds of latency to consumer transactions?'
+        ],
+        tipsForSuccess: [
+          'Proactively discuss ACID semantics, idempotency tokens, and disaster recovery strategies.',
+          'Highlight trade-offs between strong consistency and low latency.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'barc-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Superday — Managing Director Values & Regulatory Stewardship Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Behavioral & Values Evaluation',
+        durationMinutes: 45,
+        interviewerProfile: 'Managing Director / Global Technology Head',
+        coreCompetencies: ['Barclays RISE Values', 'Ethical Courage', 'Stakeholder Leadership', 'Team Mentorship'],
+        description: 'Final executive interview focusing on how you lead through uncertainty, handle ethical challenges, and build long-term value.',
+        typicalQuestions: [
+          'Tell me about a time you faced conflicting priorities between rapid delivery and thorough security or compliance validation. How did you resolve it?',
+          'How do you foster an environment of continuous learning, psychological safety, and stewardship in your engineering teams?'
+        ],
+        tipsForSuccess: [
+          'Use the STAR method with clear personal responsibility ("I did" rather than "we did").',
+          'Demonstrate knowledge of Barclays recent technology transformations and global initiatives.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Capital One',
+    normalizedName: 'capitalone',
+    tagline: 'Cloud-native banking, machine learning credit models & the Technical Case Interview',
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    overview: 'Capital One was the first major US bank to migrate 100% of its data centers to the public cloud (AWS). Their hiring loop is renowned for the Capital One Technical Case Interview—an interactive architectural problem where candidates design a scalable cloud-native microservices solution—paired with algorithmic coding and behavioral job family evaluations.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Excellence (Strive for the highest standards in tech craftsmanship)',
+      'Do the Right Thing (Operate with honesty, integrity, and customer obsession)',
+      'Change Banking for Good (Innovate through cloud, open-source, and machine learning)',
+      'Collaborative & Inclusive Culture (Focus on shared mentorship and psychological safety)'
+    ],
+    evaluationPhilosophy: 'Capital One seeks engineers who think critically about cloud architecture, microservices separation of concerns, API contracts, and business value. The technical case round is unique and tests your ability to think aloud with the interviewer.',
+    typicalTimeline: '2 to 4 weeks from initial screening to Power Day decision',
+    popularRoles: [
+      'Associate Software Engineer (TDP Program)',
+      'Senior Software Engineer (Cloud Card & Payments)',
+      'Lead Software Engineer (Real-Time Fraud Detection)',
+      'Principal Distributed Systems Architect',
+      'Director of Software Engineering',
+      'Machine Learning & Credit Modeling Engineer',
+      'Product Manager (Financial Products)',
+    ],
+    stages: [
+      {
+        id: 'cap1-s1',
+        stageNumber: 1,
+        name: 'Stage 1: CodeSignal General Coding Assessment (GCA)',
+        levelType: 'Online Assessment',
+        format: '70-Minute Timed CodeSignal Assessment (4 Algorithmic Tasks)',
+        durationMinutes: 70,
+        interviewerProfile: 'Automated Platform Calibration',
+        coreCompetencies: ['Algorithmic Problem Solving', 'Array & String Manipulation', 'Matrix & Dynamic Programming', 'Time Management'],
+        description: 'Standardized CodeSignal General Coding Framework (Task 1 & 2 straightforward, Task 3 implementation-heavy, Task 4 advanced algorithmic optimization).',
+        typicalQuestions: [
+          'Implement a continuous text editor or memory simulation tracking undo/redo states.',
+          'Given a grid representing payment flows, calculate maximum profit path with constraints on turnaround time.'
+        ],
+        tipsForSuccess: [
+          'Practice time allocation: finish tasks 1 & 2 in under 15 minutes to preserve time for task 3 & 4.',
+          'Aim for a CodeSignal score of 800+ for direct advancement.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'cap1-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen & Live Coding',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session via CodeSignal / Zoom',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Software Engineer from Hiring Org',
+        coreCompetencies: ['Data Structures & Algorithms', 'Clean Code Principles', 'Object-Oriented Design', 'Complexity Analysis'],
+        description: 'Collaborative coding problem with an emphasis on readable, production-grade code, unit testing, and edge case discussion.',
+        typicalQuestions: [
+          'Design an in-memory cache with eviction policies and expiration timestamps for sensitive credit card transaction queries.',
+          'Implement an algorithm to detect credit card fraud velocity patterns in real-time streaming data.'
+        ],
+        tipsForSuccess: [
+          'Communicate your design approach before writing code.',
+          'Handle edge cases cleanly and demonstrate clean modular code structure.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'cap1-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Power Day — The Capital One Technical Case Interview',
+        levelType: 'System Design',
+        format: '60-Minute Interactive Cloud Architecture Case Study',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Software Engineer / Senior Manager',
+        coreCompetencies: ['Cloud-Native Architecture (AWS)', 'Microservices & API Design', 'Database Selection (SQL vs NoSQL)', 'Scalability & Resiliency'],
+        description: 'The signature Capital One interview: you are given a business scenario (e.g. launching a new peer-to-peer payment feature or credit monitoring service) and collaborate to architect the system from scratch.',
+        typicalQuestions: [
+          'Case Prompt: Capital One wants to build a new instant credit pre-approval microservice that checks external credit bureaus and internal account history in under 300ms. Walk through your database schema, API contracts, caching strategy, and asynchronous fallback queues.',
+          'How do you handle a sudden 10x traffic spike on Black Friday while ensuring zero data loss and maintaining PCI-DSS compliance?'
+        ],
+        tipsForSuccess: [
+          'Treat the interviewer as a teammate; ask clarifying business and technical questions.',
+          'Structure your response clearly: Requirements -> Data Model -> API Design -> High-Level Architecture -> Bottlenecks & Edge Cases.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'cap1-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Power Day — Behavioral & Job Family Leadership Round',
+        levelType: 'Behavioral & Culture',
+        format: '45-Minute Behavioral & Values Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Engineering Manager / Director',
+        coreCompetencies: ['Ownership & Initiative', 'Conflict Resolution', 'Mentorship & Inclusion', 'Adaptability'],
+        description: 'Explores your past experiences, leadership style, teamwork, and how you uphold Capital One\'s collaborative culture.',
+        typicalQuestions: [
+          'Tell me about a time you identified a process or architectural flaw that was not strictly your responsibility. How did you take ownership to fix it?',
+          'Describe a situation where you had to influence a teammate or cross-functional partner who disagreed with your proposed technical approach.'
+        ],
+        tipsForSuccess: [
+          'Structure your answers using STAR with quantifiable impact.',
+          'Highlight collaboration, learning from mistakes, and mentoring others.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Citigroup',
+    normalizedName: 'citigroup',
+    tagline: 'Institutional clients group, real-time treasury & global currency rails',
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    overview: 'Citi\'s technology infrastructure connects over 160 countries and moves trillions of dollars daily. Their engineering interviews focus on mission-critical system reliability, global payment rails, microservices architecture, and adherence to international banking regulations and cyber hygiene.',
+    totalStages: 4,
+    cultureHighlights: [
+      'We Take Ownership (Taking personal pride and accountability in our work)',
+      'We Deliver with Pride (Excellence in commercial execution and reliability)',
+      'We Succeed Together (One Citi mindset across global borders)',
+      'We Value Integrity (Strict adherence to fiduciary responsibility and compliance)'
+    ],
+    evaluationPhilosophy: 'Citi evaluates candidates for rock-solid software engineering fundamentals, multi-datacenter resiliency, and calm judgment during production incidents.',
+    typicalTimeline: '3 to 5 weeks from initial screening to Superday decision',
+    popularRoles: [
+      'Technology Analyst (Citi Treasury & Trade Solutions)',
+      'Assistant Vice President (AVP - Institutional Clients Group)',
+      'Vice President (VP - Markets Quantitative Engineering)',
+      'Global Payments & Real-Time Settlement Architect',
+      'Risk Analytics & Regulatory Data Engineer',
+    ],
+    stages: [
+      {
+        id: 'citi-s1',
+        stageNumber: 1,
+        name: 'Stage 1: Automated Coding Challenge & Technical Screen',
+        levelType: 'Online Assessment',
+        format: '60-Minute Timed HackerRank Assessment + Video Screen',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Platform Calibration',
+        coreCompetencies: ['Algorithms & Data Structures', 'SQL & Database Indexing', 'Problem Decomposition'],
+        description: 'Foundational algorithmic coding and relational database queries assessing speed, accuracy, and code clarity.',
+        typicalQuestions: [
+          'Write an algorithm to detect circular transfer loops across accounts that may indicate layering or money laundering patterns.',
+          'Optimize a SQL query aggregating billions of daily transactions partitioned by currency and country code.'
+        ],
+        tipsForSuccess: [
+          'Focus on optimal time complexity and test edge cases thoroughly.',
+          'Write clean, readable variable names and modular functions.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'citi-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen & Live Coding',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session via CoderPad',
+        durationMinutes: 60,
+        interviewerProfile: 'Assistant Vice President / Tech Lead',
+        coreCompetencies: ['OOP & Clean Architecture', 'Concurrency & Threading', 'API Design', 'Error Handling'],
+        description: 'Interactive pair-programming probing object-oriented patterns, thread safety, and defensive programming.',
+        typicalQuestions: [
+          'Design an in-memory foreign exchange currency converter with real-time rate updates and thread-safe lock-free reads.',
+          'Explain how you ensure idempotency in REST microservices handling non-reversible fund transfers.'
+        ],
+        tipsForSuccess: [
+          'Explain concurrency guarantees and lock choices clearly.',
+          'Demonstrate clear separation between business logic and transport layers.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'citi-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Superday — Global Treasury & High-Volume Payment Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Systems Architecture Interview',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior VP / Enterprise Architect',
+        coreCompetencies: ['Global Financial Rails', 'Distributed Consensus & Replication', 'Disaster Recovery (Active-Active)', 'Kafka & Event Streaming'],
+        description: 'Designing mission-critical global settlement architectures operating across varying international network boundaries.',
+        typicalQuestions: [
+          'Design a cross-border payments messaging backbone connecting 50 countries with ISO 20022 message compliance, handling 10,000 TPS with zero transaction loss during fiber optic line cuts.',
+          'How do you manage eventual consistency in distributed account balances while preventing overdrafts?'
+        ],
+        tipsForSuccess: [
+          'Emphasize audit logging, idempotency tokens, and distributed transaction compensation (Saga pattern).',
+          'Discuss cross-region replication strategies and data residency compliance (GDPR, local banking acts).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'citi-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Superday — Senior Leadership, Governance & Fiduciary Alignment',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive Behavioral Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Managing Director / Division Head',
+        coreCompetencies: ['Fiduciary Mindset', 'Global Collaboration', 'Risk Mitigation', 'Executive Presence'],
+        description: 'Assesses executive maturity, cross-cultural leadership, navigating complex regulatory landscapes, and personal integrity.',
+        typicalQuestions: [
+          'Tell me about a time you had to deliver difficult technical news to business leaders regarding a deadline slip or security finding. How did you handle the conversation?',
+          'How do you foster an inclusive engineering culture when coordinating with teams across London, New York, Singapore, and Pune?'
+        ],
+        tipsForSuccess: [
+          'Show genuine pride in building resilient infrastructure that protects global markets.',
+          'Highlight past instances of cross-regional teamwork and ethical courage.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Uber',
+    normalizedName: 'uber',
+    tagline: 'Hyper-scale geospatial dispatch, dynamic marketplace pricing & real-time routing',
+    industry: 'Mobility, Delivery, Freight & Global Logistics',
+    overview: 'Uber operates at unprecedented real-time scale, matching millions of riders and drivers using geohashing (H3), distributed stateful microservices, and dynamic marketplace algorithms. Their interview process evaluates algorithmic mastery, distributed system design at massive scale, clean machine coding, and alignment with Uber values.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Go Get It (Bring energy and drive to make things happen)',
+      'Trip Over the Truth (Honesty and radical transparency over comfort)',
+      'Stand for Safety (Prioritize rider and platform safety in every decision)',
+      'Great Minds Don\'t Think Alike (Embrace cognitive diversity and rigorous debate)',
+      'See the Forest and the Trees (Balance broad strategic vision with deep technical execution)'
+    ],
+    evaluationPhilosophy: 'Uber seeks engineers who can write clean, production-grade code quickly and design distributed systems that degrade gracefully during network partitions and flash crowds.',
+    typicalTimeline: '3 to 5 weeks from initial screening to final onsite decision',
+    popularRoles: [
+      'Software Engineer I / II',
+      'Senior Software Engineer (5A / 5B)',
+      'Staff Software Engineer (Level 6)',
+      'Marketplace & Dispatch Algorithms Engineer',
+      'Autonomous Mobility & Maps Engineer',
+      'Engineering Manager (Driver & Rider Tech)',
+      'Product Manager (Pricing & Marketplace)',
+    ],
+    stages: [
+      {
+        id: 'uber-s1',
+        stageNumber: 1,
+        name: 'Stage 1: Automated Coding Assessment (CodeSignal / HackerRank)',
+        levelType: 'Online Assessment',
+        format: '70-Minute Timed CodeSignal Assessment',
+        durationMinutes: 70,
+        interviewerProfile: 'Automated Platform Calibration',
+        coreCompetencies: ['Data Structures & Algorithms', 'Time Complexity Optimization', 'Edge Case Handling'],
+        description: 'Timed assessment evaluating data structures (graphs, trees, two pointers) and clean coding execution.',
+        typicalQuestions: [
+          'Given a stream of driver locations and customer pickup points, compute closest matches within an expanding geohash boundary.',
+          'Optimize a route itinerary to maximize driver earnings subject to shift time constraints.'
+        ],
+        tipsForSuccess: [
+          'Prioritize code correctness and test for boundary conditions before submitting.',
+          'Aim for clean O(n log n) or O(n) solutions.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'uber-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session via CoderPad',
+        durationMinutes: 60,
+        interviewerProfile: 'Uber Senior Software Engineer',
+        coreCompetencies: ['Algorithms & Graph Theory', 'Concurrency', 'Clean Coding', 'Problem Decomposition'],
+        description: 'Live interactive coding involving shortest-path, graph traversal, or complex data structure manipulation.',
+        typicalQuestions: [
+          'Implement a thread-safe rate limiter supporting sliding-window counter or token-bucket algorithms across multiple API keys.',
+          'Given a directed graph of city transit routes with dynamic traffic delays, find the path of least delay.'
+        ],
+        tipsForSuccess: [
+          'Think aloud and discuss algorithmic trade-offs before writing code.',
+          'Test code manually with edge cases.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'uber-s3',
+        stageNumber: 3,
+        name: 'Stage 3: The Virtual Onsite — Machine Coding & Geospatial Dispatch Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Systems Architecture Round',
+        durationMinutes: 60,
+        interviewerProfile: 'Staff Software Engineer / Principal Architect',
+        coreCompetencies: ['Geospatial Indexing (H3 / Geohash)', 'Real-Time Stateful Streaming (Kafka / Flink)', 'High Availability & Failover', 'Dynamic Surge Pricing'],
+        description: 'Architecting Uber\'s real-time marketplace dispatch, rider matching, or dynamic trip pricing at global scale.',
+        typicalQuestions: [
+          'Design Uber\'s real-time ride matching and dispatch engine handling 100,000 requests/second with sub-second driver location updates using geospatial indexes (H3).',
+          'How do you handle split-brain or network partitions between city datacenters without stranding riders or duplicate trip assignments?'
+        ],
+        tipsForSuccess: [
+          'Dive deep into data storage choices: memory caches (Redis), geospatial indices, and persistent databases.',
+          'Address bottlenecks, cache invalidation, and backpressure mechanisms.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'uber-s4',
+        stageNumber: 4,
+        name: 'Stage 4: The Virtual Onsite — Engineering Principles & Bar Raiser Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Behavioral & Values Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Engineering Manager or Independent Bar Raiser',
+        coreCompetencies: ['Trip Over the Truth', 'Go Get It', 'Conflict Resolution', 'Cross-Functional Leadership'],
+        description: 'Probes your leadership instincts, handling disagreements with data, learning from failures, and raising the bar for the team.',
+        typicalQuestions: [
+          'Tell me about a time you had to champion a difficult technical truth or call out an architectural flaw that others wanted to ignore.',
+          'Describe a situation where you led a cross-functional project through severe ambiguity and conflicting priorities.'
+        ],
+        tipsForSuccess: [
+          'Use the STAR framework and articulate measurable outcomes.',
+          'Show humble self-awareness and focus on customer safety and driver experience.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Airbnb',
+    normalizedName: 'airbnb',
+    tagline: 'World-class product craftsmanship, global travel search & authentic Core Values',
+    industry: 'Hospitality, Travel Tech & Marketplace Platforms',
+    overview: 'Airbnb is celebrated for exceptional design, thoughtful code architecture, and its world-famous Core Values interviews. Their technical loops evaluate elegant API design, distributed search indexing, booking consistency, and deep alignment with company values like "Be a Host".',
+    totalStages: 4,
+    cultureHighlights: [
+      'Champion the Mission (Dedication to creating a world where anyone can belong anywhere)',
+      'Be a Host (Care for others, demonstrate hospitality and empathy in all interactions)',
+      'Be a \'Cereal\' Entrepreneur (Creativity, resourcefulness, and persistence in the face of constraints)',
+      'Simplify (Focus on clarity, elegant minimalism, and product craftsmanship)'
+    ],
+    evaluationPhilosophy: 'At Airbnb, cultural fit carries equal weight to technical capability. You will face dedicated Core Values interviewers whose only job is to assess your character, empathy, and mission alignment.',
+    typicalTimeline: '3 to 5 weeks from initial screen to final debrief',
+    popularRoles: [
+      'Software Engineer (L3 / L4)',
+      'Senior Software Engineer (L5)',
+      'Staff Software Engineer (L6)',
+      'Trust & Safety Machine Learning Engineer',
+      'Search, Ranking & Dynamic Pricing Engineer',
+      'Guest & Host Experience Frontend Engineer',
+      'Engineering Manager',
+    ],
+    stages: [
+      {
+        id: 'abnb-s1',
+        stageNumber: 1,
+        name: 'Stage 1: HackerRank Coding Assessment',
+        levelType: 'Online Assessment',
+        format: '60-Minute Timed HackerRank Assessment',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Evaluation Platform',
+        coreCompetencies: ['Data Structures & Algorithms', 'Clean Code', 'Modular Thinking'],
+        description: 'Practical algorithmic problem solving reflecting real-world engineering scenarios (e.g. pagination, calendar interval overlap).',
+        typicalQuestions: [
+          'Given an array of listing availability intervals, merge overlapping bookings and find the largest contiguous open booking window.',
+          'Implement a paginated search result iterator that guarantees unique listing display across host tiers.'
+        ],
+        tipsForSuccess: [
+          'Write readable code with descriptive variable names.',
+          'Test boundary conditions thoroughly (empty intervals, edge-to-edge bookings).'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'abnb-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session via CoderPad',
+        durationMinutes: 60,
+        interviewerProfile: 'Airbnb Senior Software Engineer',
+        coreCompetencies: ['Clean Architecture', 'API Design', 'Data Modeling', 'Algorithms'],
+        description: 'Hands-on coding session focusing on practical software craftsmanship, modular helper methods, and testability.',
+        typicalQuestions: [
+          'Design an in-memory calendar booking system that supports check-in/check-out reservation requests with concurrency checks.',
+          'Implement a boggle-style word search or string similarity match for listing titles.'
+        ],
+        tipsForSuccess: [
+          'Demonstrate clear object-oriented or functional separation of concerns.',
+          'Discuss time complexity and write unit tests.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'abnb-s3',
+        stageNumber: 3,
+        name: 'Stage 3: System Design & Search / Booking Consistency Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Systems Architecture Interview',
+        durationMinutes: 60,
+        interviewerProfile: 'Staff Software Engineer / Architecture Lead',
+        coreCompetencies: ['Distributed Search & Ranking', 'Transactional Booking Consistency', 'Caching & Invalidation', 'Availability & Disaster Recovery'],
+        description: 'Architecting Airbnb\'s search engine, reservation inventory system, or trust & safety review pipeline.',
+        typicalQuestions: [
+          'Design Airbnb\'s global listing search and ranking engine supporting complex filters (amenities, dates, geo-radius) with sub-100ms response times for 50M listings.',
+          'How do you prevent double-booking of a single listing during instantaneous concurrent checkout attempts across two different devices?'
+        ],
+        tipsForSuccess: [
+          'Discuss database choices (relational for ACID bookings vs Elasticsearch for rich search).',
+          'Explain optimistic locking, idempotency, and distributed locking mechanisms (e.g. Redlock).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'abnb-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Core Values Interview ("Be a Host" & "Champion the Mission")',
+        levelType: 'Behavioral & Culture',
+        format: '45-Minute Dedicated Core Values Interview (Conducted by Trained Core Values Interviewer)',
+        durationMinutes: 45,
+        interviewerProfile: 'Trained Airbnb Core Values Ambassador (Non-Engineering or Cross-Functional)',
+        coreCompetencies: ['Be a Host (Empathy & Hospitality)', 'Champion the Mission', 'Be a Cereal Entrepreneur', 'Simplify'],
+        description: 'The legendary Airbnb Core Values interview. Pure focus on your character, humility, how you treat others, and alignment with the mission of belonging.',
+        typicalQuestions: [
+          'Tell me about a time you went out of your way to make someone else feel welcome, supported, or included.',
+          'Describe a significant setback or failure in your career. What did you learn about yourself, and how did it change your perspective?'
+        ],
+        tipsForSuccess: [
+          'Be completely authentic, humble, and vulnerable—do not give scripted "humblebrag" answers.',
+          'Demonstrate genuine empathy, teamwork, and love for creating thoughtful experiences.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Salesforce',
+    normalizedName: 'salesforce',
+    tagline: 'Enterprise multi-tenant cloud architectures, autonomous AI agents & Ohana values',
+    industry: 'Enterprise Cloud SaaS, CRM & AI Agentforce',
+    overview: 'Salesforce powers global CRM, data clouds, and autonomous enterprise AI agents (Agentforce). Their hiring loops probe multi-tenant database virtualization, row-level security, high-scale distributed systems, and alignment with the core values of Trust, Customer Success, Innovation, and Equality.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Trust (Our #1 value; unwavering security, reliability, and transparency)',
+      'Customer Success (When our customers succeed, we succeed)',
+      'Innovation (Continuously delivering trailblazing cloud and AI capabilities)',
+      'Equality (Creating an inclusive, equitable workplace for all Ohana members)'
+    ],
+    evaluationPhilosophy: 'Salesforce evaluates candidates for robust enterprise architecture design, multi-tenant isolation, clean coding, and ethical teamwork.',
+    typicalTimeline: '3 to 5 weeks from initial screening to offer decision',
+    popularRoles: [
+      'Member of Technical Staff (MTS)',
+      'Senior Member of Technical Staff (SMTS)',
+      'Lead / Principal MTS',
+      'Enterprise Cloud Platform Architect',
+      'Product Manager (Agentforce & AI)',
+      'Engineering Manager (Data Cloud)',
+    ],
+    stages: [
+      {
+        id: 'crm-s1',
+        stageNumber: 1,
+        name: 'Stage 1: HackerRank Coding Challenge',
+        levelType: 'Online Assessment',
+        format: '60-Minute Timed HackerRank Assessment',
+        durationMinutes: 60,
+        interviewerProfile: 'Automated Platform Calibration',
+        coreCompetencies: ['Data Structures & Algorithms', 'Time Complexity', 'Clean Code'],
+        description: 'Timed assessment evaluating data structures (hash maps, trees, heaps, dynamic programming) and code correctness.',
+        typicalQuestions: [
+          'Given a stream of CRM contact activity logs, calculate real-time lead score aggregations within a moving window.',
+          'Implement an algorithm to validate hierarchical tenant permissions across nested organizational units.'
+        ],
+        tipsForSuccess: [
+          'Ensure all hidden test cases pass within optimal asymptotic time bounds.',
+          'Write clean, well-structured code.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'crm-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session via HackerRank / Zoom',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Member of Technical Staff (SMTS)',
+        coreCompetencies: ['Object-Oriented Design', 'Clean Code Principles', 'Data Structures', 'Algorithmic Optimization'],
+        description: 'Live interactive problem solving focusing on clean object-oriented architecture, modularity, and error handling.',
+        typicalQuestions: [
+          'Design an in-memory key-value store supporting transactions with commit and rollback capabilities.',
+          'Implement an LRU cache with expiration and multi-tenant key namespaces.'
+        ],
+        tipsForSuccess: [
+          'Communicate continuously and explain design choices before writing code.',
+          'Demonstrate clear separation of concerns.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'crm-s3',
+        stageNumber: 3,
+        name: 'Stage 3: System Design & Enterprise Multi-Tenant Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Enterprise Systems Architecture Interview',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Architect / Director of Engineering',
+        coreCompetencies: ['Multi-Tenant Database Virtualization', 'Row-Level Tenant Isolation', 'Metadata-Driven Engines', 'High Availability & Scalability'],
+        description: 'Architecting high-scale enterprise SaaS platforms with strict tenant data isolation, metadata compilation, and zero-downtime upgrades.',
+        typicalQuestions: [
+          'Design a multi-tenant cloud CRM database engine supporting custom user-defined schemas and fields without requiring table schema alterations in underlying relational databases.',
+          'How do you design an autonomous AI agent event processing system handling millions of webhook triggers per minute with guaranteed delivery?'
+        ],
+        tipsForSuccess: [
+          'Highlight tenant isolation, row-level security, and rate limiting to prevent "noisy neighbor" resource starvation.',
+          'Discuss metadata caching, partition strategies, and disaster recovery.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'crm-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Ohana Culture & Engineering Leadership Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Behavioral & Values Evaluation',
+        durationMinutes: 45,
+        interviewerProfile: 'Engineering Director / VP',
+        coreCompetencies: ['Trust & Ethics', 'Customer Success Orientation', 'Equality & Inclusion', 'Collaboration'],
+        description: 'Evaluates your leadership style, handling disagreements, commitment to customer trust, and upholding Ohana culture.',
+        typicalQuestions: [
+          'Tell me about a time you put customer trust and security ahead of a product feature deadline.',
+          'How do you build consensus across distributed teams when opinions on architecture differ widely?'
+        ],
+        tipsForSuccess: [
+          'Use the STAR framework and show genuine alignment with Trust, Innovation, and Equality.',
+          'Highlight mentorship and fostering an inclusive environment.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Palantir',
+    normalizedName: 'palantir',
+    tagline: 'Mission-critical enterprise intelligence, graph pipelines & the legendary Decomp round',
+    industry: 'Enterprise Intelligence, Defense & Data Platforms',
+    overview: 'Palantir builds foundational data integration platforms (Foundry, Gotham, AIP) for defense, intelligence, healthcare, and enterprise. Their interview process is renowned for its rigor, featuring the unique "Decomposition" (Decomp) interview where candidates break down vague, massive real-world problems live.',
+    totalStages: 4,
+    cultureHighlights: [
+      'Mission Matters (Deploying technology where the stakes are highest)',
+      'Substance over Appearance (Intellectual honesty, zero tolerance for superficial answers)',
+      'Flat Hierarchy (The best idea wins regardless of title or tenure)',
+      'Continuous Ownership (Engineers own outcomes from code to client frontline deployment)'
+    ],
+    evaluationPhilosophy: 'Palantir values exceptional problem decomposition, deep computer science fundamentals, intellectual agility under ambiguity, and dedication to mission-critical outcomes.',
+    typicalTimeline: '3 to 5 weeks from initial screening to onsite committee review',
+    popularRoles: [
+      'Forward Deployed Software Engineer (FDSE)',
+      'Software Engineer (Core Foundry / Gotham)',
+      'Deployment Strategist / Technical Lead',
+      'Data Platform & Graph Systems Engineer',
+      'Infrastructure & Security Operations Engineer',
+    ],
+    stages: [
+      {
+        id: 'pltr-s1',
+        stageNumber: 1,
+        name: 'Stage 1: Karat Technical Coding Screen / HackerRank',
+        levelType: 'Online Assessment',
+        format: '60-Minute Live Coding Interview via Karat Platform',
+        durationMinutes: 60,
+        interviewerProfile: 'Karat Senior Interview Engineer',
+        coreCompetencies: ['Data Structures & Algorithms', 'Fast Accurate Coding', 'Complexity Analysis'],
+        description: 'High-speed problem solving testing data structures, matrix traversals, graph algorithms, and clean debugging.',
+        typicalQuestions: [
+          'Given an undirected graph of user interactions and suspicious entity nodes, identify all connected components containing more than k flagged accounts.',
+          'Implement an access control evaluation matrix checking inherited roles and clearance levels.'
+        ],
+        tipsForSuccess: [
+          'Aim to solve 2-3 progressive problems within the 60-minute window.',
+          'Test edge cases proactively and state time/space complexity explicitly.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'pltr-s2',
+        stageNumber: 2,
+        name: 'Stage 2: The Decomp Round — System Decomposition Under Ambiguity',
+        levelType: 'System Design',
+        format: '60-Minute Interactive Problem Decomposition Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Palantir Lead Architect / Forward Deployed Tech Lead',
+        coreCompetencies: ['Problem Decomposition', 'First-Principles Structuring', 'Handling Ambiguity', 'Data Modeling'],
+        description: 'Palantir\'s signature interview round. You are presented with a complex, open-ended real-world problem (e.g. tracking vaccine supply chain fraud or optimizing crisis response logistics) and must decompose it from messy data to operational systems.',
+        typicalQuestions: [
+          'Decomp Prompt: A humanitarian coalition needs to coordinate relief supplies across disaster zones with unreliable telecom networks, corrupt local distribution, and multiple NGO data formats. How do you model the entities, resolve identity conflicts, and build an operational tracking platform?',
+          'How do you design a data lineage tracking system that can prove the provenance of every data point across a multi-million-node knowledge graph?'
+        ],
+        tipsForSuccess: [
+          'Do not jump into writing code or databases immediately. Clarify stakeholders, entity schemas, data ingress, and failure modes.',
+          'Structure your approach: 1. Core Entities & Relationships -> 2. Ingestion & Transformation -> 3. Validation & Provenance -> 4. Operational Interfaces.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'pltr-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Technical Problem Solving & Graph Data Modeling',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Algorithmic Session with Core Palantir Engineer',
+        durationMinutes: 60,
+        interviewerProfile: 'Foundry Core Infrastructure Senior Engineer',
+        coreCompetencies: ['Graph Algorithms', 'Dynamic Programming', 'Scalable Data Structures', 'Debugging'],
+        description: 'In-depth algorithmic problem solving probing graphs, trees, DFS/BFS traversals, topological sorting, and data integrity.',
+        typicalQuestions: [
+          'Design an algorithm to find the shortest dependency resolution order for complex analytical transformations in Foundry with cycle detection and parallel execution branches.',
+          'Implement an ontology relationship index supporting rapid bidirectional graph queries.'
+        ],
+        tipsForSuccess: [
+          'Communicate your algorithm clearly and explain why specific data structures were chosen.',
+          'Address concurrency and memory overhead.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'pltr-s4',
+        stageNumber: 4,
+        name: 'Stage 4: Palantir Culture, Mission & Ethical Philosophy Round',
+        levelType: 'Behavioral & Culture',
+        format: '45-Minute Cultural & Mission Alignment Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Senior Engineering Director / Long-Tenured Palantir Leader',
+        coreCompetencies: ['Mission Orientation', 'Intellectual Rigor', 'Ethical Critical Thinking', 'Ownership'],
+        description: 'Probes why you want to work on mission-critical software, how you navigate ethical complexity, your resilience, and teamwork under pressure.',
+        typicalQuestions: [
+          'Why Palantir, and how do you think about the ethical implications of building software used in national security, defense, and healthcare?',
+          'Tell me about a time you took a contrarian technical position based on data and had to defend it in front of senior leaders.'
+        ],
+        tipsForSuccess: [
+          'Be thoughtful and honest; demonstrate that you have researched Palantir\'s mission and products.',
+          'Show intellectual courage, openness to feedback, and passion for making real-world impact.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
+  {
+    companyName: 'Tesla',
+    normalizedName: 'tesla',
+    tagline: 'Autopilot vision, extreme high-speed execution & first-principles engineering',
+    industry: 'Electric Vehicles, Autopilot AI, Robotics & Energy',
+    overview: 'Tesla builds cutting-edge full self-driving (FSD) neural networks, vehicle firmware, humanoid robotics (Optimus), and massive battery energy storage systems (Megapack). Tesla\'s interview process is fast-paced, highly technical, and centered on first-principles physics, extreme ownership, and relentless work ethic.',
+    totalStages: 4,
+    cultureHighlights: [
+      'First-Principles Thinking (Reason from fundamental physics and hardware realities)',
+      'Move Incredibly Fast (Test, iterate, and deploy at lightning velocity)',
+      'Extreme Ownership (Take responsibility for the entire vehicle/software stack)',
+      'No Bureaucracy (Zero tolerance for unnecessary meetings or administrative bloat)'
+    ],
+    evaluationPhilosophy: 'Tesla looks for engineers who can roll up their sleeves and fix broken systems under extreme pressure. Hands-on coding, hardware-software integration, and first-principles mastery are prioritized over theoretical credentials.',
+    typicalTimeline: '2 to 4 weeks from recruiter reach-out to engineering offer',
+    popularRoles: [
+      'Autopilot & Computer Vision Software Engineer',
+      'Embedded Firmware & Low-Level Systems Engineer',
+      'Vehicle Software Architecture Engineer',
+      'Energy Platforms & Megapack Systems Engineer',
+      'Staff Distributed Systems Engineer',
+    ],
+    stages: [
+      {
+        id: 'tsla-s1',
+        stageNumber: 1,
+        name: 'Stage 1: Recruiter & Technical Screening',
+        levelType: 'Phone Screen',
+        format: '30-45 Minute Technical Screening Call',
+        durationMinutes: 45,
+        interviewerProfile: 'Technical Recruiter & Senior Team Engineer',
+        coreCompetencies: ['Background Walkthrough', 'C/C++ & Python Proficiency', 'First-Principles Understanding'],
+        description: 'Evaluates your technical background, real-world hands-on project accomplishments, and motivation to thrive in Tesla\'s intense engineering environment.',
+        typicalQuestions: [
+          'Walk me through the most technically challenging hardware or software system you designed from scratch. What broke first and how did you fix it?',
+          'Why Tesla specifically, and how do you handle high-pressure environments with tight deployment cycles?'
+        ],
+        tipsForSuccess: [
+          'Focus on concrete engineering details rather than high-level management talk.',
+          'Demonstrate passion for Tesla\'s mission in sustainable energy and autonomous robotics.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix',
+      },
+      {
+        id: 'tsla-s2',
+        stageNumber: 2,
+        name: 'Stage 2: Technical Phone Screen & Low-Level Systems',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session via CoderPad',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Firmware / Autopilot Software Engineer',
+        coreCompetencies: ['C/C++ Systems Programming', 'Concurrency & RTOS', 'Memory Constraints & Pointers', 'Debugging'],
+        description: 'Rigorous coding problem focusing on low-level memory management, multithreaded synchronization, bit manipulation, or algorithm optimization.',
+        typicalQuestions: [
+          'Implement a thread-safe ring buffer for streaming sensor data from radar/cameras in C++ with zero dynamic heap allocations.',
+          'Explain how you would diagnose and eliminate a priority inversion deadlock in an embedded real-time operating system (RTOS).'
+        ],
+        tipsForSuccess: [
+          'Write clean, efficient C++ code avoiding dynamic memory allocations where possible.',
+          'Discuss hardware constraints (CPU cycles, memory footprint, cache latency) proactively.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Technical & Problem Solving',
+      },
+      {
+        id: 'tsla-s3',
+        stageNumber: 3,
+        name: 'Stage 3: Technical Presentation & Architecture Deep-Dive',
+        levelType: 'System Design',
+        format: '60-90 Minute Technical Presentation to Engineering Panel',
+        durationMinutes: 90,
+        interviewerProfile: 'Panel of 4-6 Senior Staff Engineers & Engineering Manager',
+        coreCompetencies: ['Technical Presentation Mastery', 'Defending Design Decisions', 'System Architecture', 'First-Principles Problem Solving'],
+        description: 'The defining Tesla interview step: you present a 30-45 minute slide deck on a past complex engineering project you spearheaded, followed by intense grilling from Tesla\'s senior engineering panel.',
+        typicalQuestions: [
+          'Why did you choose this architecture over a simpler alternative? What was the exact bottleneck in terms of latency or bandwidth?',
+          'If we deployed your system on the vehicle\'s HW4 compute cluster with power constraints of 150W, how would it fail and how would you redesign it?'
+        ],
+        tipsForSuccess: [
+          'Know every single calculation, line of code, and architectural trade-off inside out.',
+          'Never guess if you do not know an answer—reason through it aloud from first principles.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture',
+      },
+      {
+        id: 'tsla-s4',
+        stageNumber: 4,
+        name: 'Stage 4: High-Velocity Execution & First-Principles Leadership Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Engineering Director / VP Interview',
+        durationMinutes: 45,
+        interviewerProfile: 'Director of Autopilot / Vehicle Software VP',
+        coreCompetencies: ['Speed of Execution', 'Intellectual Honesty', 'First-Principles Mindset', 'Extreme Ownership'],
+        description: 'Evaluates your stamina, ability to cut through red tape, passion for rapid prototyping, and cultural alignment with Tesla.',
+        typicalQuestions: [
+          'Tell me about a time you worked around the clock to diagnose a critical production or launch defect. What was the root cause?',
+          'Describe a scenario where you discarded standard industry practice because it was too slow or inefficient, and built a better solution.'
+        ],
+        tipsForSuccess: [
+          'Demonstrate relentless grit, urgency, and pride in engineering craftsmanship.',
+          'Show that you are comfortable working directly with hardware and taking personal responsibility.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership',
+      },
+    ],
+  },
 ];
 
 export const POPULAR_COMPANIES = [
@@ -1146,8 +2381,13 @@ export const POPULAR_COMPANIES = [
   'Bank of America',
   'Barclays',
   'Capital One',
+  'Citigroup',
   'Stripe',
-  'Uber'
+  'Uber',
+  'Airbnb',
+  'Salesforce',
+  'Palantir',
+  'Tesla'
 ];
 
 export const POPULAR_ROLES = [
@@ -1580,3 +2820,244 @@ export function generateFallbackPipeline(companyName: string, roleTitle = 'Softw
   };
 }
 
+
+
+export interface SupportedCompanyMeta {
+  name: string;
+  aliases: string[];
+  industry: string;
+  category: 'tech' | 'banks' | 'fintech' | 'consulting' | 'healthcare' | 'defense' | 'automotive';
+  tagline: string;
+}
+
+export const ALL_SUPPORTED_COMPANIES: SupportedCompanyMeta[] = [
+  {
+    name: 'Amazon',
+    aliases: ['amz', 'aws', 'amazon.com'],
+    industry: 'Cloud Computing, E-Commerce & AI',
+    category: 'tech',
+    tagline: '16 Leadership Principles & Bar Raiser Hiring Standard',
+  },
+  {
+    name: 'Google',
+    aliases: ['alphabet', 'deepmind', 'goog'],
+    industry: 'Search, Cloud & Artificial Intelligence',
+    category: 'tech',
+    tagline: 'Googleyness, algorithmic problem solving & system design',
+  },
+  {
+    name: 'Meta',
+    aliases: ['facebook', 'fb', 'instagram', 'whatsapp', 'oculus'],
+    industry: 'Social Platforms, AR/VR & Open AI',
+    category: 'tech',
+    tagline: 'Move Fast, systems engineering & E3-E6 leveling',
+  },
+  {
+    name: 'Microsoft',
+    aliases: ['msft', 'azure', 'copilot'],
+    industry: 'Enterprise Cloud, Productivity & AI',
+    category: 'tech',
+    tagline: 'Growth Mindset, Azure cloud scale & collaborative design',
+  },
+  {
+    name: 'Apple',
+    aliases: ['aapl', 'ios', 'macos'],
+    industry: 'Consumer Hardware, Silicon & Operating Systems',
+    category: 'tech',
+    tagline: 'Uncompromising craftsmanship, silicon firmware & secrecy',
+  },
+  {
+    name: 'Netflix',
+    aliases: ['nflx', 'streaming'],
+    industry: 'Global Media, CDN & Distributed Streaming',
+    category: 'tech',
+    tagline: 'Freedom & Responsibility, high-leverage Senior L5 bar',
+  },
+  {
+    name: 'Nvidia',
+    aliases: ['nvda', 'geforce', 'cuda'],
+    industry: 'Semiconductors, Accelerated Computing & AI Platforms',
+    category: 'tech',
+    tagline: 'Accelerated computing, CUDA & first-principles architecture',
+  },
+  {
+    name: 'JPMorgan Chase',
+    aliases: ['jpmorgan', 'chase', 'jpm', 'jp morgan'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'High-concurrency banking, electronic trading & fiduciary rigor',
+  },
+  {
+    name: 'Goldman Sachs',
+    aliases: ['gs', 'goldman', 'marcus'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'Algorithmic trading, quantitative modeling & Superday loops',
+  },
+  {
+    name: 'Morgan Stanley',
+    aliases: ['ms', 'morgan', 'institutional securities'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'Institutional trading systems, Java/C++ concurrency & risk governance',
+  },
+  {
+    name: 'Bank of America',
+    aliases: ['bofa', 'bof a', 'merrill', 'cashpro'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'High-availability transaction ledgers & Merrill wealth tech',
+  },
+  {
+    name: 'Barclays',
+    aliases: ['barclay', 'barx', 'investment bank'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'Investment banking tech, markets settlement & RISE values',
+  },
+  {
+    name: 'Capital One',
+    aliases: ['capone', 'cap1', 'capital 1'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'Cloud-native banking & the Technical Case Interview',
+  },
+  {
+    name: 'Citigroup',
+    aliases: ['citi', 'citibank', 'ttss'],
+    industry: 'Investment Banking, Capital Markets & Global Financial Services',
+    category: 'banks',
+    tagline: 'Institutional clients group & global payment rails',
+  },
+  {
+    name: 'Stripe',
+    aliases: ['payments', 'fintech'],
+    industry: 'Financial Infrastructure & Developer APIs',
+    category: 'fintech',
+    tagline: 'Core ledger resilience, developer APIs & high-rigor coding',
+  },
+  {
+    name: 'Uber',
+    aliases: ['rideshare', 'eats', 'freight'],
+    industry: 'Mobility, Delivery, Freight & Global Logistics',
+    category: 'tech',
+    tagline: 'Geospatial dispatch (H3), dynamic pricing & Bar Raiser',
+  },
+  {
+    name: 'Airbnb',
+    aliases: ['abnb', 'travel', 'hospitality'],
+    industry: 'Hospitality, Travel Tech & Marketplace Platforms',
+    category: 'tech',
+    tagline: 'Product craftsmanship & legendary Core Values interview',
+  },
+  {
+    name: 'Salesforce',
+    aliases: ['crm', 'agentforce', 'force.com'],
+    industry: 'Enterprise Cloud SaaS, CRM & AI Agentforce',
+    category: 'tech',
+    tagline: 'Multi-tenant cloud architecture, Agentforce & Ohana values',
+  },
+  {
+    name: 'Palantir',
+    aliases: ['pltr', 'foundry', 'gotham', 'aip'],
+    industry: 'Enterprise Intelligence, Defense & Data Platforms',
+    category: 'defense',
+    tagline: 'The Decomp Round, graph models & mission-critical defense',
+  },
+  {
+    name: 'Tesla',
+    aliases: ['tsla', 'autopilot', 'fsd', 'optimus'],
+    industry: 'Electric Vehicles, Autopilot AI, Robotics & Energy',
+    category: 'automotive',
+    tagline: 'Autopilot vision, low-level systems & architecture presentation',
+  },
+];
+
+export function validateCompanyName(name: string): {
+  isValid: boolean;
+  matchedName?: string;
+  suggestions: string[];
+  error?: string;
+} {
+  const clean = (name || '').trim();
+  if (!clean || clean.length < 2) {
+    return {
+      isValid: false,
+      suggestions: POPULAR_COMPANIES.slice(0, 5),
+      error: 'Please enter a valid company name (at least 2 characters).'
+    };
+  }
+
+  const lower = clean.toLowerCase();
+
+  // 1. Direct match or alias in ALL_SUPPORTED_COMPANIES
+  const directMatch = ALL_SUPPORTED_COMPANIES.find((c) => 
+    c.name.toLowerCase() === lower || 
+    c.aliases.some((a) => a.toLowerCase() === lower) ||
+    c.name.toLowerCase().includes(lower) ||
+    lower.includes(c.name.toLowerCase())
+  );
+
+  if (directMatch) {
+    return {
+      isValid: true,
+      matchedName: directMatch.name,
+      suggestions: []
+    };
+  }
+
+  // 2. Preset match in PRESET_COMPANY_PIPELINES
+  const preset = findCompanyPipeline(clean);
+  if (preset) {
+    return {
+      isValid: true,
+      matchedName: preset.companyName,
+      suggestions: []
+    };
+  }
+
+  // 3. Recognized banking/industry keywords
+  const ind = detectCompanyIndustry(clean);
+  if (ind.category !== 'general' && ind.category !== 'tech') {
+    return {
+      isValid: true,
+      matchedName: clean,
+      suggestions: []
+    };
+  }
+
+  // 4. Input health checks (numbers only, repeating characters, no vowels)
+  const hasVowels = /[aeiouy]/i.test(clean);
+  const isAlpha = /^[a-zA-Zs.&'-]+$/.test(clean);
+  const isRepeated = /(.)\1{3,}/.test(clean);
+
+  // 5. Build intelligent suggestions
+  const scored = ALL_SUPPORTED_COMPANIES.map((c) => {
+    let score = 0;
+    const cLower = c.name.toLowerCase();
+    if (cLower.startsWith(lower.slice(0, 2))) score += 5;
+    for (const char of lower) {
+      if (cLower.includes(char)) score += 1;
+    }
+    return { name: c.name, score };
+  })
+  .filter((s) => s.score > 1)
+  .sort((a, b) => b.score - a.score)
+  .map((s) => s.name);
+
+  const topSuggestions = Array.from(new Set(scored.concat(POPULAR_COMPANIES))).slice(0, 4);
+
+  if (!hasVowels || !isAlpha || isRepeated || clean.length > 35) {
+    return {
+      isValid: false,
+      suggestions: topSuggestions,
+      error: `"${clean}" does not appear to be a recognized company name. Please verify spelling or pick from the suggestions below.`
+    };
+  }
+
+  return {
+    isValid: false,
+    suggestions: topSuggestions,
+    error: `Company "${clean}" could not be verified in our verified hiring loop database. Please choose a suggested company below.`
+  };
+}
