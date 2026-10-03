@@ -180,6 +180,235 @@ export const COMPANY_SPECIFIC_ROLES: Record<string, string[]> = {
     'Energy Platforms & Megapack Systems Engineer',
     'Staff Distributed Systems Engineer',
   ],
+  Spotify: [
+    'Audio Backend Engineer (Apollo / Java)',
+    'Recommendation & Personalization ML Engineer',
+    'Mobile Platform Engineer (iOS / Android)',
+    'Web & Desktop Client Infrastructure Engineer',
+    'Data Platform & Analytics Engineer (GCP)',
+    'Engineering Manager (Audio & Content)',
+  ],
+  Adobe: [
+    'Creative Cloud Desktop & Web Engineer',
+    'Generative AI (Firefly) Systems Engineer',
+    'PDF Core & Document Cloud Architect',
+    'GPU Rendering & Computer Graphics Engineer',
+    'Cloud Extensibility & APIs Engineer',
+    'Product Manager (Creative Suite)',
+  ],
+  Cisco: [
+    'Network Protocol Software Engineer (C / C++)',
+    'Cloud Security & SASE Platform Architect',
+    'Silicon One ASIC / Embedded Firmware Engineer',
+    'Distributed Telemetry & Observability Engineer',
+    'Enterprise Routing & SD-WAN Engineer',
+  ],
+  Oracle: [
+    'OCI Cloud Infrastructure & Virtualization Engineer',
+    'Database Kernel & High-Performance Storage Engineer',
+    'Java Platform & HotSpot VM Systems Engineer',
+    'Autonomous Database & Exadata Architect',
+    'Cloud Native Microservices Engineer',
+  ],
+  SpaceX: [
+    'Flight Software Engineer (Starship / Falcon)',
+    'Avionics Embedded Systems Engineer',
+    'Starlink Satellite Networking & Ground Station Engineer',
+    'Guidance, Navigation & Control (GNC) Engineer',
+    'Telemetry & Hardware-in-the-Loop (HIL) Test Engineer',
+  ],
+  Boeing: [
+    'Avionics Systems & Flight Controls Engineer',
+    'Defense Mission Systems Software Engineer',
+    'Flight Simulation & Mathematical Modeling Architect',
+    'Embedded Real-Time DO-178C Safety Engineer',
+  ],
+  'Lockheed Martin': [
+    'Skunk Works Embedded Flight Software Engineer',
+    'Autonomous Systems & Drone Guidance Engineer',
+    'Radar & Sensor Processing Systems Engineer',
+    'Mission Systems Integration Architect',
+  ],
+  NASA: [
+    'Flight Avionics & Embedded Software Engineer',
+    'Planetary Exploration Telemetry Systems Engineer',
+    'Space Mission Autonomy & Robotics Architect',
+    'Real-Time Spacecraft Control Systems Engineer',
+  ],
+  'McKinsey & Company': [
+    'Digital Specialist / Full Stack Engineer',
+    'QuantumBlack Machine Learning Architect',
+    'Cloud Modernization & DevOps Advisory Expert',
+    'Enterprise Technology Strategist / Consultant',
+  ],
+  'Boston Consulting Group (BCG)': [
+    'BCG X Lead Software Engineer',
+    'Senior AI Systems & Quantitative Architect',
+    'Enterprise Technology Strategist',
+    'Principal Digital Transformation Consultant',
+  ],
+  Deloitte: [
+    'Cloud Migration Solution Architect',
+    'Enterprise ERP & Core Modernization Engineer',
+    'Cybersecurity Advisory & Zero-Trust Consultant',
+    'Senior Technology Consultant',
+  ],
+  Accenture: [
+    'Cloud Native Full Stack Developer',
+    'Enterprise Systems Integration Lead',
+    'DevOps & Platform Engineering Specialist',
+    'Technology Architecture Associate Director',
+  ],
+  'PricewaterhouseCoopers (PwC)': [
+    'Cloud & Digital Transformation Architect',
+    'Cybersecurity & Identity Management Specialist',
+    'Enterprise Solutions Advisory Consultant',
+  ],
+  'Ernst & Young (EY)': [
+    'Technology Risk & Cybersecurity Engineer',
+    'Digital Systems Transformation Consultant',
+    'Enterprise Cloud & Data Architect',
+  ],
+  KPMG: [
+    'Enterprise Cloud & Data Transformation Architect',
+    'IT Advisory & Technology Risk Consultant',
+    'Digital Solutions Delivery Lead',
+  ],
+  'Tata Consultancy Services (TCS)': [
+    'Systems Engineer / Specialist Programmer (Digital)',
+    'Lead Java & Cloud Microservices Developer',
+    'Technical Architect (Enterprise Systems)',
+    'Delivery Lead / Solution Consultant',
+  ],
+  Infosys: [
+    'Specialist Programmer (Power Programmer)',
+    'Senior Systems Engineer (Digital Specialist)',
+    'Cloud & Full Stack Solution Architect',
+    'Technical Lead (Enterprise Platforms)',
+  ],
+  Wipro: [
+    'Project Engineer / Velocity Programmer',
+    'Cloud Platform & Infrastructure Engineer',
+    'Full Stack Enterprise Developer',
+    'Technical Lead (Digital Operations)',
+  ],
+  Walmart: [
+    'Software Engineer (Catalog, Search & Discovery)',
+    'Checkout & Payments Distributed Systems Engineer',
+    'Supply Chain & Fulfillment Optimization Architect',
+    'Principal Cloud Infrastructure Engineer',
+  ],
+  Flipkart: [
+    'SDE II (Core Commerce & Cart Ledger)',
+    'Big Billion Days Flash Sale Platform Architect',
+    'Hyperlocal Logistics & Warehouse Systems Engineer',
+    'Staff Machine Learning Engineer (Recommendations)',
+  ],
+  Zomato: [
+    'Backend Engineer (High-Throughput Order Dispatch)',
+    'Mobile App Architect (Consumer Experience)',
+    'Geofencing & Real-Time Logistics Engineer',
+    'Product Manager (Blinkit & Delivery)',
+  ],
+  Swiggy: [
+    'SDE II (Instamart & Hyperlocal Delivery)',
+    'Real-Time Dispatch & Dynamic Pricing Systems Engineer',
+    'Delivery Partner Routing & Geodata Architect',
+  ],
+  'Epic Games': [
+    'Unreal Engine Core Programmer (C++)',
+    'Fortnite Gameplay & Netcode Engineer',
+    'Rendering & Graphics Systems Engineer (Lumen / Nanite)',
+    'Epic Online Services (EOS) Distributed Systems Architect',
+  ],
+  'Riot Games': [
+    'Gameplay Systems Engineer (C++ - Valorant / LoL)',
+    'Anti-Cheat (Vanguard) Systems Engineer',
+    '128-Tick Game Server Infrastructure Engineer',
+    'LiveOps Platform & Matchmaking Architect',
+  ],
+  Roblox: [
+    'Distributed Physics Simulation Engineer',
+    'Lua VM & Engine Systems Architect',
+    'Global Multiplayer Netcode Engineer',
+    'Creator Economy & Microservices Architect',
+  ],
+  CrowdStrike: [
+    'Falcon Sensor Kernel Engineer (C++ / Rust)',
+    'Threat Graph Distributed Processing Architect',
+    'Cloud Incident Response & Malware Analysis Engineer',
+    'Cloud Infrastructure Security Engineer (DevSecOps)',
+  ],
+  'Palo Alto Networks': [
+    'Next-Gen Firewall (PAN-OS) Software Engineer',
+    'Prisma Cloud Security Infrastructure Architect',
+    'Cortex XDR Detection & Threat Intelligence Engineer',
+  ],
+  Pfizer: [
+    'Bioinformatics Pipeline Software Engineer',
+    'Clinical Trial Data Platform Architect',
+    'Healthcare Machine Learning Scientist',
+    'Regulatory Health Data Platform Engineer',
+  ],
+  Qualcomm: [
+    'Snapdragon NPU & AI Runtime Engineer',
+    '5G Modem Firmware Systems Engineer',
+    'Embedded Linux Kernel & BSP Developer',
+    'Adreno GPU Driver Software Engineer',
+  ],
+  Snowflake: [
+    'Database Kernel & Execution Engine Engineer',
+    'Distributed Storage & Cache Architect',
+    'Virtual Warehouse Resource Scheduler Engineer',
+    'Security & Tenant Isolation Architect',
+  ],
+  Databricks: [
+    'Apache Spark & Photon Engine Engineer',
+    'Delta Lake Distributed Storage Architect',
+    'Unity Catalog & Enterprise Governance Engineer',
+    'MLflow Platform & Generative AI Systems Engineer',
+  ],
+  OpenAI: [
+    'Research Engineer (Frontier Reasoning Models)',
+    'Distributed Infrastructure & Training Clusters Engineer',
+    'Post-Training & RLHF Systems Engineer',
+    'API Platform & Scalability Engineer',
+  ],
+  PayPal: [
+    'High-Throughput Payment Rails Engineer',
+    'Real-Time Fraud & Risk Decisioning Engineer',
+    'Merchant Checkout Experience Developer',
+  ],
+  Robinhood: [
+    'Real-Time Order Execution & Brokerage Systems Engineer',
+    'Market Data Streaming Architect',
+    'Crypto Trading Platform Engineer',
+  ],
+  Rivian: [
+    'Automotive OS & Infotainment Software Engineer',
+    'Battery Management System (BMS) Firmware Engineer',
+    'Connected Vehicle Cloud Platform Architect',
+  ],
+  Waymo: [
+    'Autonomous Driving Behavior & Motion Planning Engineer',
+    'Sensor Fusion & LiDAR Perception Engineer',
+    'Fleet Autonomy Simulation Infrastructure Engineer',
+  ],
+  'Deutsche Bank': [
+    'Electronic FX Trading Systems Developer',
+    'Capital Markets Regulatory Data Architect',
+    'High-Concurrency Corporate Banking Developer',
+  ],
+  'Wells Fargo': [
+    'Core Banking Transaction Systems Engineer',
+    'Enterprise Wealth & Lending Platform Architect',
+    'Cybersecurity & Identity Architect',
+  ],
+  UBS: [
+    'Global Wealth Management Systems Architect',
+    'Investment Bank Low-Latency Execution Developer',
+    'Wealth Planning Platform Engineer',
+  ],
 };
 
 export const PRESET_COMPANY_PIPELINES: CompanyHiringPipeline[] = [
@@ -2677,14 +2906,29 @@ export function getCompanyRoles(companyName?: string, industry?: string): string
   if (!companyName) return POPULAR_ROLES;
   const clean = companyName.trim().toLowerCase();
 
-  // 1. Check exact key or match in COMPANY_SPECIFIC_ROLES
+  // 1. Alias lookup via ALL_SUPPORTED_COMPANIES
+  const meta = ALL_SUPPORTED_COMPANIES.find((c) =>
+    c.name.toLowerCase() === clean ||
+    c.aliases.some((a) => a.toLowerCase() === clean) ||
+    (clean.length >= 4 && (c.name.toLowerCase().includes(clean) || clean.includes(c.name.toLowerCase())))
+  );
+  if (meta) {
+    for (const [key, roles] of Object.entries(COMPANY_SPECIFIC_ROLES)) {
+      if (key.toLowerCase() === meta.name.toLowerCase()) {
+        return roles;
+      }
+    }
+  }
+
+  // 2. Direct key or case-insensitive match in COMPANY_SPECIFIC_ROLES
   for (const [key, roles] of Object.entries(COMPANY_SPECIFIC_ROLES)) {
-    if (key.toLowerCase() === clean || clean.includes(key.toLowerCase()) || key.toLowerCase().includes(clean)) {
+    const k = key.toLowerCase();
+    if (k === clean || (clean.length >= 4 && (clean.includes(k) || k.includes(clean)))) {
       return roles;
     }
   }
 
-  // 2. Check preset pipelines
+  // 3. Check preset pipelines
   const preset = PRESET_COMPANY_PIPELINES.find(
     (p) => p.normalizedName === clean || p.companyName.toLowerCase().includes(clean) || clean.includes(p.normalizedName)
   );

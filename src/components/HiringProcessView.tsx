@@ -26,8 +26,6 @@ import {
 import { CompanyHiringPipeline, HiringStage } from '../types';
 import { 
   PRESET_COMPANY_PIPELINES, 
-  POPULAR_COMPANIES, 
-  POPULAR_ROLES, 
   ALL_SUPPORTED_COMPANIES,
   findCompanyPipeline, 
   generateFallbackPipeline,
@@ -38,6 +36,27 @@ import {
 interface HiringProcessViewProps {
   onPracticeStage: (pipeline: CompanyHiringPipeline, stage: HiringStage, roleTitle: string) => void;
 }
+
+const CURATED_CATEGORY_COMPANIES: Record<string, string[]> = {
+  all: [
+    'Amazon', 'Google', 'Meta', 'Microsoft', 'Apple', 'Nvidia', 'Tesla', 'JPMorgan Chase'
+  ],
+  tech: [
+    'Google', 'Meta', 'Microsoft', 'Apple', 'Netflix', 'Nvidia'
+  ],
+  banks: [
+    'JPMorgan Chase', 'Goldman Sachs', 'Morgan Stanley', 'Barclays', 'Stripe'
+  ],
+  aerospace: [
+    'SpaceX', 'Boeing', 'Lockheed Martin', 'NASA'
+  ],
+  consulting: [
+    'McKinsey & Company', 'Boston Consulting Group (BCG)', 'Deloitte', 'Accenture'
+  ],
+  services: [
+    'Tata Consultancy Services (TCS)', 'Infosys', 'Wipro'
+  ],
+};
 
 export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
   onPracticeStage,
@@ -67,16 +86,17 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
   const selectedStage = 
     activePipeline.stages.find((s) => s.id === selectedStageId) || activePipeline.stages[0];
 
-  const currentCompanyRoles =
-    activePipeline.popularRoles && activePipeline.popularRoles.length > 0
-      ? activePipeline.popularRoles
-      : getCompanyRoles(activePipeline.companyName, activePipeline.industry);
+  // Dynamic roles strictly matched to current company
+  const currentCompanyRoles = useMemo(() => {
+    const comp = companyInput.trim() || activePipeline.companyName;
+    return getCompanyRoles(comp, activePipeline.industry);
+  }, [companyInput, activePipeline.companyName, activePipeline.industry]);
 
-  // Filter autocomplete companies based on input
+  // Filter autocomplete companies based on input - reduced to 4 crisp suggestions
   const filteredCompanies = useMemo(() => {
     const query = companyInput.trim().toLowerCase();
     if (!query) {
-      return ALL_SUPPORTED_COMPANIES.slice(0, 8);
+      return ALL_SUPPORTED_COMPANIES.slice(0, 4);
     }
     return ALL_SUPPORTED_COMPANIES.filter((c) => {
       return (
@@ -84,7 +104,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
         c.aliases.some((a) => a.toLowerCase().includes(query)) ||
         c.industry.toLowerCase().includes(query)
       );
-    }).slice(0, 8);
+    }).slice(0, 4);
   }, [companyInput]);
 
   // Click-away listener to dismiss autocomplete dropdown
@@ -137,19 +157,19 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
           setActivePipeline(localMatch);
           setSelectedStageId(localMatch.stages[0]?.id || '');
           const availableRoles = localMatch.popularRoles || getCompanyRoles(localMatch.companyName, localMatch.industry);
-          if (!availableRoles.includes(roleInput) && availableRoles.length > 0) {
+          if (availableRoles.length > 0) {
             setRoleInput(availableRoles[0]);
           }
           return;
         }
 
         // 2. Immediate authentic industry pipeline (banking if bank, consulting, healthcare, tech, etc.)
-        const instantPipeline = generateFallbackPipeline(trimmed, roleInput);
+        const rolesForCompany = getCompanyRoles(trimmed);
+        const topRole = rolesForCompany[0] || 'Software Engineer';
+        const instantPipeline = generateFallbackPipeline(trimmed, topRole);
         setActivePipeline(instantPipeline);
         setSelectedStageId(instantPipeline.stages[0]?.id || '');
-        if (instantPipeline.popularRoles && !instantPipeline.popularRoles.includes(roleInput) && instantPipeline.popularRoles.length > 0) {
-          setRoleInput(instantPipeline.popularRoles[0]);
-        }
+        setRoleInput(topRole);
       }
     }, 280);
 
@@ -164,19 +184,20 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
     setIsDropdownOpen(false);
     setHighlightedIndex(-1);
 
+    const rolesForCompany = getCompanyRoles(co);
+    const defaultRole = rolesForCompany[0] || 'Software Engineer';
+    setRoleInput(defaultRole);
+
     const localMatch = findCompanyPipeline(co);
-    const fallback = generateFallbackPipeline(co, roleInput);
+    const fallback = generateFallbackPipeline(co, defaultRole);
     const pipeline = localMatch || fallback;
     setActivePipeline(pipeline);
     setSelectedStageId(pipeline.stages[0]?.id || '');
-    const rolesForCompany = pipeline.popularRoles || getCompanyRoles(co, pipeline.industry);
-    const defaultRole = rolesForCompany[0] || 'Software Engineer';
-    setRoleInput(defaultRole);
     handleSearchCompany(co, defaultRole);
   };
 
   // Handle Search / Fetch
-  const handleSearchCompany = async (targetCo = companyInput, targetRole = roleInput) => {
+  const handleSearchCompany = async (targetCo = companyInput, targetRole?: string) => {
     const cleanCompany = targetCo.trim();
     if (!cleanCompany) return;
 
@@ -191,15 +212,18 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
       setSuggestedCorrections([]);
     }
 
+    const companyToUse = validation.matchedName || cleanCompany;
+    const rolesForCompany = getCompanyRoles(companyToUse);
+    const roleToUse = targetRole || (rolesForCompany.includes(roleInput) ? roleInput : rolesForCompany[0]);
+
     // 1. Check local rich preset first
-    const localMatch = findCompanyPipeline(validation.matchedName || cleanCompany);
+    const localMatch = findCompanyPipeline(companyToUse);
     if (localMatch) {
       setActivePipeline(localMatch);
       setSelectedStageId(localMatch.stages[0]?.id || '');
-      const availableRoles = localMatch.popularRoles || getCompanyRoles(localMatch.companyName, localMatch.industry);
-      if (!availableRoles.includes(targetRole) && availableRoles.length > 0) {
-        setRoleInput(availableRoles[0]);
-      }
+      const availableRoles = localMatch.popularRoles || rolesForCompany;
+      const matchedRole = targetRole || (availableRoles.includes(roleInput) ? roleInput : availableRoles[0]);
+      setRoleInput(matchedRole);
       return;
     }
 
@@ -210,8 +234,8 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          companyName: cleanCompany,
-          roleTitle: targetRole || 'Software Engineer',
+          companyName: companyToUse,
+          roleTitle: roleToUse || 'Software Engineer',
         }),
       });
 
@@ -220,25 +244,25 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
         if (data?.pipeline?.stages?.length > 0) {
           const pipeline: CompanyHiringPipeline = data.pipeline;
           if (!pipeline.popularRoles || pipeline.popularRoles.length === 0) {
-            pipeline.popularRoles = getCompanyRoles(pipeline.companyName, pipeline.industry);
+            pipeline.popularRoles = rolesForCompany;
           }
           setActivePipeline(pipeline);
           setSelectedStageId(pipeline.stages[0].id);
-          if (pipeline.popularRoles && !pipeline.popularRoles.includes(targetRole) && pipeline.popularRoles.length > 0) {
-            setRoleInput(pipeline.popularRoles[0]);
-          }
+          const availableRoles = pipeline.popularRoles || rolesForCompany;
+          const matchedRole = targetRole || (availableRoles.includes(roleInput) ? roleInput : availableRoles[0]);
+          setRoleInput(matchedRole);
           return;
         }
       }
       throw new Error('Fallback to local synthesis');
     } catch {
       // 3. Resilient fallback generator
-      const fallback = generateFallbackPipeline(cleanCompany, targetRole);
+      const fallback = generateFallbackPipeline(cleanCompany, roleToUse);
       setActivePipeline(fallback);
       setSelectedStageId(fallback.stages[0]?.id || '');
-      if (fallback.popularRoles && !fallback.popularRoles.includes(targetRole) && fallback.popularRoles.length > 0) {
-        setRoleInput(fallback.popularRoles[0]);
-      }
+      const availableRoles = fallback.popularRoles || rolesForCompany;
+      const matchedRole = targetRole || (availableRoles.includes(roleInput) ? roleInput : availableRoles[0]);
+      setRoleInput(matchedRole);
     } finally {
       setIsLoading(false);
     }
@@ -528,16 +552,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {POPULAR_COMPANIES.filter((co) => {
-                    const meta = ALL_SUPPORTED_COMPANIES.find((c) => c.name.toLowerCase() === co.toLowerCase());
-                    const cat = meta?.category || detectCompanyIndustry(co).category;
-                    if (selectedCategory === 'banks') return cat === 'banks' || cat === 'banking' || cat === 'fintech';
-                    if (selectedCategory === 'aerospace') return cat === 'aerospace' || cat === 'defense';
-                    if (selectedCategory === 'consulting') return cat === 'consulting';
-                    if (selectedCategory === 'services') return cat === 'services';
-                    if (selectedCategory === 'tech') return cat === 'tech' || cat === 'hardware' || cat === 'gaming' || cat === 'retail';
-                    return true;
-                  }).map((co) => {
+                  {(CURATED_CATEGORY_COMPANIES[selectedCategory] || CURATED_CATEGORY_COMPANIES['all']).map((co) => {
                     const isSelected = activePipeline.companyName.toLowerCase() === co.toLowerCase();
                     const meta = ALL_SUPPORTED_COMPANIES.find((c) => c.name.toLowerCase() === co.toLowerCase());
                     const isBankCo = meta?.category === 'banks' || meta?.category === 'fintech';
@@ -589,7 +604,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
-                    Roles at {activePipeline.companyName}:
+                    Roles at {companyInput.trim() || activePipeline.companyName}:
                   </span>
                   <span className="text-[10px] text-zinc-400 font-medium">Click to select authentic leveled role</span>
                 </div>
