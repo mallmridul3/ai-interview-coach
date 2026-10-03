@@ -6,12 +6,9 @@ import {
   Target, 
   ArrowRight, 
   Award, 
-  Copy, 
-  Check, 
   BookOpen,
   Mic,
   Search,
-  Filter,
   Plus,
   Trash2,
   Edit3,
@@ -216,7 +213,6 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
 }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'vault'>('questions');
   const [expandedId, setExpandedId] = useState<number | null>(1);
-  const [copiedId, setCopiedId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -259,12 +255,6 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
       item.whyAsked.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const handleCopyQuestion = (item: BehavioralQuestionItem) => {
-    navigator.clipboard.writeText(item.question);
-    setCopiedId(item.id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
 
   const handleSaveStory = (e: React.FormEvent) => {
     e.preventDefault();
@@ -363,7 +353,6 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
             </div>
 
             <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-              <Filter className="w-3.5 h-3.5 text-zinc-400 shrink-0 mr-1" />
               {categories.slice(0, 5).map((cat) => (
                 <button
                   key={cat}
@@ -413,22 +402,6 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
                     </div>
 
                     <div className="flex items-center space-x-2 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopyQuestion(item);
-                        }}
-                        title="Copy Question"
-                        className="p-2 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {copiedId === item.id ? (
-                          <Check className="w-4 h-4 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-4 h-4" />
-                        )}
-                      </button>
-
                       <button
                         type="button"
                         onClick={(e) => {

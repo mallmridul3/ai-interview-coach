@@ -9,8 +9,7 @@ import {
   CheckCircle2, 
   RotateCcw,
   Mic,
-  MicOff,
-  Filter
+  MicOff
 } from 'lucide-react';
 import { QuickDrillQuestion, AnswerEvaluation } from '../types';
 import { QUICK_DRILL_QUESTIONS } from '../data/mockData';
@@ -170,7 +169,6 @@ export const QuickDrillsView: React.FC = () => {
 
       {/* Category Pills Filter */}
       <div className="flex items-center space-x-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
-        <Filter className="w-4 h-4 text-zinc-400 shrink-0" />
         {categories.map((cat) => (
           <button
             key={cat}
