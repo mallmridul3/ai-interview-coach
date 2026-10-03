@@ -2387,7 +2387,35 @@ export const POPULAR_COMPANIES = [
   'Airbnb',
   'Salesforce',
   'Palantir',
-  'Tesla'
+  'Tesla',
+  'Spotify',
+  'Adobe',
+  'Cisco',
+  'Oracle',
+  'SpaceX',
+  'Boeing',
+  'Lockheed Martin',
+  'McKinsey & Company',
+  'Boston Consulting Group (BCG)',
+  'Deloitte',
+  'Accenture',
+  'Tata Consultancy Services (TCS)',
+  'Infosys',
+  'Wipro',
+  'Flipkart',
+  'Zomato',
+  'Swiggy',
+  'Walmart',
+  'Epic Games',
+  'Riot Games',
+  'Roblox',
+  'CrowdStrike',
+  'Palo Alto Networks',
+  'Pfizer',
+  'Qualcomm',
+  'Snowflake',
+  'Databricks',
+  'OpenAI'
 ];
 
 export const POPULAR_ROLES = [
@@ -2411,39 +2439,101 @@ export const BANKING_ROLES = [
   'Product Manager (Payments, Digital Banking & Wealth)',
 ];
 
+function matchesKeyword(text: string, kw: string): boolean {
+  if (kw.length <= 4) {
+    const regex = new RegExp(`\\b${kw.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}\\b`, 'i');
+    return regex.test(text);
+  }
+  return text.includes(kw);
+}
+
 export function detectCompanyIndustry(name: string): {
   industry: string;
-  category: 'banking' | 'tech' | 'consulting' | 'healthcare' | 'cybersecurity' | 'hardware' | 'general';
+  category: 'banking' | 'tech' | 'consulting' | 'healthcare' | 'cybersecurity' | 'hardware' | 'aerospace' | 'gaming' | 'retail' | 'telecom' | 'automotive' | 'services' | 'general';
 } {
   if (!name) return { industry: 'Technology & Enterprise Scale', category: 'tech' };
   const n = name.trim().toLowerCase();
 
-  // 1. Banking, Finance, Quant, Trading, Payments
+  // 1. Consulting & Strategy (check before generic finance to prevent "consulting" matching)
+  const consultKeywords = [
+    'mckinsey', 'bcg', 'boston consulting', 'bain', 'deloitte', 'pwc', 
+    'pricewaterhousecoopers', 'ey', 'ernst', 'kpmg', 'accenture', 'oliver wyman', 'kearney', 'booz allen', 'consulting', 'advisory'
+  ];
+  if (consultKeywords.some((k) => matchesKeyword(n, k))) {
+    return { industry: 'Management, Technology & Strategy Consulting', category: 'consulting' };
+  }
+
+  // 2. Aerospace & Defense
+  const aeroKeywords = [
+    'spacex', 'boeing', 'lockheed', 'nasa', 'northrop', 'raytheon', 'rtx', 'blue origin', 
+    'general dynamics', 'l3harris', 'relativity space', 'planet labs', 'aerospace', 'aviation', 'space'
+  ];
+  if (aeroKeywords.some((k) => matchesKeyword(n, k))) {
+    return { industry: 'Aerospace, Defense & Mission-Critical Systems', category: 'aerospace' };
+  }
+
+  // 3. Banking, Finance, Quant, Trading, Payments
   const bankKeywords = [
     'bank', 'banking', 'chase', 'jpmorgan', 'jp morgan', 'morgan stanley', 'goldman', 'bofa', 
     'barclays', 'citi', 'citigroup', 'citibank', 'wells fargo', 'capital one', 
     'fidelity', 'blackrock', 'vanguard', 'deutsche', 'ubs', 'credit suisse', 'hsbc', 
     'standard chartered', 'pnc', 'us bank', 'schwab', 'charles schwab', 'mellon', 'state street', 
     'nomura', 'macquarie', 'rbc', 'td bank', 'scotiabank', 'bmo', 'santander', 
-    'bnp paribas', 'societe generale', 'ing', 'mizuho', 'hdfc', 'icici', 'kotak', 
+    'bnp paribas', 'societe generale', 'ing bank', 'ing groep', 'mizuho', 'hdfc', 'icici', 'kotak', 
     'axis', 'sbi', 'quant', 'trading', 'hedge', 'citadel', 'two sigma', 'jane street', 
     'de shaw', 'point72', 'jump trading', 'fintech', 'revolut', 'monzo', 'chime', 
     'plaid', 'robinhood', 'coinbase', 'financial', 'wealth', 'capital', 'securities'
   ];
-  if (bankKeywords.some((k) => n.includes(k))) {
+  if (bankKeywords.some((k) => matchesKeyword(n, k))) {
     return { industry: 'Investment Banking, Capital Markets & Global Financial Services', category: 'banking' };
   }
 
-  // 2. Consulting & Strategy
-  const consultKeywords = [
-    'mckinsey', 'bcg', 'boston consulting', 'bain', 'deloitte', 'pwc', 
-    'pricewaterhousecoopers', 'ey', 'ernst', 'kpmg', 'accenture', 'oliver wyman', 'kearney', 'consulting'
+  // 4. Gaming & Interactive Entertainment
+  const gameKeywords = [
+    'epic games', 'riot games', 'electronic arts', 'ea', 'activision', 'blizzard', 'roblox', 
+    'playstation', 'sony interactive', 'nintendo', 'ubisoft', 'unity', 'take-two', '2k', 
+    'valve', 'bungie', 'bethesda', 'bioware', 'square enix', 'cd projekt', 'gaming', 'game dev', 'game studio'
   ];
-  if (consultKeywords.some((k) => n.includes(k))) {
-    return { industry: 'Management, Technology & Strategy Consulting', category: 'consulting' };
+  if (gameKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Interactive Entertainment, Game Engines & Multiplayer Systems', category: 'gaming' };
   }
 
-  // 3. Healthcare & Biotech
+  // 5. Retail & E-Commerce
+  const retailKeywords = [
+    'walmart', 'target', 'ebay', 'flipkart', 'alibaba', 'shopee', 'etsy', 'wayfair', 
+    'chewy', 'instacart', 'mercadolibre', 'costco', 'home depot', 'best buy', 
+    'swiggy', 'zomato', 'doordash', 'ecommerce', 'e-commerce', 'retail'
+  ];
+  if (retailKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Omnichannel E-Commerce, Logistics & Consumer Marketplaces', category: 'retail' };
+  }
+
+  // 6. Automotive & Autonomous Mobility
+  const autoKeywords = [
+    'tesla', 'rivian', 'lucid', 'waymo', 'cruise', 'ford', 'gm', 'general motors', 
+    'bmw', 'mercedes', 'volkswagen', 'audi', 'hyundai', 'toyota', 'honda', 'volvo', 'byd', 'aurora', 'zoox', 'nuro', 'automotive'
+  ];
+  if (autoKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Autonomous Mobility, Electric Vehicles & Robotics', category: 'automotive' };
+  }
+
+  // 7. Telecommunications & Networking
+  const telecomKeywords = [
+    'at&t', 'verizon', 't-mobile', 'comcast', 'cisco', 'ericsson', 'nokia', 'juniper', 'arista', 'vodafone', 'telefonica', 'telecom', 'networking'
+  ];
+  if (telecomKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Telecommunications, 5G Infrastructure & Cloud Networking', category: 'telecom' };
+  }
+
+  // 8. IT Services & Systems Integration
+  const itServicesKeywords = [
+    'tcs', 'tata consultancy', 'infosys', 'wipro', 'hcl', 'tech mahindra', 'cognizant', 'ltimindtree', 'mphasis', 'hexaware', 'persistent systems'
+  ];
+  if (itServicesKeywords.some((k) => n.includes(k))) {
+    return { industry: 'Global IT Engineering & Enterprise Digital Services', category: 'services' };
+  }
+
+  // 9. Healthcare & Biotech
   const healthKeywords = [
     'health', 'pfizer', 'moderna', 'johnson', 'j&j', 'roche', 'novartis', 'merck', 
     'astrazeneca', 'gilead', 'abbvie', 'amgen', 'unitedhealth', 'cvs', 'optum', 
@@ -2453,7 +2543,7 @@ export function detectCompanyIndustry(name: string): {
     return { industry: 'Healthcare, Life Sciences & Biomedical Systems', category: 'healthcare' };
   }
 
-  // 4. Cybersecurity
+  // 10. Cybersecurity
   const secKeywords = [
     'cyber', 'security', 'palo alto', 'crowdstrike', 'fortinet', 'zscaler', 
     'cloudflare', 'okta', 'checkpoint', 'sentinelone', 'splunk', 'fireeye', 'mandiant'
@@ -2462,7 +2552,7 @@ export function detectCompanyIndustry(name: string): {
     return { industry: 'Enterprise Cybersecurity & Threat Intelligence', category: 'cybersecurity' };
   }
 
-  // 5. Hardware & Semiconductor
+  // 11. Hardware & Semiconductor
   const hwKeywords = [
     'nvidia', 'amd', 'intel', 'qualcomm', 'broadcom', 'arm', 'tsmc', 'asml', 
     'texas instruments', 'micron', 'nxp', 'applied materials', 'semiconductor', 'hardware', 'chip'
@@ -2659,6 +2749,69 @@ export function getCompanyRoles(companyName?: string, industry?: string): string
     ];
   }
 
+  if (detected.category === 'aerospace' || ind.includes('aerospace') || ind.includes('defense') || ind.includes('space') || ind.includes('aviation')) {
+    return [
+      `Flight Software Engineer (${companyName})`,
+      `Guidance, Navigation & Control (GNC) Engineer`,
+      `Hardware-in-the-Loop (HIL) Test Systems Engineer`,
+      `Avionics & Embedded Firmware Engineer`,
+      `Mission Telemetry & Ground Operations Architect`,
+      `Senior Reliability & Systems Safety Engineer`,
+    ];
+  }
+
+  if (detected.category === 'gaming' || ind.includes('game') || ind.includes('gaming')) {
+    return [
+      `Gameplay Systems Engineer (C++ - ${companyName})`,
+      `Graphics & Shaders Rendering Engineer`,
+      `Game Engine Core Systems Architect`,
+      `Multiplayer Game Server & Low-Latency Networking Engineer`,
+      `LiveOps Platform & Anti-Cheat Security Engineer`,
+      `Technical Audio & Physics Systems Developer`,
+    ];
+  }
+
+  if (detected.category === 'retail' || ind.includes('retail') || ind.includes('e-commerce') || ind.includes('commerce')) {
+    return [
+      `Software Engineer (Catalog, Search & Discovery)`,
+      `Senior Distributed Systems Engineer (Checkout & Order Ledger)`,
+      `Logistics, Supply Chain & Fulfillment Architect`,
+      `Dynamic Pricing & Machine Learning Engineer`,
+      `Staff Mobile Engineer (Consumer App)`,
+      `Product Manager (${companyName} E-Commerce)`,
+    ];
+  }
+
+  if (detected.category === 'automotive' || ind.includes('auto') || ind.includes('vehicle')) {
+    return [
+      `Autonomous Vehicle Perception & Sensor Fusion Engineer`,
+      `Embedded Vehicle Controls Software Engineer`,
+      `Real-Time OS & AUTOSAR Firmware Architect`,
+      `Edge Telemetry & Fleet Cloud Infrastructure Engineer`,
+      `Functional Safety Systems Engineer (ISO 26262)`,
+    ];
+  }
+
+  if (detected.category === 'telecom' || ind.includes('telecom') || ind.includes('network')) {
+    return [
+      `Network Protocol & DPDK Systems Engineer`,
+      `5G Core & Radio Access Network (RAN) Software Engineer`,
+      `Cloud SDN & Virtual Network Functions Architect`,
+      `Embedded DSP & Radio Firmware Engineer`,
+      `Telecom Systems Reliability & NOC Infrastructure Engineer`,
+    ];
+  }
+
+  if (detected.category === 'services' || ind.includes('services') || ind.includes('consultancy')) {
+    return [
+      `Systems Engineer / Specialist Programmer`,
+      `Senior Software Developer (${companyName})`,
+      `Technical Lead / Enterprise Cloud Architect`,
+      `Full Stack Application Developer (Java / Python / Cloud)`,
+      `Delivery Manager / Client Technology Partner`,
+    ];
+  }
+
   // Standard tech enterprise roles customized with the company name
   return [
     `Software Engineer (${companyName})`,
@@ -2707,13 +2860,1059 @@ export function findCompanyPipeline(query: string): CompanyHiringPipeline | unde
   );
 }
 
+export function generateAerospacePipeline(companyName: string, roleTitle = 'Flight Software Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Aerospace Enterprise';
+  const roles = getCompanyRoles(company, 'Aerospace');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `Mission-critical flight software, real-time determinism & zero-defect safety at ${company}`,
+    industry: 'Aerospace, Defense & Mission-Critical Systems',
+    overview: `${company} builds high-reliability hardware and software systems where software failures can lead to loss of mission or human life. Candidates are evaluated for low-level C++ performance, real-time operating systems (RTOS), telemetry processing, and conservative fail-safe engineering.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Zero-defect mission assurance & flight readiness mindset',
+      'First-principles physical modeling and mathematical rigor',
+      'Real-time deterministic computing & memory safety',
+      'Collaborative hardware-software integration'
+    ],
+    evaluationPhilosophy: `${company} demands engineers who verify assumptions with rigorous telemetry and testing. A candidate who proactively points out edge cases under communication blackout or hardware failure passes the bar.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Technical Recruiter & Engineering Screening',
+        levelType: 'Phone Screen',
+        format: '30-45 Minute Technical Background & Project Deep Dive',
+        durationMinutes: 45,
+        interviewerProfile: 'Avionics / Flight Software Lead',
+        coreCompetencies: ['Embedded C/C++', 'RTOS Concepts', 'Mission-Critical Architecture'],
+        description: `Calibration interview assessing your background with low-level systems, concurrency, real-time hardware constraints, and motivation for ${company}'s missions.`,
+        typicalQuestions: [
+          `Why do you want to build mission-critical avionics at ${company}?`,
+          'Walk me through a project where hardware failure or unexpected sensor data caused an anomaly. How did your software handle it?'
+        ],
+        tipsForSuccess: [
+          'Highlight experience with deterministic systems, watchdogs, and memory management without dynamic allocation.',
+          'Speak clearly to past post-mortems and test coverage strategies.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Behavioral Mix'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Embedded Systems & C++ Deterministic Programming',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding & Memory Model Evaluation',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Embedded Flight Software Engineer',
+        coreCompetencies: ['C++ Memory Layout', 'Concurrency & Mutexes', 'Interrupt Handlers & DMA', 'Bitwise Manipulation'],
+        description: `Writing high-performance, deterministic C++ code under memory and timing constraints without relying on heavy runtime reflection or unchecked heap allocations.`,
+        typicalQuestions: [
+          'Implement a thread-safe, lock-free ring buffer for streaming sensor data between an ISR and a telemetry task.',
+          'Given raw packed binary packets from an IMU over SPI, parse and validate the checksum while preventing memory alignment faults.'
+        ],
+        tipsForSuccess: [
+          'Avoid std::vector reallocation or new/malloc in inner loops; explain cache coherency.',
+          'Discuss priority inversion and how priority inheritance prevents starvation.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Flight Telemetry & Hardware-in-the-Loop (HIL) Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Architecture & Distributed Avionics Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Avionics Architect / Systems Lead',
+        coreCompetencies: ['Hardware-in-the-Loop Simulation', 'Fault Detection, Isolation & Recovery (FDIR)', 'Real-Time Pub/Sub (DDS / CAN)'],
+        description: `Designing an end-to-end telemetry and guidance loop that processes multi-sensor inputs with sub-millisecond latency and guaranteed failover.`,
+        typicalQuestions: [
+          `Design the flight computer software architecture for a vehicle at ${company} with triple-modular redundancy (TMR) voting.`,
+          'How do you architect a Hardware-in-the-Loop (HIL) automated test harness to simulate extreme flight turbulence and sensor dropouts?'
+        ],
+        tipsForSuccess: [
+          'Diagram the sensor-to-actuator pipeline with explicit timing deadlines (e.g. 500 Hz control loops).',
+          'Explain byzantine fault tolerance and fallback modes.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Mission Assurance, Flight Readiness & Values Bar',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive & Culture Fit Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Director of Flight Operations / Chief Engineer',
+        coreCompetencies: ['Accountability for Safety', 'Constructive Disagreement', 'Crisis Composure'],
+        description: `Final assessment evaluating safety culture, composure when facing schedule pressure vs engineering integrity, and dedication to team success.`,
+        typicalQuestions: [
+          'Describe a situation where schedule demands urged deploying a build, but you were not completely confident in a test result. What did you do?',
+          'Tell me about an engineering mistake you made that taught you the most about defensive design.'
+        ],
+        tipsForSuccess: [
+          'Demonstrate that safety and technical truth always take precedence over convenience.',
+          'Show extreme ownership without shifting blame.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateConsultingPipeline(companyName: string, roleTitle = 'Technology Consultant'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Global Consulting Firm';
+  const roles = getCompanyRoles(company, 'Consulting');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `Enterprise digital transformation, technology advisory & client strategy at ${company}`,
+    industry: 'Management, Technology & Strategy Consulting',
+    overview: `${company} advises Fortune 500 executives on strategic technology modernization, cloud migration, and AI deployment. Candidates must combine deep architectural knowledge with structured problem solving, business acumen, and executive presence.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Structured hypothesis-driven problem solving (MECE)',
+      'Executive communication and client empathy',
+      'Business value creation through scalable technology',
+      'Collaborative team leadership across diverse industries'
+    ],
+    evaluationPhilosophy: `${company} evaluates how well you translate complex technical trade-offs into compelling business value for non-technical executive stakeholders.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Talent Acquisition & Fit Calibration',
+        levelType: 'Phone Screen',
+        format: '30-Minute Recruiter & Career Trajectory Screen',
+        durationMinutes: 30,
+        interviewerProfile: 'Consulting Talent Specialist',
+        coreCompetencies: ['Consultative Presence', 'Track Record of Impact', 'Communication Poise'],
+        description: `Introductory conversation to evaluate client-facing experience, adaptability across industries, and clarity of communication.`,
+        typicalQuestions: [
+          `Why do you want to pursue technology advisory at ${company}?`,
+          'Describe a high-stakes project where you had to bridge the gap between engineering teams and business executives.'
+        ],
+        tipsForSuccess: ['Use structured STAR responses and highlight measurable client outcomes ($ or % improvement).'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Enterprise Architecture & Technology Case Study',
+        levelType: 'Technical Round',
+        format: '60-Minute Interactive Architecture & Modernization Case',
+        durationMinutes: 60,
+        interviewerProfile: 'Engagement Manager / Principal Architect',
+        coreCompetencies: ['Legacy Modernization', 'Cloud Migration Strategy', 'TCO & ROI Analysis', 'Microservices'],
+        description: `Solving a realistic client dilemma: modernizing a legacy core banking or retail platform with high technical debt under strict operational constraints.`,
+        typicalQuestions: [
+          'A global enterprise client wants to migrate an on-premise monolithic ERP system to AWS/Azure. Walk me through your assessment methodology and target state architecture.',
+          'How do you evaluate whether a client should buy an off-the-shelf SaaS solution versus building a bespoke microservices architecture?'
+        ],
+        tipsForSuccess: [
+          'Structure your approach using MECE (Mutually Exclusive, Collectively Exhaustive) frameworks.',
+          'Incorporate business metrics: cost of delay, compliance risk, and total cost of ownership (TCO).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Executive Client Discovery & Presentation Simulation',
+        levelType: 'System Design',
+        format: '60-Minute Simulated Client Workshop & Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Associate Partner / Solution Director',
+        coreCompetencies: ['Stakeholder Management', 'Active Listening', 'Live Whiteboarding', 'Objection Handling'],
+        description: `Simulating a live steering committee workshop where you interview the client (interviewer roleplaying a skeptical CIO/CTO) and deliver strategic recommendations.`,
+        typicalQuestions: [
+          'The client CIO challenges your proposal, stating that their existing database team lacks cloud skills. How do you address their objection?',
+          'Whiteboard the 3-year phased digital roadmap balancing quick wins with long-term architectural stability.'
+        ],
+        tipsForSuccess: [
+          'Ask clarifying questions before proposing answers; active listening is heavily scored.',
+          'Keep technical slides or diagrams crisp, clear, and business-focused.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Partner Interview & Leadership Fit',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Partner Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Senior Partner / Practice Leader',
+        coreCompetencies: ['Values Alignment', 'Integrity & Ethics', 'Talent Mentorship', 'Entrepreneurial Drive'],
+        description: `Final interview with senior firm leadership assessing cultural alignment, intellectual curiosity, resilience in demanding client environments, and mentorship.`,
+        typicalQuestions: [
+          'Tell me about a time a client engagement went off track. How did you restore trust with the client sponsor?',
+          'How do you cultivate an inclusive, high-morale team dynamic when working under tight client deliverables?'
+        ],
+        tipsForSuccess: [
+          'Demonstrate authenticity, humility, and passion for developing junior colleagues.',
+          'Show readiness to thrive in an apprenticeship-oriented culture.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateGamingPipeline(companyName: string, roleTitle = 'Gameplay Systems Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Game Studio';
+  const roles = getCompanyRoles(company, 'Gaming');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `High-framerate engine architecture, real-time simulation & player experience at ${company}`,
+    industry: 'Interactive Entertainment, Game Engines & Multiplayer Systems',
+    overview: `${company} crafts immersive interactive experiences powered by low-latency graphics pipelines, custom game engines, and distributed multiplayer backends. Engineers are evaluated on C++ performance, 3D math, concurrency, and passion for player satisfaction.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Player-first craftsmanship and intuitive game feel',
+      'Low-level hardware utilization and frame-budget discipline (16.6ms)',
+      'High-bandwidth, low-latency networking & deterministic simulation',
+      'Interdisciplinary collaboration between programmers, artists, and designers'
+    ],
+    evaluationPhilosophy: `${company} looks for engineers who treat every CPU/GPU cycle with care to maintain butter-smooth 60+ FPS while building flexible systems for game designers.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Studio Recruiter Screen & Portfolio Review',
+        levelType: 'Phone Screen',
+        format: '30-Minute Phone / Video Call',
+        durationMinutes: 30,
+        interviewerProfile: 'Technical Studio Recruiter',
+        coreCompetencies: ['Game Development Passion', 'C++ / Engine Familiarity', 'Collaboration'],
+        description: `Reviewing your game development portfolio, completed titles or engine prototypes, and alignment with ${company}'s gaming universes.`,
+        typicalQuestions: [
+          `What attracts you to building games at ${company}?`,
+          'Walk me through a gameplay or engine system you implemented that required creative optimization.'
+        ],
+        tipsForSuccess: ['Demonstrate enthusiasm for the studio’s games and explain your specific technical contributions to projects.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: C++ Systems, 3D Math & Data-Oriented Design',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding & Math Problem Solving',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Engine / Gameplay Programmer',
+        coreCompetencies: ['Vector & Matrix Math', 'Data-Oriented Design (DOD)', 'Memory Cache Optimization', 'Modern C++'],
+        description: `Hands-on live coding assessing memory layout, vector math, collision routines, and cache-friendly Entity-Component-System (ECS) architecture.`,
+        typicalQuestions: [
+          'Implement an efficient spatial partitioning data structure (e.g. Quadtree or BVH) to accelerate frustum culling or collision checks for 10,000 entities.',
+          'Explain how Structure of Arrays (SoA) outperforms Array of Structures (AoS) in cache hit rates during physics ticks.'
+        ],
+        tipsForSuccess: [
+          'Be comfortable writing 3D vector dot/cross product operations and matrix transforms.',
+          'Explain cache line utilization (L1/L2) and avoid virtual dispatch in tight per-frame loops.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Multiplayer Server & Low-Latency Network Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Game Architecture Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Network Engineer / Tech Director',
+        coreCompetencies: ['Client-Side Prediction', 'Lag Compensation & Rollback', 'UDP Network Serialization', 'Matchmaking & LiveOps'],
+        description: `Designing multiplayer systems that maintain state consistency across global players with packet loss, jitter, and strict latency budgets.`,
+        typicalQuestions: [
+          `Design the authoritative dedicated server networking architecture for a fast-paced multiplayer title at ${company}.`,
+          'How do you implement client-side prediction, server reconciliation, and lag-compensated hit detection for fast projectile weapons?'
+        ],
+        tipsForSuccess: [
+          'Clarify tick rates, packet delta compression, and reconciliation buffers.',
+          'Discuss anti-cheat mechanisms and why clients must never be trusted for authoritative game state.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Creative Director & Culture Alignment Bar',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Studio Values & Collaboration Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Game Director / Studio Engineering Lead',
+        coreCompetencies: ['Player Empathy', 'Constructive Creative Critique', 'Fast Prototyping & Iteration'],
+        description: `Evaluating how effectively you collaborate with non-technical designers, iterate on gameplay feel, and uphold studio culture.`,
+        typicalQuestions: [
+          'Describe a situation where a game designer requested a feature that was technically very expensive or would hurt frame rate. How did you collaborate to find a creative alternative?',
+          'Tell me about a game mechanic that felt clunky during playtesting and how you tuned it to feel satisfying.'
+        ],
+        tipsForSuccess: [
+          'Show that technology serves player entertainment and game design vision.',
+          'Demonstrate openness to iterative redesign based on playtest feedback.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateRetailPipeline(companyName: string, roleTitle = 'Software Engineer (E-Commerce)'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Commerce Enterprise';
+  const roles = getCompanyRoles(company, 'Retail');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `High-throughput commerce engines, distributed inventory & omnichannel scale at ${company}`,
+    industry: 'Omnichannel E-Commerce, Logistics & Consumer Marketplaces',
+    overview: `${company} processes millions of transactions, managing massive product catalogs, dynamic pricing, and warehouse fulfillment. Engineers are tested on high-throughput microservices, distributed transaction consistency, and consumer-facing reliability.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Customer obsession and friction-free shopping experience',
+      'High-throughput availability during peak flash sales and holiday rushes',
+      'Data-driven pricing, catalog search & recommendation intelligence',
+      'End-to-end operational accountability across the fulfillment chain'
+    ],
+    evaluationPhilosophy: `${company} values engineers who build systems that never drop an order, gracefully handle inventory race conditions, and keep checkout latency under 100 milliseconds.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Recruiter Screen & Fit Calibration',
+        levelType: 'Phone Screen',
+        format: '30-Minute Video / Phone Screen',
+        durationMinutes: 30,
+        interviewerProfile: 'Talent Acquisition Partner',
+        coreCompetencies: ['Background Walkthrough', 'Scale Awareness', 'Communication Clarity'],
+        description: `Introductory conversation to explore your engineering accomplishments, distributed systems interest, and motivation for ${company}.`,
+        typicalQuestions: [
+          `Why are you excited to build e-commerce and retail tech at ${company}?`,
+          'Walk me through a project where your service had to handle sudden traffic spikes.'
+        ],
+        tipsForSuccess: ['Demonstrate awareness of consumer retail scale and measurable performance metrics.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Algorithmic Problem Solving & Data Optimization',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Pair Coding Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Software Engineer from Commerce Platform',
+        coreCompetencies: ['Data Structures & Algorithms', 'Concurrency', 'Time & Space Complexity'],
+        description: `Solving practical data structure and algorithmic challenges simulating shopping cart aggregation, routing optimization, or inventory lookups.`,
+        typicalQuestions: [
+          'Design an in-memory rate-limiter and throttle for promotional coupons or flash sale checkout requests.',
+          'Given a directed graph of fulfillment centers and delivery routes, compute the most cost-effective multi-item shipping split.'
+        ],
+        tipsForSuccess: ['Think aloud and structure clean modular code with edge case checks.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Distributed Inventory, Cart & Checkout Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Architecture Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Staff / Principal Systems Architect',
+        coreCompetencies: ['Distributed Locking & Idempotency', 'Event-Driven Microservices (Kafka)', 'Cache Tiering & Invalidation', 'Database Partitioning'],
+        description: `Designing a scalable commerce subsystem handling hundreds of thousands of concurrent checkouts without overselling scarce inventory.`,
+        typicalQuestions: [
+          `Architect the flash sale checkout and inventory reservation service at ${company} handling 100,000 QPS with strict consistency guarantees.`,
+          'How do you design a real-time product search and faceted filtering catalog for 50 million items with sub-50ms latency?'
+        ],
+        tipsForSuccess: [
+          'Discuss distributed locks (Redis Redlock), optimistic locking, and Saga pattern for distributed transactions.',
+          'Address cache stampedes and CDN caching strategies for catalog assets.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Hiring Manager Bar & Customer Obsession Behavioral',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Leadership & Operational Excellence Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Engineering Director / VP of Commerce',
+        coreCompetencies: ['Customer Obsession', 'Outage Post-Mortems', 'Cross-Functional Collaboration'],
+        description: `Evaluating leadership principles, how you manage production outages during peak sales, and collaboration with product/business leaders.`,
+        typicalQuestions: [
+          'Tell me about an outage or production regression you owned during high customer traffic. How did you triage and prevent future recurrences?',
+          'Describe a situation where product priorities conflicted with technical debt remediation. How did you reach consensus?'
+        ],
+        tipsForSuccess: [
+          'Show unwavering focus on customer impact and business outcomes.',
+          'Frame responses using STAR with quantified metrics.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateAutomotivePipeline(companyName: string, roleTitle = 'Autonomous Systems Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Automotive Enterprise';
+  const roles = getCompanyRoles(company, 'Automotive');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `Autonomous mobility, sensor fusion & functional safety (ISO 26262) at ${company}`,
+    industry: 'Autonomous Mobility, Electric Vehicles & Robotics',
+    overview: `${company} builds cutting-edge electric powertrains, autonomous vehicle systems, and connected vehicle fleets. Engineers are evaluated on C++ performance, robotics perception, real-time vehicle bus communication (CAN/Ethernet), and functional safety.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Uncompromising functional safety and hardware-software reliability',
+      'First-principles physics and computer vision modeling',
+      'Low-latency edge computing and sensor telemetry',
+      'Rapid prototype validation paired with rigorous automotive compliance'
+    ],
+    evaluationPhilosophy: `${company} selects engineers who can write real-time deterministic code that operates reliably in real-world road and weather conditions.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Talent Acquisition & Technical Calibration',
+        levelType: 'Phone Screen',
+        format: '30-Minute Phone / Video Call',
+        durationMinutes: 30,
+        interviewerProfile: 'Technical Automotive Recruiter',
+        coreCompetencies: ['C++ / Robotics Background', 'Safety Culture', 'Role Alignment'],
+        description: `Reviewing your background with autonomous driving, robotics, or embedded systems, and calibration for ${company}'s autonomy missions.`,
+        typicalQuestions: [
+          `Why do you want to build autonomous and EV systems at ${company}?`,
+          'Walk me through a project where sensor noise or latency created challenges in control logic.'
+        ],
+        tipsForSuccess: ['Demonstrate passion for real-world robotics, computer vision, and automotive safety.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: C++ Algorithms, Spatial Geometry & Real-Time Logic',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Autonomy / Controls Software Engineer',
+        coreCompetencies: ['C++ Concurrency', 'Spatial Math (Quaternions / Transforms)', 'Kalman Filtering', 'Memory Optimization'],
+        description: `Live coding focused on sensor data streams, spatial transformations, trajectory planning algorithms, and multi-threaded data pipelines.`,
+        typicalQuestions: [
+          'Implement an algorithm to track and associate bounding box detections across consecutive video frames with bounding box IoU matching.',
+          'Explain how you implement an Extended Kalman Filter (EKF) to fuse noisy GPS and wheel odometry data.'
+        ],
+        tipsForSuccess: [
+          'Be comfortable with vector math, homogeneous transformations, and memory efficiency.',
+          'Emphasize thread-safety in sensor ingestion queues.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Vehicle Telemetry & Autonomous Edge Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Distributed Autonomy Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Autonomous Architect / Tech Director',
+        coreCompetencies: ['Edge Inference Pipeline', 'CAN / SOME/IP Bus Communication', 'Fail-Safe Architecture', 'Fleet Telemetry (OTA)'],
+        description: `Architecting an end-to-end edge vehicle perception or fleet management platform with real-time latency deadlines and over-the-air (OTA) updates.`,
+        typicalQuestions: [
+          `Architect the on-vehicle sensor fusion pipeline at ${company} combining cameras, LiDAR, and radar into a unified 360-degree scene representation.`,
+          'How do you design a reliable, secure Over-The-Air (OTA) firmware update pipeline for 500,000 connected vehicles that guarantees rollbacks on failure?'
+        ],
+        tipsForSuccess: [
+          'Differentiate between edge computing constraints and cloud fleet analytics.',
+          'Incorporate fail-safe vs fail-operational modes under camera occlusion or ECU failure.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Safety-Critical Systems & ISO 26262 Engineering Bar',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Safety & Executive Values Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Director of Vehicle Engineering / Chief Safety Officer',
+        coreCompetencies: ['ISO 26262 / ASIL-D Standards', 'Safety Integrity', 'Cross-Functional Teamwork'],
+        description: `Final leadership evaluation assessing adherence to automotive safety integrity levels (ASIL), personal accountability, and ethical rigor.`,
+        typicalQuestions: [
+          'Describe a situation where you discovered a subtle software bug that could have safety implications on the road. How did you champion its resolution?',
+          'Tell me about a time you worked with hardware engineers to diagnose an intermittent electrical or sensor glitch.'
+        ],
+        tipsForSuccess: [
+          'Never compromise safety standards for delivery speed in your answers.',
+          'Demonstrate deep respect for multidisciplinary engineering.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateServicesPipeline(companyName: string, roleTitle = 'Senior Software Developer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Global IT Enterprise';
+  const roles = getCompanyRoles(company, 'Services');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `National qualifier rigor, enterprise delivery & full-stack cloud systems at ${company}`,
+    industry: 'Global IT Engineering & Enterprise Digital Services',
+    overview: `${company} delivers mission-critical software solutions and digital transformation to global clients. The hiring process emphasizes strong computer science fundamentals, OOP concepts, relational database mastery, full-stack frameworks, and client communication skills.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Comprehensive computer science fundamentals and disciplined engineering',
+      'Client delivery excellence and adaptability to diverse project domains',
+      'Continuous upskilling in cloud, AI, and enterprise tech stacks',
+      'Collaborative team spirit and professional ethics'
+    ],
+    evaluationPhilosophy: `${company} evaluates candidates for strong core programming principles, problem-solving speed, clean object-oriented architecture, and positive attitude toward client success.`,
+    typicalTimeline: '2 to 4 weeks from initial assessment to offer letter',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: National Qualifier / Online Coding & Aptitude Challenge',
+        levelType: 'Online Assessment',
+        format: '90-Minute Timed Coding & Quantitative Assessment',
+        durationMinutes: 90,
+        interviewerProfile: 'Automated Testing Platform (HackerRank / Mettl)',
+        coreCompetencies: ['Data Structures', 'Algorithmic Problem Solving', 'Quantitative Aptitude', 'Code Efficiency'],
+        description: `Standardized online screening evaluating foundational algorithms, string/array manipulations, logic puzzles, and quantitative aptitude.`,
+        typicalQuestions: [
+          'Given a stream of strings representing product logs, count unique anagram groups with optimal memory complexity.',
+          'Find the maximum subarray sum with at least one element replaced by zero.'
+        ],
+        tipsForSuccess: ['Ensure all edge test cases pass with optimal time complexity.', 'Manage time effectively across aptitude and coding sections.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Core Engineering & OOP / DBMS Technical Round',
+        levelType: 'Technical Round',
+        format: '45-60 Minute Live Technical Interview',
+        durationMinutes: 60,
+        interviewerProfile: 'Technical Lead / Senior Project Manager',
+        coreCompetencies: ['OOP Principles (Java / C# / Python)', 'DBMS & SQL Queries', 'Data Structures', 'Operating Systems'],
+        description: `Deep-dive technical assessment probing object-oriented design, normalization, complex SQL joins, indexing, and core runtime concepts.`,
+        typicalQuestions: [
+          'Explain the 4 pillars of OOP with real-world enterprise code examples. When do you favor composition over inheritance?',
+          'Write a SQL query to find the second highest salary in each department using window functions (DENSE_RANK) and explain indexing trade-offs.'
+        ],
+        tipsForSuccess: [
+          'Clearly explain memory models, garbage collection, and multithreading basics.',
+          'Write clean, readable code with proper naming conventions.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Enterprise Architecture & Full-Stack Systems Round',
+        levelType: 'System Design',
+        format: '45-60 Minute Project & System Architecture Evaluation',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Consultant / Enterprise Architect',
+        coreCompetencies: ['REST APIs & Microservices', 'Cloud Fundamentals (AWS/Azure)', 'Design Patterns', 'Project Walkthrough'],
+        description: `In-depth walkthrough of your past production projects, architecture choices, framework expertise (Spring Boot, React, Node.js), and cloud deployment.`,
+        typicalQuestions: [
+          `Walk me through the architecture of the most complex application you built. How did you handle authentication, caching, and database scaling?`,
+          'How do you design a resilient RESTful microservices architecture with circuit breakers and central configuration management?'
+        ],
+        tipsForSuccess: [
+          'Be prepared to diagram end-to-end data flow from client frontend to database.',
+          'Highlight design patterns used (Singleton, Factory, Observer, Repository).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Managerial & HR Calibration Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '30-45 Minute Fitment & Behavioral Interview',
+        durationMinutes: 30,
+        interviewerProfile: 'Senior Delivery Manager & HR Business Partner',
+        coreCompetencies: ['Client Communication', 'Flexibility & Adaptability', 'Team Spirit', 'Long-term Goals'],
+        description: `Final assessment verifying cultural fitment, willingness to adapt to new technology stacks, client interaction readiness, and career aspirations.`,
+        typicalQuestions: [
+          'Tell me about a situation where a client requested sudden scope changes near a delivery deadline. How did you manage it?',
+          'How do you handle working with team members across different time zones and cultures?'
+        ],
+        tipsForSuccess: [
+          'Show a collaborative, growth-oriented mindset and enthusiasm for learning new tech.',
+          'Communicate with confidence and clarity.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateCybersecurityPipeline(companyName: string, roleTitle = 'Application Security Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Cybersecurity Enterprise';
+  const roles = getCompanyRoles(company, 'Cybersecurity');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `Threat intelligence, zero-trust infrastructure & defensive resilience at ${company}`,
+    industry: 'Enterprise Cybersecurity & Threat Intelligence',
+    overview: `${company} protects mission-critical enterprise systems against nation-state actors and advanced persistent threats. The hiring loop tests secure code review, cryptography, distributed threat detection, and ethical composure.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Assume breach mindset and zero-trust verification',
+      'Uncompromising ethical integrity and confidentiality',
+      'Low-level operating systems & network packet forensics',
+      'Proactive threat modeling and defense in depth'
+    ],
+    evaluationPhilosophy: `${company} looks for engineers who think like both an attacker and a defender, identifying subtle design flaws before they become CVEs.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Talent Acquisition & Security Calibration',
+        levelType: 'Phone Screen',
+        format: '30-Minute Security Background Screen',
+        durationMinutes: 30,
+        interviewerProfile: 'Cybersecurity Talent Partner',
+        coreCompetencies: ['Security Mindset', 'OWASP Top 10', 'Role Alignment'],
+        description: `Introductory conversation to explore your security engineering background, certifications or bug bounty track record, and motivation for ${company}.`,
+        typicalQuestions: [
+          `Why do you want to work on enterprise security at ${company}?`,
+          'Walk me through a vulnerability you discovered or remediated in production.'
+        ],
+        tipsForSuccess: ['Demonstrate clear grasp of defensive concepts and ethical boundaries.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Secure Code Analysis & Exploit Mitigation',
+        levelType: 'Technical Round',
+        format: '60-Minute Vulnerability Identification & Remediation Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior AppSec Engineer / Red Team Lead',
+        coreCompetencies: ['Secure Code Review', 'Injection & XSS Defense', 'Authentication & JWT Flaws', 'Memory Safety'],
+        description: `Reviewing real vulnerable source code snippets to identify weaknesses, explain exploit vectors, and write secure patches.`,
+        typicalQuestions: [
+          'Analyze this code snippet handling OAuth 2.0 PKCE tokens. Identify three security flaws and write remediated logic.',
+          'Explain how SSRF (Server-Side Request Forgery) occurs in microservices and how to implement defense-in-depth network validation.'
+        ],
+        tipsForSuccess: ['Think methodically through input validation, context encoding, and privilege levels.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Zero-Trust Distributed Architecture & Threat Modeling',
+        levelType: 'System Design',
+        format: '60-Minute Threat Modeling & System Design Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Security Architect / CISO Staff',
+        coreCompetencies: ['STRIDE Threat Modeling', 'mTLS & Service Mesh', 'Identity & Access Management (IAM)', 'SIEM & Anomaly Detection'],
+        description: `Designing secure enterprise infrastructure and conducting a STRIDE threat model across network boundaries, data stores, and public APIs.`,
+        typicalQuestions: [
+          `Design a global Zero-Trust corporate access proxy at ${company} supporting 100,000 employees with context-aware device authentication.`,
+          'How do you design a real-time SIEM event pipeline ingesting 1 million security logs/sec with automated SOAR alert triage?'
+        ],
+        tipsForSuccess: [
+          'Diagram trust boundaries clearly and apply STRIDE to each data flow.',
+          'Emphasize least-privilege principles and secrets management (Vault/KMS).'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Incident Response & Ethical Trust Review',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Executive & Ethical Governance Round',
+        durationMinutes: 45,
+        interviewerProfile: 'VP of Security / Head of Threat Research',
+        coreCompetencies: ['Crisis Incident Response', 'Ethical Governance', 'Cross-Functional De-escalation'],
+        description: `Evaluating how you maintain calm under live ransomware/breach scenarios, communicate with executive leaders, and uphold ethical trust.`,
+        typicalQuestions: [
+          'You suspect a critical production database has been compromised right before a major product launch. Walk me step-by-step through your incident response protocol.',
+          'How do you balance high security controls with engineering developer productivity?'
+        ],
+        tipsForSuccess: [
+          'Demonstrate structured incident management (Identify, Protect, Detect, Respond, Recover).',
+          'Show empathy for developer velocity while holding firm on security baselines.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateHealthcarePipeline(companyName: string, roleTitle = 'HealthTech Software Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Healthcare Enterprise';
+  const roles = getCompanyRoles(company, 'Healthcare');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `HIPAA compliance, biomedical data platforms & life-saving software at ${company}`,
+    industry: 'Healthcare, Life Sciences & Biomedical Systems',
+    overview: `${company} builds clinical health applications, patient records platforms, and biomedical data systems. The hiring loop evaluates data privacy (HIPAA/GDPR), distributed consistency, interoperability standards (FHIR/HL7), and ethical devotion to patient care.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Patient privacy and strict regulatory compliance (HIPAA / HITECH)',
+      'Zero-downtime reliability for clinical care systems',
+      'Interoperability with healthcare standards (FHIR, HL7, DICOM)',
+      'Empathetic design centered on clinicians and patients'
+    ],
+    evaluationPhilosophy: `${company} selects candidates who demonstrate uncompromising respect for patient health information and building fault-tolerant software where bugs can affect patient outcomes.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Talent Acquisition & Fit Calibration',
+        levelType: 'Phone Screen',
+        format: '30-Minute Video / Phone Screen',
+        durationMinutes: 30,
+        interviewerProfile: 'Healthcare Talent Specialist',
+        coreCompetencies: ['Background Walkthrough', 'Healthcare Passion', 'Regulatory Awareness'],
+        description: `Introductory conversation to explore your background, interest in health technology, and familiarity with clinical software needs.`,
+        typicalQuestions: [
+          `What motivates you to work in health technology at ${company}?`,
+          'Walk me through a project where data privacy or sensitive customer data required special architectural safeguards.'
+        ],
+        tipsForSuccess: ['Demonstrate understanding of the societal impact and responsibility of healthcare technology.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Technical Coding & Data Pipeline Validation',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Health Data Engineer',
+        coreCompetencies: ['Data Structures & Algorithms', 'Data Cleaning & Validation', 'Concurrency & Thread Safety'],
+        description: `Algorithmic problem solving focusing on data ingestion, temporal patient event streams, and deterministic validation.`,
+        typicalQuestions: [
+          'Design an algorithm to merge and deduplicate overlapping patient medical record timelines from disparate clinical sources.',
+          'Implement a thread-safe cache for patient vital signs with automatic TTL eviction and anomaly threshold alerts.'
+        ],
+        tipsForSuccess: ['Highlight input sanitization and defensive edge case validation.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Distributed Health Data & Interoperability Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Health Systems Architecture Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Healthcare Architect',
+        coreCompetencies: ['FHIR / HL7 Data Modeling', 'HIPAA Encryption at Rest/Transit', 'Audit Logging & BAA Compliance', 'Disaster Recovery'],
+        description: `Architecting a distributed clinical data platform that integrates electronic health records (EHR) with strict access control and auditing.`,
+        typicalQuestions: [
+          `Design the FHIR-compliant Electronic Health Record (EHR) exchange platform for ${company} with immutable audit trails.`,
+          'How do you architect an encrypted patient messaging and telehealth video streaming platform with sub-second latency and HIPAA compliance?'
+        ],
+        tipsForSuccess: [
+          'Discuss field-level encryption, tokenization of Protected Health Information (PHI), and immutable audit logs.',
+          'Demonstrate familiarity with FHIR REST APIs and resource schemas.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Clinical Ethics, Patient Privacy & Values Round',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Medical Ethics & Values Round',
+        durationMinutes: 45,
+        interviewerProfile: 'VP of Health Engineering / Chief Medical Officer',
+        coreCompetencies: ['Clinical Empathy', 'Ethical Stewardship', 'Collaboration with Clinicians'],
+        description: `Final assessment evaluating ethics, how you handle privacy dilemmas, and collaboration with clinicians and researchers.`,
+        typicalQuestions: [
+          'Describe a situation where you had to push back on a feature design because it compromised user data privacy or consent.',
+          'How do you approach designing user interfaces or workflows when the primary user is an exhausted nurse or physician in an emergency room?'
+        ],
+        tipsForSuccess: [
+          'Highlight empathy for healthcare providers and patients.',
+          'Demonstrate clear moral clarity regarding patient rights.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateHardwarePipeline(companyName: string, roleTitle = 'Silicon Systems Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Semiconductor Enterprise';
+  const roles = getCompanyRoles(company, 'Hardware');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `Silicon architecture, low-level microcode & accelerated computing at ${company}`,
+    industry: 'Semiconductors, Accelerated Computing & Hardware Architecture',
+    overview: `${company} designs accelerated chips, GPU architectures, and low-level firmware. The interview process probes deep computer architecture, cache hierarchies, DMA, PCIe protocols, and C/C++ low-level systems programming.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'First-principles silicon engineering and tapeout perfection',
+      'Cycle-accurate performance optimization and microarchitecture',
+      'Hardware-software co-design and driver efficiency',
+      'Uncompromising technical rigor across verification and emulation'
+    ],
+    evaluationPhilosophy: `${company} evaluates how deeply you understand physical hardware execution, memory barriers, cache lines, and low-level driver logic.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Technical Talent Screening',
+        levelType: 'Phone Screen',
+        format: '30-Minute Video / Phone Call',
+        durationMinutes: 30,
+        interviewerProfile: 'Hardware Systems Talent Partner',
+        coreCompetencies: ['Computer Architecture Basics', 'C/C++ Background', 'Role Alignment'],
+        description: `Preliminary interview assessing hardware-software integration experience, silicon projects, and motivation for ${company}.`,
+        typicalQuestions: [
+          `Why do you want to work on silicon and low-level systems at ${company}?`,
+          'Walk me through a project where you debugged a low-level driver or silicon emulation anomaly.'
+        ],
+        tipsForSuccess: ['Demonstrate fluency with assembly, C/C++, and hardware architecture concepts.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Low-Level C/C++, Bitwise Logic & Memory Hierarchy',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Low-Level Coding Session',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Firmware / Driver Engineer',
+        coreCompetencies: ['Bitwise Operations', 'DMA & Memory-Mapped I/O', 'Cache Coherency & Memory Barriers', 'Concurrency'],
+        description: `Writing low-level C code interacting directly with hardware registers, ring buffers, and DMA descriptors.`,
+        typicalQuestions: [
+          'Write a C driver routine to program a DMA controller for scatter-gather transfers with proper memory barrier synchronization.',
+          'Explain the difference between write-through and write-back caches and how MESI cache coherency protocol functions.'
+        ],
+        tipsForSuccess: [
+          'Explain volatile keyword, alignment requirements, and atomic memory operations.',
+          'Articulate how CPU pipelines branch-predict and handle stalls.'
+        ],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: Computer Architecture & Silicon Emulation Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Computer Architecture Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Distinguished Silicon Architect',
+        coreCompetencies: ['PCIe & AXI Bus Protocols', 'Hardware-Software Co-design', 'GPU / NPU Accelerator Pipelines', 'Silicon Emulation'],
+        description: `Designing accelerated hardware-software pipelines, PCIe interconnects, or AI tensor processor execution graphs.`,
+        typicalQuestions: [
+          `Architect the memory subsystem and PCIe Gen 5 host interface for an AI inference accelerator card at ${company}.`,
+          'How do you design a cycle-accurate emulator to profile cache miss penalties before silicon tapeout?'
+        ],
+        tipsForSuccess: [
+          'Discuss bandwidth bottlenecks (HBM vs DDR5), NUMA nodes, and memory controller arbitration.',
+          'Diagram latency budgets for host-to-device transfers.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Chief Architect Review & Silicon Rigor Bar',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Senior Technical Leadership Round',
+        durationMinutes: 45,
+        interviewerProfile: 'VP of Silicon Architecture / Fellow',
+        coreCompetencies: ['First-Principles Thinking', 'Tapeout Commitment', 'Cross-Disciplinary Teamwork'],
+        description: `Final assessment evaluating problem solving under high-stakes silicon deadlines, cross-team collaboration with EDA tools and fabrication partners.`,
+        typicalQuestions: [
+          'Silicon fabrication errors cost millions of dollars and months of delay. Describe how you approach verification to guarantee zero defect escapes.',
+          'Tell me about an instance where you pushed back against a specification because it created an unviable hardware constraint.'
+        ],
+        tipsForSuccess: [
+          'Demonstrate obsession with rigorous verification and testing.',
+          'Show deep pride in building the physical foundation of modern computing.'
+        ],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
+export function generateTelecomPipeline(companyName: string, roleTitle = 'Telecommunications Network Engineer'): CompanyHiringPipeline {
+  const company = companyName.trim() || 'Premier Telecom Enterprise';
+  const roles = getCompanyRoles(company, 'Telecom');
+  return {
+    companyName: company,
+    normalizedName: company.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    tagline: `Carrier-grade 5G infrastructure, packet core & cloud networking at ${company}`,
+    industry: 'Telecommunications, 5G Infrastructure & Cloud Networking',
+    overview: `${company} operates carrier-grade telecommunications backbones, 5G radio access networks (RAN), and cloud-native software-defined networks (SDN). Engineers are evaluated on network protocols, DPDK packet acceleration, five-nines (99.999%) uptime, and distributed resilience.`,
+    totalStages: 4,
+    cultureHighlights: [
+      'Five-nines (99.999%) carrier-grade reliability',
+      'Ultra-reliable low-latency communication (URLLC)',
+      'Software-defined networking (SDN) and network function virtualization (NFV)',
+      'Operational excellence across 24/7 mission-critical operations'
+    ],
+    evaluationPhilosophy: `${company} evaluates how well you design resilient network systems that handle unexpected fiber cuts, BGP flapping, and massive concurrent cellular connections without dropping calls or packets.`,
+    typicalTimeline: '3 to 5 weeks from initial screen to offer decision',
+    popularRoles: roles,
+    stages: [
+      {
+        id: `${company.toLowerCase()}-s1`,
+        stageNumber: 1,
+        name: 'Stage 1: Technical Talent Screening',
+        levelType: 'Phone Screen',
+        format: '30-Minute Video / Phone Screen',
+        durationMinutes: 30,
+        interviewerProfile: 'Telecom Talent Partner',
+        coreCompetencies: ['Networking Fundamentals', 'OSI Model & TCP/IP', 'Role Alignment'],
+        description: `Introductory conversation to evaluate your experience with networking protocols, cloud platforms, and motivation for ${company}.`,
+        typicalQuestions: [
+          `Why are you interested in telecommunications infrastructure at ${company}?`,
+          'Walk me through how you troubleshoot a packet drop issue in a complex network topology.'
+        ],
+        tipsForSuccess: ['Demonstrate clear grasp of TCP/IP, routing protocols, and carrier infrastructure.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Behavioral & Leadership'
+      },
+      {
+        id: `${company.toLowerCase()}-s2`,
+        stageNumber: 2,
+        name: 'Stage 2: Low-Level Packet Processing & C/C++ Systems',
+        levelType: 'Technical Round',
+        format: '60-Minute Live Coding & Network Socket Programming',
+        durationMinutes: 60,
+        interviewerProfile: 'Senior Network Software Engineer',
+        coreCompetencies: ['Socket Programming', 'DPDK / eBPF Kernel Bypass', 'Concurrency', 'Buffer Ring Optimization'],
+        description: `Writing high-throughput socket programming routines and evaluating knowledge of Linux networking stack, eBPF, or DPDK.`,
+        typicalQuestions: [
+          'Implement an asynchronous epoll-based packet router handling 100,000 concurrent UDP connections.',
+          'Explain how DPDK bypasses the Linux kernel network stack and why zero-copy ring buffers prevent CPU cache thrashing.'
+        ],
+        tipsForSuccess: ['Explain memory alignment and zero-copy packet descriptor structures.'],
+        recommendedPersonaId: 'alex-mentor',
+        recommendedTrack: 'Technical & Problem Solving'
+      },
+      {
+        id: `${company.toLowerCase()}-s3`,
+        stageNumber: 3,
+        name: 'Stage 3: 5G Core & Carrier-Grade Network Architecture',
+        levelType: 'System Design',
+        format: '60-Minute Network Architecture Whiteboard',
+        durationMinutes: 60,
+        interviewerProfile: 'Principal Network Architect',
+        coreCompetencies: ['5G Standalone Core (5G SA)', 'Network Slicing', 'BGP & MPLS Routing', 'High Availability (Five-Nines)'],
+        description: `Designing a scalable cloud-native 5G core user plane function (UPF) with automated failover and dynamic network slicing.`,
+        typicalQuestions: [
+          `Architect the 5G Core User Plane Function (UPF) at ${company} handling 10 Terabits/sec of mobile data traffic across redundant edge nodes.`,
+          'How do you design a multi-region software-defined WAN (SD-WAN) connecting 500 edge enterprise data centers with automated failover under fiber severance?'
+        ],
+        tipsForSuccess: [
+          'Discuss control-plane / user-plane separation (CUPS) and Kubernetes CNFs.',
+          'Detail automated failover mechanics with sub-50ms convergence.'
+        ],
+        recommendedPersonaId: 'sarah-vp',
+        recommendedTrack: 'System Design & Architecture'
+      },
+      {
+        id: `${company.toLowerCase()}-s4`,
+        stageNumber: 4,
+        name: 'Stage 4: Operational Stewardship & Network Reliability Bar',
+        levelType: 'Bar Raiser / Executive',
+        format: '45-Minute Engineering Leadership Round',
+        durationMinutes: 45,
+        interviewerProfile: 'Director of Network Operations / VP of Infrastructure',
+        coreCompetencies: ['Outage Prevention', 'Post-Mortem Accountability', 'Cross-Functional Leadership'],
+        description: `Final assessment evaluating calm decision making during widespread carrier outages, root cause analysis, and operational stewardship.`,
+        typicalQuestions: [
+          'Describe a situation where a network change created an unintended regional outage. How did you coordinate the rollback and communicate with customers?',
+          'How do you foster a culture where junior engineers feel safe proposing changes while strictly adhering to change management procedures?'
+        ],
+        tipsForSuccess: ['Emphasize blameless post-mortems and rigorous canary deployment practices.'],
+        recommendedPersonaId: 'morgan-chen',
+        recommendedTrack: 'Behavioral & Leadership'
+      }
+    ]
+  };
+}
+
 export function generateFallbackPipeline(companyName: string, roleTitle = 'Software Engineer'): CompanyHiringPipeline {
   const company = companyName.trim() || 'Premier Global Enterprise';
   const detected = detectCompanyIndustry(company);
 
-  if (detected.category === 'banking') {
-    return generateBankingPipeline(company, roleTitle);
-  }
+  if (detected.category === 'banking') return generateBankingPipeline(company, roleTitle);
+  if (detected.category === 'aerospace') return generateAerospacePipeline(company, roleTitle);
+  if (detected.category === 'consulting') return generateConsultingPipeline(company, roleTitle);
+  if (detected.category === 'gaming') return generateGamingPipeline(company, roleTitle);
+  if (detected.category === 'retail') return generateRetailPipeline(company, roleTitle);
+  if (detected.category === 'automotive') return generateAutomotivePipeline(company, roleTitle);
+  if (detected.category === 'cybersecurity') return generateCybersecurityPipeline(company, roleTitle);
+  if (detected.category === 'healthcare') return generateHealthcarePipeline(company, roleTitle);
+  if (detected.category === 'hardware') return generateHardwarePipeline(company, roleTitle);
+  if (detected.category === 'services') return generateServicesPipeline(company, roleTitle);
+  if (detected.category === 'telecom') return generateTelecomPipeline(company, roleTitle);
 
   return {
     companyName: company,
@@ -2826,11 +4025,12 @@ export interface SupportedCompanyMeta {
   name: string;
   aliases: string[];
   industry: string;
-  category: 'tech' | 'banks' | 'fintech' | 'consulting' | 'healthcare' | 'defense' | 'automotive';
+  category: 'tech' | 'banks' | 'fintech' | 'consulting' | 'healthcare' | 'defense' | 'automotive' | 'aerospace' | 'gaming' | 'retail' | 'telecom' | 'cybersecurity' | 'hardware' | 'services';
   tagline: string;
 }
 
 export const ALL_SUPPORTED_COMPANIES: SupportedCompanyMeta[] = [
+  // 1. Tech Giants & Big Tech
   {
     name: 'Amazon',
     aliases: ['amz', 'aws', 'amazon.com'],
@@ -2877,9 +4077,88 @@ export const ALL_SUPPORTED_COMPANIES: SupportedCompanyMeta[] = [
     name: 'Nvidia',
     aliases: ['nvda', 'geforce', 'cuda'],
     industry: 'Semiconductors, Accelerated Computing & AI Platforms',
-    category: 'tech',
+    category: 'hardware',
     tagline: 'Accelerated computing, CUDA & first-principles architecture',
   },
+  {
+    name: 'Salesforce',
+    aliases: ['crm', 'agentforce', 'force.com'],
+    industry: 'Enterprise Cloud SaaS, CRM & AI Agentforce',
+    category: 'tech',
+    tagline: 'Multi-tenant cloud architecture, Agentforce & Ohana values',
+  },
+  {
+    name: 'Adobe',
+    aliases: ['creative cloud', 'photoshop', 'firefly'],
+    industry: 'Creative Software, Document Cloud & Generative AI',
+    category: 'tech',
+    tagline: 'Digital experience platforms & GPU creative acceleration',
+  },
+  {
+    name: 'Spotify',
+    aliases: ['audio', 'streaming', 'music'],
+    industry: 'Audio Streaming, Recommendation AI & Developer Culture',
+    category: 'tech',
+    tagline: 'Squad framework, graph recommendation algorithms & low latency audio',
+  },
+  {
+    name: 'Oracle',
+    aliases: ['oci', 'java', 'database'],
+    industry: 'Enterprise Database, Autonomous Cloud & ERP',
+    category: 'tech',
+    tagline: 'OCI distributed architecture & mission-critical database clustering',
+  },
+  {
+    name: 'Cisco',
+    aliases: ['networking', 'catalyst', 'webex'],
+    industry: 'Networking Hardware, Enterprise Telemetry & Cloud Security',
+    category: 'telecom',
+    tagline: 'Carrier-grade routing, Silicon One & enterprise network resilience',
+  },
+  {
+    name: 'Intel',
+    aliases: ['intel corp', 'xeon', 'core'],
+    industry: 'Semiconductors, Silicon Microarchitecture & Foundries',
+    category: 'hardware',
+    tagline: 'x86 microarchitecture, chip packaging & low-level compiler optimization',
+  },
+  {
+    name: 'AMD',
+    aliases: ['advanced micro devices', 'ryzen', 'epyc', 'radeon'],
+    industry: 'Semiconductors, High-Performance Computing & GPUs',
+    category: 'hardware',
+    tagline: 'Chiplet packaging, ROCm software stack & high-performance computing',
+  },
+  {
+    name: 'Snowflake',
+    aliases: ['data warehouse', 'cortex'],
+    industry: 'Cloud Data Warehouse & AI Data Cloud',
+    category: 'tech',
+    tagline: 'Separation of storage and compute & multi-cluster virtual warehouses',
+  },
+  {
+    name: 'Databricks',
+    aliases: ['spark', 'lakehouse', 'delta lake'],
+    industry: 'Data Intelligence Platform, Apache Spark & AI Models',
+    category: 'tech',
+    tagline: 'Unified Lakehouse architecture, Photon engine & distributed AI',
+  },
+  {
+    name: 'Palantir',
+    aliases: ['pltr', 'foundry', 'gotham', 'aip'],
+    industry: 'Enterprise Intelligence, Defense & Data Platforms',
+    category: 'defense',
+    tagline: 'The Decomp Round, graph models & mission-critical defense',
+  },
+  {
+    name: 'OpenAI',
+    aliases: ['chatgpt', 'gpt', 'sam altman'],
+    industry: 'Artificial General Intelligence & Frontier Foundation Models',
+    category: 'tech',
+    tagline: 'Frontier model research, RLHF training clusters & scalable inference APIs',
+  },
+
+  // 2. Investment Banking & Capital Markets
   {
     name: 'JPMorgan Chase',
     aliases: ['jpmorgan', 'chase', 'jpm', 'jp morgan'],
@@ -2930,6 +4209,29 @@ export const ALL_SUPPORTED_COMPANIES: SupportedCompanyMeta[] = [
     tagline: 'Institutional clients group & global payment rails',
   },
   {
+    name: 'Wells Fargo',
+    aliases: ['wellsfargo', 'wf'],
+    industry: 'Commercial & Retail Banking, Wealth Management',
+    category: 'banks',
+    tagline: 'Core consumer banking rails, enterprise auditability & compliance',
+  },
+  {
+    name: 'Deutsche Bank',
+    aliases: ['db', 'deutsche'],
+    industry: 'Investment Banking, Capital Markets & Corporate Bank',
+    category: 'banks',
+    tagline: 'European financial rails, FX algorithmic execution & risk analytics',
+  },
+  {
+    name: 'UBS',
+    aliases: ['ubs group', 'swiss bank'],
+    industry: 'Global Wealth Management & Investment Banking',
+    category: 'banks',
+    tagline: 'Global wealth platforms, low-latency equities & fiduciary precision',
+  },
+
+  // 3. Fintech Pioneers
+  {
     name: 'Stripe',
     aliases: ['payments', 'fintech'],
     industry: 'Financial Infrastructure & Developer APIs',
@@ -2951,19 +4253,51 @@ export const ALL_SUPPORTED_COMPANIES: SupportedCompanyMeta[] = [
     tagline: 'Product craftsmanship & legendary Core Values interview',
   },
   {
-    name: 'Salesforce',
-    aliases: ['crm', 'agentforce', 'force.com'],
-    industry: 'Enterprise Cloud SaaS, CRM & AI Agentforce',
-    category: 'tech',
-    tagline: 'Multi-tenant cloud architecture, Agentforce & Ohana values',
+    name: 'PayPal',
+    aliases: ['venmo', 'braintree'],
+    industry: 'Global Digital Payments & Merchant Checkout',
+    category: 'fintech',
+    tagline: 'High-throughput payment gateway resilience & distributed risk scoring',
   },
   {
-    name: 'Palantir',
-    aliases: ['pltr', 'foundry', 'gotham', 'aip'],
-    industry: 'Enterprise Intelligence, Defense & Data Platforms',
-    category: 'defense',
-    tagline: 'The Decomp Round, graph models & mission-critical defense',
+    name: 'Robinhood',
+    aliases: ['hood', 'brokerage'],
+    industry: 'Retail Brokerage, Crypto & Financial Tech',
+    category: 'fintech',
+    tagline: 'Real-time order routing, market data feeds & zero-commission brokerage',
   },
+
+  // 4. Aerospace & Defense
+  {
+    name: 'SpaceX',
+    aliases: ['space exploration technologies', 'starlink', 'falcon', 'starship'],
+    industry: 'Aerospace, Defense & Mission-Critical Systems',
+    category: 'aerospace',
+    tagline: 'Flight software determinism, Starlink constellations & multiplanetary engineering',
+  },
+  {
+    name: 'Boeing',
+    aliases: ['commercial airplanes', 'defense space'],
+    industry: 'Aerospace, Defense & Mission-Critical Systems',
+    category: 'aerospace',
+    tagline: 'Avionics DO-178C certification, fly-by-wire controls & systems safety',
+  },
+  {
+    name: 'Lockheed Martin',
+    aliases: ['skunk works', 'defense'],
+    industry: 'Aerospace, Defense & Mission-Critical Systems',
+    category: 'aerospace',
+    tagline: 'Skunk Works innovation, mission avionics & autonomous defense platforms',
+  },
+  {
+    name: 'NASA',
+    aliases: ['jpl', 'national aeronautics and space administration'],
+    industry: 'Aerospace, Defense & Mission-Critical Systems',
+    category: 'aerospace',
+    tagline: 'Deep space telemetry, autonomous rover navigation & zero-defect flight systems',
+  },
+
+  // 5. Automotive & Autonomy
   {
     name: 'Tesla',
     aliases: ['tsla', 'autopilot', 'fsd', 'optimus'],
@@ -2971,7 +4305,208 @@ export const ALL_SUPPORTED_COMPANIES: SupportedCompanyMeta[] = [
     category: 'automotive',
     tagline: 'Autopilot vision, low-level systems & architecture presentation',
   },
+  {
+    name: 'Rivian',
+    aliases: ['r1t', 'r1s', 'edv'],
+    industry: 'Electric Vehicles, Connected Fleet Software & Powertrain',
+    category: 'automotive',
+    tagline: 'Custom automotive OS, battery management systems & adventure tech',
+  },
+  {
+    name: 'Waymo',
+    aliases: ['alphabet autonomous', 'self driving car'],
+    industry: 'Autonomous Mobility, Sensor Fusion & Robotics AI',
+    category: 'automotive',
+    tagline: 'Full level-4 autonomous driving stack, sensor fusion & simulation testing',
+  },
+
+  // 6. Consulting & Strategy
+  {
+    name: 'McKinsey & Company',
+    aliases: ['mckinsey', 'mckinsey digital', 'quantumblack'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Strategic hypothesis framing, QuantumBlack AI & C-level tech transformation',
+  },
+  {
+    name: 'Boston Consulting Group (BCG)',
+    aliases: ['bcg', 'bcg x', 'boston consulting'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'BCG X deep engineering, enterprise digital ventures & case architecture',
+  },
+  {
+    name: 'Bain & Company',
+    aliases: ['bain', 'bain consulting'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Results delivery, enterprise private equity advisory & digital roadmaps',
+  },
+  {
+    name: 'Deloitte',
+    aliases: ['deloitte consulting', 'deloitte digital'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Enterprise cloud transformation, ERP advisory & large-scale modernization',
+  },
+  {
+    name: 'Accenture',
+    aliases: ['accenture technology', 'accenture song'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Global systems integration, cloud scale & client delivery excellence',
+  },
+  {
+    name: 'PricewaterhouseCoopers (PwC)',
+    aliases: ['pwc', 'pricewaterhousecoopers'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Enterprise transformation, cybersecurity advisory & cloud consulting',
+  },
+  {
+    name: 'Ernst & Young (EY)',
+    aliases: ['ey', 'ernst and young', 'ernst & young'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Technology transformation, risk intelligence & digital advisory',
+  },
+  {
+    name: 'KPMG',
+    aliases: ['kpmg consulting'],
+    industry: 'Management, Technology & Strategy Consulting',
+    category: 'consulting',
+    tagline: 'Enterprise systems advisory, regulatory compliance & digital strategy',
+  },
+
+  // 7. IT Services & Global Engineering Giants
+  {
+    name: 'Tata Consultancy Services (TCS)',
+    aliases: ['tcs', 'tata', 'tata consultancy'],
+    industry: 'Global IT Engineering & Enterprise Digital Services',
+    category: 'services',
+    tagline: 'National qualifier challenge, core CS rigor & enterprise delivery scale',
+  },
+  {
+    name: 'Infosys',
+    aliases: ['infy', 'infosys limited'],
+    industry: 'Global IT Engineering & Enterprise Digital Services',
+    category: 'services',
+    tagline: 'Topaz AI, digital core modernization & global engineering delivery',
+  },
+  {
+    name: 'Wipro',
+    aliases: ['wipro limited', 'wipro technologies'],
+    industry: 'Global IT Engineering & Enterprise Digital Services',
+    category: 'services',
+    tagline: 'FullStride cloud services, enterprise engineering & digital consulting',
+  },
+
+  // 8. Retail, E-Commerce & Consumer Tech
+  {
+    name: 'Walmart',
+    aliases: ['walmart global tech', 'walmart labs'],
+    industry: 'Omnichannel E-Commerce, Logistics & Consumer Marketplaces',
+    category: 'retail',
+    tagline: 'Hyper-scale retail catalogs, automated supply chain & omnichannel checkout',
+  },
+  {
+    name: 'Flipkart',
+    aliases: ['flipkart internet', 'big billion days'],
+    industry: 'Omnichannel E-Commerce, Logistics & Consumer Marketplaces',
+    category: 'retail',
+    tagline: 'Big Billion Days flash sale scale, distributed cart ledgers & mobile commerce',
+  },
+  {
+    name: 'Zomato',
+    aliases: ['zomato online', 'blinkit'],
+    industry: 'Food Delivery, Quick Commerce & Hyperlocal Logistics',
+    category: 'retail',
+    tagline: 'Hyperlocal rider dispatch, real-time geofencing & high-QPS search',
+  },
+  {
+    name: 'Swiggy',
+    aliases: ['swiggy instamart'],
+    industry: 'Food Delivery, Quick Commerce & Hyperlocal Logistics',
+    category: 'retail',
+    tagline: 'Sub-15 minute grocery routing, dark store inventory & geospatial matching',
+  },
+
+  // 9. Gaming & Interactive Entertainment
+  {
+    name: 'Epic Games',
+    aliases: ['unreal engine', 'fortnite'],
+    industry: 'Interactive Entertainment, Game Engines & Multiplayer Systems',
+    category: 'gaming',
+    tagline: 'Unreal Engine 5 Nanite/Lumen, 100-player Battle Royale netcode & Metaverse',
+  },
+  {
+    name: 'Riot Games',
+    aliases: ['league of legends', 'valorant'],
+    industry: 'Interactive Entertainment, Game Engines & Multiplayer Systems',
+    category: 'gaming',
+    tagline: '128-tick competitive game servers, Vanguard anti-cheat & player obsession',
+  },
+  {
+    name: 'Roblox',
+    aliases: ['rblx', 'roblox studio'],
+    industry: 'Interactive Entertainment, Game Engines & Multiplayer Systems',
+    category: 'gaming',
+    tagline: 'Distributed physics simulation, global creator economy & Lua engine scale',
+  },
+
+  // 10. Cybersecurity & Infrastructure
+  {
+    name: 'CrowdStrike',
+    aliases: ['falcon', 'crwd'],
+    industry: 'Enterprise Cybersecurity & Threat Intelligence',
+    category: 'cybersecurity',
+    tagline: 'Falcon kernel telemetry, real-time graph threat intelligence & zero-trust',
+  },
+  {
+    name: 'Palo Alto Networks',
+    aliases: ['panw', 'prisma', 'cortex'],
+    industry: 'Enterprise Cybersecurity & Threat Intelligence',
+    category: 'cybersecurity',
+    tagline: 'Next-Gen Firewalls, SASE architecture & automated SOC security operations',
+  },
+
+  // 11. Healthcare & Life Sciences
+  {
+    name: 'Pfizer',
+    aliases: ['pfizer inc', 'biopharma'],
+    industry: 'Healthcare, Life Sciences & Biomedical Systems',
+    category: 'healthcare',
+    tagline: 'Clinical trial analytics, biomedical data pipelines & life sciences software',
+  },
+  {
+    name: 'Qualcomm',
+    aliases: ['snapdragon', 'qcom'],
+    industry: 'Semiconductors, 5G Wireless & Mobile Compute',
+    category: 'hardware',
+    tagline: 'Snapdragon NPU acceleration, 5G modems & low-power ARM architecture',
+  }
 ];
+
+// Recognized acronyms and abbreviations without conventional vowels
+const KNOWN_ACRONYMS = new Set([
+  'IBM', 'HP', 'BMW', 'AMD', 'TCS', 'PWC', 'EY', 'KPMG', 'SAP', 'AWS',
+  'BYD', 'BCG', 'S&P', 'GE', '3M', 'MSI', 'JLL', 'DXC', 'HCL', 'CVS',
+  'GS', 'MS', 'JPM', 'BOFA', 'TDK', 'NTT', 'SNC', 'GLG', 'KKR', 'LG',
+  'BP', 'GM', 'VW', 'UPS', 'DHL', 'ZTE', 'CGI', 'ABB', 'CNO', 'TJX'
+]);
+
+export function formatCompanyName(raw: string): string {
+  const trimmed = raw.trim();
+  // Preserve intentional casing if user typed camelCase or all-caps (e.g. SpaceX, eBay, IBM, OpenAI)
+  if (/[a-z][A-Z]/.test(trimmed) || /^[A-Z0-9&.-]+$/.test(trimmed)) {
+    return trimmed;
+  }
+  // Title-case standard word strings (e.g. "spotify" -> "Spotify", "infosys" -> "Infosys")
+  return trimmed
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
 
 export function validateCompanyName(name: string): {
   isValid: boolean;
@@ -2988,14 +4523,39 @@ export function validateCompanyName(name: string): {
     };
   }
 
+  if (clean.length > 55) {
+    return {
+      isValid: false,
+      suggestions: POPULAR_COMPANIES.slice(0, 5),
+      error: 'Company name is too long. Please enter a valid organization name.'
+    };
+  }
+
   const lower = clean.toLowerCase();
+
+  // Helper to build intelligent suggestions
+  const buildSuggestions = (): string[] => {
+    const scored = ALL_SUPPORTED_COMPANIES.map((c) => {
+      let score = 0;
+      const cLower = c.name.toLowerCase();
+      if (cLower.startsWith(lower.slice(0, 2))) score += 5;
+      for (const char of lower) {
+        if (cLower.includes(char)) score += 1;
+      }
+      return { name: c.name, score };
+    })
+    .filter((s) => s.score > 1)
+    .sort((a, b) => b.score - a.score)
+    .map((s) => s.name);
+
+    return Array.from(new Set(scored.concat(POPULAR_COMPANIES))).slice(0, 4);
+  };
 
   // 1. Direct match or alias in ALL_SUPPORTED_COMPANIES
   const directMatch = ALL_SUPPORTED_COMPANIES.find((c) => 
     c.name.toLowerCase() === lower || 
     c.aliases.some((a) => a.toLowerCase() === lower) ||
-    c.name.toLowerCase().includes(lower) ||
-    lower.includes(c.name.toLowerCase())
+    (lower.length >= 4 && (c.name.toLowerCase().includes(lower) || lower.includes(c.name.toLowerCase())))
   );
 
   if (directMatch) {
@@ -3016,48 +4576,52 @@ export function validateCompanyName(name: string): {
     };
   }
 
-  // 3. Recognized banking/industry keywords
-  const ind = detectCompanyIndustry(clean);
-  if (ind.category !== 'general' && ind.category !== 'tech') {
+  // 3. Gibberish & invalid input filtering
+  // Pure numbers, pure spaces, or pure punctuation (no letters at all)
+  if (/^[0-9\s!@#$%^&*()_+=\-[\]{};:'",.<>/?\\|`~]+$/.test(clean) && !/[a-zA-Z]/.test(clean)) {
     return {
-      isValid: true,
-      matchedName: clean,
-      suggestions: []
+      isValid: false,
+      suggestions: buildSuggestions(),
+      error: `"${clean}" does not appear to be a recognized company name. Please enter a valid company or pick from the suggestions below.`
     };
   }
 
-  // 4. Input health checks (numbers only, repeating characters, no vowels)
-  const hasVowels = /[aeiouy]/i.test(clean);
-  const isAlpha = /^[a-zA-Zs.&'-]+$/.test(clean);
-  const isRepeated = /(.)\1{3,}/.test(clean);
-
-  // 5. Build intelligent suggestions
-  const scored = ALL_SUPPORTED_COMPANIES.map((c) => {
-    let score = 0;
-    const cLower = c.name.toLowerCase();
-    if (cLower.startsWith(lower.slice(0, 2))) score += 5;
-    for (const char of lower) {
-      if (cLower.includes(char)) score += 1;
-    }
-    return { name: c.name, score };
-  })
-  .filter((s) => s.score > 1)
-  .sort((a, b) => b.score - a.score)
-  .map((s) => s.name);
-
-  const topSuggestions = Array.from(new Set(scored.concat(POPULAR_COMPANIES))).slice(0, 4);
-
-  if (!hasVowels || !isAlpha || isRepeated || clean.length > 35) {
+  // Repetitive spam (e.g. "aaaaa", "zzzzzzz", "111111")
+  if (/(.)\1{3,}/i.test(clean)) {
     return {
       isValid: false,
-      suggestions: topSuggestions,
+      suggestions: buildSuggestions(),
+      error: `"${clean}" contains repetitive characters. Please enter a valid organization name.`
+    };
+  }
+
+  // No vowels and not a recognized acronym (e.g. "asdfghjk", "bcdfghjkl")
+  const lettersOnly = clean.replace(/[^a-zA-Z]/g, '');
+  const hasVowels = /[aeiouy]/i.test(clean);
+  const isAcronym = KNOWN_ACRONYMS.has(clean.toUpperCase()) || (clean.length <= 4 && /^[A-Z0-9&]+$/.test(clean));
+
+  if (!hasVowels && lettersOnly.length >= 4 && !isAcronym) {
+    return {
+      isValid: false,
+      suggestions: buildSuggestions(),
       error: `"${clean}" does not appear to be a recognized company name. Please verify spelling or pick from the suggestions below.`
     };
   }
 
+  // Long consonant cluster without vowels (6+ consecutive consonants)
+  if (/[bcdfghjklmnpqrstvwxz]{6,}/i.test(clean) && !isAcronym) {
+    return {
+      isValid: false,
+      suggestions: buildSuggestions(),
+      error: `"${clean}" contains unpronounceable letter combinations. Please verify spelling.`
+    };
+  }
+
+  // 4. Universal Acceptance: Any legitimate organization name is valid!
   return {
-    isValid: false,
-    suggestions: topSuggestions,
-    error: `Company "${clean}" could not be verified in our verified hiring loop database. Please choose a suggested company below.`
+    isValid: true,
+    matchedName: formatCompanyName(clean),
+    suggestions: []
   };
 }
+

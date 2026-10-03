@@ -1114,13 +1114,16 @@ Analyze the authentic hiring process specifically for:
 Company: "${companyName}"
 Role / Post: "${roleTitle}"
 
-Provide an authentic, highly detailed, real-world multi-stage hiring pipeline reflecting exactly how this specific company interviews and evaluates candidates. 
-For example:
-- If Amazon: include Online Assessment, Phone Screen, Coding Loop, System Design Loop, and Bar Raiser with 16 Leadership Principles.
-- If Google: include Recruiter Screen, Technical Screen, Coding Onsite 1 & 2, System Design, and Googleyness & Leadership.
-- If Meta: include CoderPad Technical Screen, Ninja Coding rounds, Pirate System Design, and Jedi Behavioral.
-- If Stripe: include Real-IDE screen, Integration & Bug Squash, Payment Ledger System Design, and Operating Principles.
-- If another company or startup: accurately reflect their real-world stages, format, duration, core values, typical questions, and evaluation philosophy.
+IMPORTANT INDUSTRY GUIDANCE:
+- If "${companyName}" is a bank, investment firm, hedge fund, or financial institution (e.g. JPMorgan, Goldman Sachs, Morgan Stanley, Barclays, Bank of America, Citigroup, Wells Fargo, Capital One, HSBC, HDFC, ICICI, etc.):
+  * Set industry to "Investment Banking, Capital Markets & Global Financial Services".
+  * Include authentic banking hiring stages: HackerRank + HireVue Video Screen, Technical Live Pair-Coding (concurrency, relational database transactions/ACID, OOP), Superday Systems Architecture (double-entry ledgering, idempotency, high-throughput money movement), and Managing Director Behavioral / Regulatory Ethics round.
+  * In popularRoles, strictly provide authentic banking titles: Technology Analyst (Software Engineering Program), Associate Software Engineer, Vice President (VP), Quantitative Developer, Low-Latency C++ / Java Systems Developer, Financial Data & Regulatory Architect, and Product Manager (Payments & Digital Banking).
+- If it is aerospace/defense (e.g. SpaceX, Boeing, Lockheed Martin, NASA, Northrop Grumman):
+  * Set industry to "Aerospace, Defense & Mission-Critical Systems".
+  * Include authentic stages: Technical Screen (C++, Real-Time embedded), Mission Telemetry & Hardware-In-The-Loop Architecture, and Reliability & Safety-Critical Engineering Bar.
+  * In popularRoles: Flight Software Engineer, Avionics Systems Engineer, GNC Engineer, Telemetry & Operations Architect.
+- If it is consulting, healthcare, retail/e-commerce, gaming, semiconductor, or tech, tailor the culture, stages, and questions strictly to that authentic domain.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -1133,6 +1136,7 @@ Return ONLY valid JSON matching this schema:
   "cultureHighlights": ["Core value 1", "Core value 2", "Core value 3", "Core value 4"],
   "evaluationPhilosophy": "1-2 sentences on what decides a hire vs no-hire at this company",
   "typicalTimeline": "e.g. 3 to 5 weeks from initial screen to offer",
+  "popularRoles": ["6-8 authentic job titles commonly hired at ${companyName}"],
   "stages": [
     {
       "id": "co-s1",
@@ -1622,66 +1626,6 @@ Include:
   }
 });
 
-// 6. Look up or dynamically generate Company Hiring Process & Specific Roles
-app.post("/api/hiring-process/lookup", async (req, res) => {
-  const { companyName, roleTitle = "Software Engineer" } = req.body;
-  if (!companyName) {
-    return res.status(400).json({ error: "companyName is required" });
-  }
-
-  try {
-    const prompt = `Generate a realistic, comprehensive, multi-stage hiring process pipeline for the company: "${companyName}" and role: "${roleTitle}".
-
-IMPORTANT INDUSTRY GUIDANCE:
-- If "${companyName}" is a bank, investment firm, hedge fund, or financial institution (e.g. JPMorgan, Goldman Sachs, Morgan Stanley, Barclays, Bank of America, Citigroup, Wells Fargo, Capital One, HSBC, HDFC, ICICI, etc.):
-  * Set industry to "Investment Banking, Capital Markets & Global Financial Services".
-  * Include authentic banking hiring stages: HackerRank + HireVue Video Screen, Technical Live Pair-Coding (concurrency, relational database transactions/ACID, OOP), Superday Systems Architecture (double-entry ledgering, idempotency, high-throughput money movement), and Managing Director Behavioral / Regulatory Ethics round.
-  * In popularRoles, strictly provide authentic banking titles: Technology Analyst (Software Engineering Program), Associate Software Engineer, Vice President (VP), Quantitative Developer, Low-Latency C++ / Java Systems Developer, Financial Data & Regulatory Architect, and Product Manager (Payments & Digital Banking).
-- If it is consulting, healthcare, semiconductor, or tech, tailor the culture, stages, and questions strictly to that industry.
-
-Return JSON adhering strictly to:
-{
-  "companyName": "${companyName}",
-  "normalizedName": "${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}",
-  "tagline": "string (company mission or hiring motto)",
-  "industry": "string",
-  "overview": "string (detailed breakdown of their hiring style, format, and loop structure)",
-  "totalStages": 4 or 5,
-  "cultureHighlights": ["string", "string", "string", "string"],
-  "evaluationPhilosophy": "string (what makes candidate pass or fail the hiring bar)",
-  "typicalTimeline": "string (e.g. 3 to 5 weeks from initial screen to offer)",
-  "popularRoles": ["array of 6-8 authentic, company-specific job titles and levels commonly hired at ${companyName}"],
-  "stages": [
-    {
-      "id": "stage-id-string",
-      "stageNumber": 1,
-      "name": "Stage 1: ...",
-      "levelType": "Online Assessment" | "Phone Screen" | "Technical Round" | "System Design" | "Behavioral & Culture" | "Bar Raiser / Executive",
-      "format": "string",
-      "durationMinutes": 45,
-      "interviewerProfile": "string",
-      "coreCompetencies": ["string", "string"],
-      "description": "string",
-      "typicalQuestions": ["string", "string"],
-      "tipsForSuccess": ["string", "string"]
-    }
-  ]
-}`;
-
-    const response = await callGeminiWithRetry({
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      },
-    });
-
-    const pipeline = JSON.parse(response.text || "{}");
-    res.json({ pipeline });
-  } catch (err: any) {
-    console.error("Error looking up company hiring process:", err);
-    res.status(500).json({ error: "Failed to generate company hiring pipeline" });
-  }
-});
 
 // Vite middleware & static serving
 async function startServer() {

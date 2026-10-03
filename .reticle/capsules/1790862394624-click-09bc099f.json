@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "origin": "failed-assert",
+  "expected": "text \"Roles at Nvidia:\"",
+  "observed": "no element matched {\"text\":\"Roles at Nvidia:\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e46",
+        "source": {
+          "file": "src/components/HiringProcessView.tsx",
+          "line": 199,
+          "column": 22
+        }
+      },
+      "action": "click"
+    }
+  ],
+  "id": "1790862394624-click-09bc099f",
+  "createdAt": 1790862394624,
+  "seen": 1,
+  "lastSeenAt": 1790862394624
+}

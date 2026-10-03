@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "name": "drive-verification-failed",
+  "projectId": "ai-interview-coach-7116cd55",
+  "createdAt": 1790923329489,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "e.g. JPMorgan Chase, Barclays, Google, Amazon, Nvidia..."
+      },
+      "args": {
+        "value": "zzzinvalid"
+      },
+      "action": "fill",
+      "expect": {
+        "kind": "text",
+        "contains": "Verification Failed"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "+ Palantir"
+      },
+      "args": {},
+      "action": "click",
+      "page": "/"
+    }
+  ],
+  "startPath": "/",
+  "requires": [
+    {
+      "kind": "route",
+      "pathname": "/"
+    }
+  ],
+  "ensures": [
+    {
+      "kind": "route",
+      "pathname": "/"
+    }
+  ],
+  "author": {
+    "agent": "reticle-cli"
+  }
+}

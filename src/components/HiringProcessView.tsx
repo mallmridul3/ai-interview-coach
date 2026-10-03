@@ -48,7 +48,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
     () => (initialPipeline.popularRoles && initialPipeline.popularRoles[0]) || 'Software Development Engineer I (SDE I)'
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'tech' | 'banks' | 'fintech'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'tech' | 'banks' | 'aerospace' | 'consulting' | 'services'>('all');
 
   // Autocomplete dropdown & error validation state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -506,8 +506,10 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                     {[
                       { id: 'all', label: 'All' },
                       { id: 'tech', label: 'Tech Giants' },
-                      { id: 'banks', label: 'Global Banks & Finance' },
-                      { id: 'fintech', label: 'Fintech' },
+                      { id: 'banks', label: 'Banking & Finance' },
+                      { id: 'aerospace', label: 'Aerospace & Defense' },
+                      { id: 'consulting', label: 'Consulting' },
+                      { id: 'services', label: 'IT Services' },
                     ].map((cat) => (
                       <button
                         key={cat.id}
@@ -527,31 +529,18 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
 
                 <div className="flex flex-wrap gap-2">
                   {POPULAR_COMPANIES.filter((co) => {
-                    const isBank = [
-                      'jpmorgan chase',
-                      'goldman sachs',
-                      'morgan stanley',
-                      'bank of america',
-                      'barclays',
-                      'capital one',
-                      'citigroup',
-                    ].includes(co.toLowerCase());
-                    if (selectedCategory === 'banks') return isBank;
-                    const isFintech = ['stripe', 'uber'].includes(co.toLowerCase());
-                    if (selectedCategory === 'fintech') return isFintech;
-                    if (selectedCategory === 'tech') return !isBank && !isFintech;
+                    const meta = ALL_SUPPORTED_COMPANIES.find((c) => c.name.toLowerCase() === co.toLowerCase());
+                    const cat = meta?.category || detectCompanyIndustry(co).category;
+                    if (selectedCategory === 'banks') return cat === 'banks' || cat === 'banking' || cat === 'fintech';
+                    if (selectedCategory === 'aerospace') return cat === 'aerospace' || cat === 'defense';
+                    if (selectedCategory === 'consulting') return cat === 'consulting';
+                    if (selectedCategory === 'services') return cat === 'services';
+                    if (selectedCategory === 'tech') return cat === 'tech' || cat === 'hardware' || cat === 'gaming' || cat === 'retail';
                     return true;
                   }).map((co) => {
                     const isSelected = activePipeline.companyName.toLowerCase() === co.toLowerCase();
-                    const isBankCo = [
-                      'jpmorgan chase',
-                      'goldman sachs',
-                      'morgan stanley',
-                      'bank of america',
-                      'barclays',
-                      'capital one',
-                      'citigroup',
-                    ].includes(co.toLowerCase());
+                    const meta = ALL_SUPPORTED_COMPANIES.find((c) => c.name.toLowerCase() === co.toLowerCase());
+                    const isBankCo = meta?.category === 'banks' || meta?.category === 'fintech';
                     return (
                       <button
                         key={co}
@@ -658,7 +647,7 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                 </h2>
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center space-x-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{activePipeline.totalStages} Levels of Hiring</span>
+                  <span>Verified Hiring Pipeline ({activePipeline.totalStages} Stages)</span>
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">{activePipeline.tagline || activePipeline.industry}</p>

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "origin": "failed-assert",
+  "expected": "text \"Roles at Goldman Sachs:\"",
+  "observed": "no element matched {\"text\":\"Roles at Goldman Sachs:\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e48",
+        "source": {
+          "file": "src/components/HiringProcessView.tsx",
+          "line": 199,
+          "column": 22
+        }
+      },
+      "action": "click"
+    }
+  ],
+  "id": "1790862415221-click-a2013be7",
+  "createdAt": 1790862415221,
+  "seen": 1,
+  "lastSeenAt": 1790862415221
+}

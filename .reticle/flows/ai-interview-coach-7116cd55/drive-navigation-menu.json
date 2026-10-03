@@ -1,0 +1,129 @@
+{
+  "version": 2,
+  "name": "drive-navigation-menu",
+  "projectId": "ai-interview-coach-7116cd55",
+  "createdAt": 1790922975030,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Current: Hiring Process"
+      },
+      "args": {},
+      "action": "click",
+      "expect": {
+        "kind": "text",
+        "contains": "Navigation Menu"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Mock Interview Live interactive AI interview simulation with real-time STAR scoring"
+      },
+      "args": {},
+      "action": "click",
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Current: Mock Interview"
+      },
+      "args": {},
+      "action": "click",
+      "expect": {
+        "kind": "text",
+        "contains": "Navigation Menu"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Hiring Process Top Company-specific interview stages, leveled roles & authentic questions"
+      },
+      "args": {},
+      "action": "click",
+      "expect": {
+        "kind": "text",
+        "contains": "Targeted Company Hiring Process"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "e.g. JPMorgan Chase, Barclays, Google, Amazon, Nvidia..."
+      },
+      "args": {
+        "value": "Nvi"
+      },
+      "action": "fill",
+      "expect": {
+        "kind": "text",
+        "contains": "Suggested & Verified Companies"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "e.g. JPMorgan Chase, Barclays, Google, Amazon, Nvidia..."
+      },
+      "args": {
+        "value": "xyz999invalid"
+      },
+      "action": "fill",
+      "expect": {
+        "kind": "text",
+        "contains": "Verification Failed"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "+ Capital One"
+      },
+      "args": {},
+      "action": "click",
+      "expect": {
+        "kind": "text",
+        "contains": "Verified Banking & Financial Pipeline"
+      },
+      "page": "/"
+    }
+  ],
+  "startPath": "/",
+  "requires": [
+    {
+      "kind": "route",
+      "pathname": "/"
+    }
+  ],
+  "ensures": [
+    {
+      "kind": "route",
+      "pathname": "/"
+    }
+  ],
+  "author": {
+    "agent": "reticle-cli"
+  }
+}
