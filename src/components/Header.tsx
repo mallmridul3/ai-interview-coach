@@ -152,15 +152,14 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="border-b border-zinc-200 bg-white sticky top-0 z-30 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Top Left Corner: Menu Tab + Current Tab Heading */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            {/* Menu Tab Button in Top Left Corner */}
+        <div className="relative flex items-center justify-between h-16">
+          {/* Top Left Corner: Menu Tab */}
+          <div className="flex items-center z-10">
             <button
               id="header-nav-menu-btn"
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="flex items-center space-x-2 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer group"
+              className="flex items-center space-x-2 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer group shrink-0"
               title="Open Navigation Menu"
               aria-label="Menu"
               aria-expanded={isMenuOpen}
@@ -168,19 +167,19 @@ export const Header: React.FC<HeaderProps> = ({
               <Menu className="w-4 h-4 text-amber-300 transition-transform group-hover:scale-110" />
               <span>Menu</span>
             </button>
+          </div>
 
-            <div className="h-5 sm:h-6 w-px bg-zinc-200" />
-
-            {/* Current Tab Heading */}
-            <div className="flex items-center space-x-2 sm:space-x-2.5">
+          {/* Centered Tab Name Heading */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none max-w-[55vw]">
+            <div className="flex items-center space-x-2 sm:space-x-2.5 pointer-events-auto">
               <div className="p-1.5 rounded-lg bg-zinc-100/80 border border-zinc-200/80 shadow-2xs hidden xs:flex">
                 <CurrentIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${currentTabObj.iconColor}`} />
               </div>
-              <h1 className="text-base sm:text-lg md:text-xl font-bold text-zinc-900 tracking-tight flex items-center space-x-2">
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-zinc-900 tracking-tight flex items-center space-x-2 whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => setIsMenuOpen(true)}
-                  className="hover:text-zinc-700 transition-colors cursor-pointer text-left font-bold"
+                  className="hover:text-zinc-700 transition-colors cursor-pointer text-center font-bold"
                   aria-label={currentTabObj.label}
                   title="Click to view all sections menu"
                 >
@@ -203,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right Action Items: User Role, Google Workspace & Voice Toggle */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 z-10">
             {/* User Account / Role Badge */}
             {currentUser ? (
               <div className="flex items-center space-x-1.5">
