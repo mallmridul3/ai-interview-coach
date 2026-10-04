@@ -34,8 +34,6 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
     mouthOpening: 0,
     phonemeShape: 'rest',
   });
-  const [headTilt, setHeadTilt] = useState(0);
-  const [isNodding, setIsNodding] = useState(false);
 
   // Subscribe to speech audio volume & articulation for soundwave visualizer
   useEffect(() => {
@@ -51,6 +49,7 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
     if (!vid) return;
 
     if (isSpeaking) {
+      vid.currentTime = 0;
       const playPromise = vid.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
@@ -62,43 +61,6 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
       vid.currentTime = 0;
     }
   }, [isSpeaking]);
-
-  // Subtle natural head micro-motion while speaking (-0.6deg to +0.6deg)
-  useEffect(() => {
-    if (!isSpeaking) {
-      setHeadTilt(0);
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setHeadTilt((Math.random() - 0.5) * 1.2);
-    }, 700);
-
-    return () => clearInterval(interval);
-  }, [isSpeaking]);
-
-  // Attentive nodding when candidate is speaking their response
-  useEffect(() => {
-    if (!isCandidateSpeaking) {
-      setIsNodding(false);
-      return;
-    }
-
-    let nodInterval: any;
-    const scheduleNod = () => {
-      const delay = 5000 + Math.random() * 3500;
-      nodInterval = setTimeout(() => {
-        setIsNodding(true);
-        setTimeout(() => {
-          setIsNodding(false);
-          scheduleNod();
-        }, 1200);
-      }, delay);
-    };
-
-    scheduleNod();
-    return () => clearTimeout(nodInterval);
-  }, [isCandidateSpeaking]);
 
   const avatarSrc = persona.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80';
   const videoSrc = PERSONA_VIDEOS[persona.id] || PERSONA_VIDEOS['alex-mentor'];
@@ -118,16 +80,7 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
 
         {/* Video / Avatar Container - Full Head & Face 100% in Frame (NEVER cut in half) */}
         {!videoError ? (
-          <div
-            className="relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 ease-out"
-            style={{
-              transform: `
-                rotate(${headTilt}deg) 
-                translateY(${isNodding ? '4px' : isSpeaking ? '1px' : '0px'})
-                scale(${isSpeaking ? 1.02 : 1.0})
-              `,
-            }}
-          >
+          <div className="relative z-10 w-full h-full flex items-center justify-center">
             <video
               ref={videoRef}
               src={videoSrc}
@@ -146,16 +99,7 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
             />
           </div>
         ) : !imageError ? (
-          <div
-            className="relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 ease-out"
-            style={{
-              transform: `
-                rotate(${headTilt}deg) 
-                translateY(${isNodding ? '4px' : isSpeaking ? '1px' : '0px'})
-                scale(${isSpeaking ? 1.02 : 1.0})
-              `,
-            }}
-          >
+          <div className="relative z-10 w-full h-full flex items-center justify-center">
             <img
               src={avatarSrc}
               alt={persona.name}

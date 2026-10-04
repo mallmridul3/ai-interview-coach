@@ -5,6 +5,7 @@ import crypto from "crypto";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { EdgeTTS } from "node-edge-tts";
 
 dotenv.config();
 
@@ -102,8 +103,17 @@ if (!fs.existsSync(audioCacheDir)) {
 // Track temporary TTS quota cooldowns to prevent log noise and unneeded retries
 let ttsQuotaCooldownUntil = 0;
 
+// High-Fidelity Human Neural Voice Mapping
+const NEURAL_VOICE_MAP: Record<string, string> = {
+  Puck: "en-US-GuyNeural",
+  Fenrir: "en-US-ChristopherNeural",
+  Charon: "en-US-EricNeural",
+  Kore: "en-US-JennyNeural",
+  Zephyr: "en-US-AriaNeural",
+};
+
 // Instant Pre-Synthesized Human Voice Samples for the 5 Interviewer Personas
-app.get("/api/tts/sample/:voice", (req, res) => {
+app.get("/api/tts/sample/:voice", async (req, res) => {
   const { voice } = req.params;
   const validVoices = ["Kore", "Puck", "Charon", "Fenrir", "Zephyr"];
   const chosenVoice = validVoices.includes(voice) ? voice : "Kore";
@@ -118,10 +128,33 @@ app.get("/api/tts/sample/:voice", (req, res) => {
     }
   }
 
+  // Synthesize sample with EdgeTTS on demand
+  try {
+    const edgeVoice = NEURAL_VOICE_MAP[chosenVoice] || "en-US-GuyNeural";
+    const tts = new EdgeTTS({ voice: edgeVoice });
+    const tempFile = path.join(audioCacheDir, `temp_sample_${chosenVoice}_${Date.now()}.mp3`);
+    const sampleText = "Hello, I will be your interviewer today. Walk me through a challenging technical problem you solved.";
+    await tts.ttsPromise(sampleText, tempFile);
+    if (fs.existsSync(tempFile)) {
+      const audioBuf = fs.readFileSync(tempFile);
+      fs.unlinkSync(tempFile);
+      const base64Mp3 = audioBuf.toString("base64");
+      const samplePayload = {
+        audioUrl: `data:audio/mp3;base64,${base64Mp3}`,
+        mimeType: "audio/mp3",
+        voice: chosenVoice,
+      };
+      fs.writeFileSync(sampleFile, JSON.stringify(samplePayload));
+      return res.json(samplePayload);
+    }
+  } catch (err) {
+    // continue to 404
+  }
+
   res.status(404).json({ error: "Sample not ready yet" });
 });
 
-// Human-like Speech Synthesis via Gemini TTS with Disk Caching & Dual-Model Fallback
+// Human-like Speech Synthesis via Microsoft Neural TTS & Gemini TTS with Disk Caching
 app.post("/api/tts", async (req, res) => {
   const { text, voice = "Kore", isSample = false } = req.body;
   if (!text || typeof text !== "string") {
@@ -167,16 +200,36 @@ app.post("/api/tts", async (req, res) => {
     }
   }
 
-  // 3. If within quota cooldown, tell client to use neural browser fallback for the actual question
-  if (Date.now() < ttsQuotaCooldownUntil) {
-    return res.json({
-      audioUrl: null,
-      fallback: true,
-      voice: chosenVoice,
-    });
+  // 3. High-Quality Human Neural Speech Generation via EdgeTTS (Natural, Uncapped, Instant)
+  try {
+    const edgeVoice = NEURAL_VOICE_MAP[chosenVoice] || "en-US-GuyNeural";
+    const tts = new EdgeTTS({ voice: edgeVoice });
+    const tempFile = path.join(audioCacheDir, `temp_${Date.now()}_${Math.random().toString(36).substring(7)}.mp3`);
+    await tts.ttsPromise(cleanText, tempFile);
+    if (fs.existsSync(tempFile)) {
+      const audioBuf = fs.readFileSync(tempFile);
+      fs.unlinkSync(tempFile);
+      const base64Mp3 = audioBuf.toString("base64");
+
+      const resultPayload = {
+        audioUrl: `data:audio/mp3;base64,${base64Mp3}`,
+        mimeType: "audio/mp3",
+        voice: chosenVoice,
+      };
+
+      try {
+        fs.writeFileSync(cacheFilePath, JSON.stringify(resultPayload));
+      } catch (saveErr) {
+        // non-blocking cache write
+      }
+
+      return res.json(resultPayload);
+    }
+  } catch (edgeErr: any) {
+    console.warn("EdgeTTS generation fallback:", edgeErr?.message);
   }
 
-  // 4. Generate using gemini-3.1-flash-tts-preview with clean, natural conversational text
+  // 4. Secondary Fallback: Generate using Gemini TTS
   const ttsModels = ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview"];
   for (const model of ttsModels) {
     try {
@@ -228,24 +281,7 @@ app.post("/api/tts", async (req, res) => {
     }
   }
 
-  // 5. If this is an intro sample, provide the persona's studio sample
-  if (isIntroSample) {
-    const sampleFile = path.join(audioCacheDir, `sample_${chosenVoice}.json`);
-    if (fs.existsSync(sampleFile)) {
-      try {
-        const cachedSample = JSON.parse(fs.readFileSync(sampleFile, "utf-8"));
-        return res.json({
-          ...cachedSample,
-          voice: chosenVoice,
-          isStudioFallback: true,
-        });
-      } catch (e) {
-        // continue
-      }
-    }
-  }
-
-  // 6. Final fallback to client-side persona-calibrated synthesis of the actual question
+  // 5. Final fallback to client-side persona-calibrated synthesis of the actual question
   res.json({
     audioUrl: null,
     fallback: true,
