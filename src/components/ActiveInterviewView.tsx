@@ -36,7 +36,7 @@ import { VideoInterviewRoom } from './VideoInterviewRoom';
 import { AudioWaveform } from './AudioWaveform';
 import { ClarificationModal } from './ClarificationModal';
 import { CandidateScratchpad } from './CandidateScratchpad';
-import { speakText, stopSpeaking, preloadSpeech, isSpeechRecognitionSupported } from '../utils/speechUtils';
+import { speakText, stopSpeaking, preloadSpeech, isSpeechRecognitionSupported, getVoiceForPersonaId } from '../utils/speechUtils';
 import { analyzeSpeechDelivery, captureVideoFrame } from '../utils/deliveryAnalyzer';
 import { VoiceSettingsModal } from './VoiceSettingsModal';
 import { ProTipDrawer } from './ProTipDrawer';
@@ -197,7 +197,8 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
         : currentTurn.question.question;
 
       // Preload current question voice audio buffer in background for zero-latency fluid playback
-      preloadSpeech(spokenQuestion);
+      const personaVoice = getVoiceForPersonaId(persona.id);
+      preloadSpeech(spokenQuestion, personaVoice);
 
       // Also pre-fetch the next upcoming question so audio transitions between turns remain fluid
       const nextTurn = turns[currentTurnIndex + 1];
@@ -205,15 +206,19 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
         const nextSpoken = nextTurn.question.conversationalLeadIn
           ? `${nextTurn.question.conversationalLeadIn} ${nextTurn.question.question}`
           : nextTurn.question.question;
-        preloadSpeech(nextSpoken);
+        preloadSpeech(nextSpoken, personaVoice);
       }
 
       // Speak question if voiceEnabled and not evaluated yet
       if (voiceEnabled && !currentTurn.evaluation) {
         setIsSpeakingQuestion(true);
-        speakText(spokenQuestion, () => {
-          setIsSpeakingQuestion(false);
-        });
+        speakText(
+          spokenQuestion,
+          () => {
+            setIsSpeakingQuestion(false);
+          },
+          { voice: personaVoice }
+        );
       }
     }
     return () => {
@@ -265,9 +270,13 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
       : currentTurn.question.question;
 
     setIsSpeakingQuestion(true);
-    speakText(spokenQuestion, () => {
-      setIsSpeakingQuestion(false);
-    });
+    speakText(
+      spokenQuestion,
+      () => {
+        setIsSpeakingQuestion(false);
+      },
+      { voice: getVoiceForPersonaId(persona.id) }
+    );
   };
 
   const handleToggleCamera = () => {

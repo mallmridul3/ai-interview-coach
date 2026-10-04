@@ -115,5 +115,17 @@
       },
       "page": "/"
     }
+  ],
+  "learned": [
+    {
+      "kind": "request-never-settled",
+      "step": 2,
+      "state": "open"
+    },
+    {
+      "kind": "duplicate-request",
+      "step": -1,
+      "state": "open"
+    }
   ]
 }

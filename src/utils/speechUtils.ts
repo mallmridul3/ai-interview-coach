@@ -296,6 +296,13 @@ export function getSelectedVoiceId(): AiVoiceOption['id'] {
   return 'Kore';
 }
 
+export function getVoiceForPersonaId(personaId?: string): AiVoiceOption['id'] {
+  if (personaId === 'alex-mentor') return 'Puck';
+  if (personaId === 'morgan-bar-raiser') return 'Kore';
+  if (personaId === 'taylor-exec') return 'Zephyr';
+  return getSelectedVoiceId();
+}
+
 /**
  * Pre-fetches and pre-decodes voice audio buffers in memory.
  * When a speaker model like Fenrir is selected, this guarantees
@@ -381,56 +388,61 @@ interface PersonaVocalProfile {
   disallowedPatterns: string[];
 }
 
+const BANNED_ROBOTIC_PATTERNS = [
+  'desktop', 'david', 'zira', 'mark', 'george', 'espeak', 'robot', 'klatt',
+  'microsoft david', 'microsoft zira', 'sapi'
+];
+
 const PERSONA_VOCAL_PROFILES: Record<AiVoiceOption['id'], PersonaVocalProfile> = {
   Puck: {
     targetGender: 'male',
-    pitch: 1.0, // Natural organic pitch (no phase-vocoder distortion)
-    rateMultiplier: 1.0,
+    pitch: 1.0,
+    rateMultiplier: 0.98,
     namePreferences: [
-      'natural', 'neural', 'ryan', 'eric', 'guy', 'kevin', 'steffan', 'alex',
-      'google uk english male', 'google us english', 'daniel', 'nathan', 'david'
+      'natural', 'neural', 'online', 'ryan', 'guy', 'steffan', 'eric', 'kevin',
+      'google uk english male', 'google us english', 'daniel', 'nathan'
     ],
-    disallowedPatterns: ['espeak', 'robot', 'klatt'],
+    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Charon: {
     targetGender: 'male',
-    pitch: 1.0, // Grounded, natural delivery without metallic artifacts
+    pitch: 1.0,
     rateMultiplier: 0.96,
     namePreferences: [
-      'natural', 'neural', 'steffan', 'davis', 'brian', 'malcolm', 'james',
-      'google uk english male', 'daniel', 'christopher', 'george', 'david'
+      'natural', 'neural', 'online', 'steffan', 'guy', 'ryan', 'brian', 'christopher',
+      'google uk english male', 'daniel', 'oliver'
     ],
-    disallowedPatterns: ['espeak', 'robot', 'klatt'],
+    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Fenrir: {
     targetGender: 'male',
-    pitch: 1.0, // Authentic commanding vocal timbre without pitch shift distortion
+    pitch: 1.0,
     rateMultiplier: 0.95,
     namePreferences: [
-      'natural', 'neural', 'christopher', 'guy', 'brian', 'george', 'arthur',
-      'google uk english male', 'alex', 'daniel', 'mark', 'oliver', 'david'
+      'natural', 'neural', 'online', 'christopher', 'guy', 'ryan', 'brian', 'steffan',
+      'google uk english male', 'daniel', 'oliver'
     ],
-    disallowedPatterns: ['espeak', 'robot', 'klatt'],
+    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Zephyr: {
     targetGender: 'female',
     pitch: 1.0,
-    rateMultiplier: 1.0,
+    rateMultiplier: 0.98,
     namePreferences: [
-      'natural', 'neural', 'aria', 'jenny', 'michelle', 'serena', 'sonia',
-      'google uk english female', 'google us english', 'samantha', 'victoria', 'zira'
+      'natural', 'neural', 'online', 'jenny', 'aria', 'michelle', 'serena', 'sonia',
+      'google uk english female', 'google us english', 'samantha', 'victoria'
     ],
-    disallowedPatterns: ['espeak', 'robot', 'klatt'],
+    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Kore: {
     targetGender: 'female',
     pitch: 1.0,
-    rateMultiplier: 0.98,
+    rateMultiplier: 0.97,
     namePreferences: [
-      'natural', 'neural', 'jenny', 'ava', 'emma', 'sonia', 'ana',
-      'google us english', 'google uk english female', 'samantha', 'victoria', 'zira'
+      'natural', 'neural', 'online', 'jenny', 'aria', 'ava', 'emma', 'sonia',
+      'google us english', 'google uk english female', 'samantha', 'victoria'
     ],
-    disallowedPatterns: ['espeak', 'robot', 'klatt'],
+    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
 };
 
@@ -445,40 +457,39 @@ function scoreVoiceForProfile(v: SpeechSynthesisVoice, profile: PersonaVocalProf
 
   // 1. Must be English
   if (!lang.startsWith('en')) {
-    return -99999;
+    return -999999;
   }
 
-  // 2. Reject explicitly low-quality robotic synthesizers
+  // 2. Strictly reject legacy robotic synthesizers (Windows desktop SAPI, etc.)
   if (profile.disallowedPatterns.some((dis) => name.includes(dis))) {
-    return -5000;
+    return -999999;
   }
 
   let score = 0;
 
-  // 3. Premium Natural/Neural Voice Tier (+1200 to +1800 pts)
+  // 3. Premium Natural/Neural Voice Tier (+2500 to +5000 pts)
   // Microsoft Edge Online Natural, Apple Enhanced/Premium, Chrome Google Neural
-  if (name.includes('natural') || name.includes('neural') || name.includes('online')) {
-    score += 1800;
+  if (name.includes('natural') || name.includes('online')) {
+    score += 5000;
+  } else if (name.includes('neural')) {
+    score += 4500;
   } else if (name.includes('enhanced') || name.includes('premium')) {
-    score += 1400;
+    score += 3500;
   } else if (name.includes('google')) {
-    score += 1100;
+    score += 3000;
   }
 
-  // 4. Target Gender Matching (+600 pts if matched, -800 pts if mismatched)
+  // 4. Target Gender Matching (+800 pts if matched, -1200 pts if mismatched)
   const isMaleName =
     name.includes('male') ||
     name.includes('guy') ||
     name.includes('ryan') ||
     name.includes('eric') ||
     name.includes('christopher') ||
-    name.includes('davis') ||
     name.includes('steffan') ||
     name.includes('daniel') ||
-    name.includes('alex') ||
     name.includes('george') ||
     name.includes('brian') ||
-    name.includes('mark') ||
     name.includes('oliver') ||
     name.includes('james');
 
@@ -491,33 +502,32 @@ function scoreVoiceForProfile(v: SpeechSynthesisVoice, profile: PersonaVocalProf
     name.includes('ava') ||
     name.includes('emma') ||
     name.includes('serena') ||
-    name.includes('sonia') ||
-    name.includes('zira');
+    name.includes('sonia');
 
   if (profile.targetGender === 'male') {
-    if (isMaleName) score += 600;
-    else if (isFemaleName) score -= 800;
+    if (isMaleName) score += 800;
+    else if (isFemaleName) score -= 1200;
   } else if (profile.targetGender === 'female') {
-    if (isFemaleName) score += 600;
-    else if (isMaleName) score -= 800;
+    if (isFemaleName) score += 800;
+    else if (isMaleName) score -= 1200;
   }
 
   // 5. Persona-specific keyword affinity
   for (let i = 0; i < profile.namePreferences.length; i++) {
     const pref = profile.namePreferences[i];
     if (name.includes(pref)) {
-      score += (profile.namePreferences.length - i) * 75;
+      score += (profile.namePreferences.length - i) * 150;
     }
   }
 
-  // 6. Prefer standard en-US or en-GB over obscure regional accents
+  // 6. Prefer standard en-US or en-GB
   if (lang === 'en-us' || lang === 'en-gb') {
-    score += 250;
+    score += 300;
   }
 
-  // 7. Non-local services are often high-fidelity cloud neural voices
+  // 7. Non-local services are high-fidelity cloud neural voices
   if (!v.localService) {
-    score += 300;
+    score += 800;
   }
 
   return score;
@@ -722,10 +732,49 @@ export function playVoiceSample(
  * Charon, Zephyr, and Kore sound like distinct, natural human interviewers rather
  * than generic robotic synthesizers.
  */
+export function ensureVoicesLoaded(): Promise<SpeechSynthesisVoice[]> {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    return Promise.resolve([]);
+  }
+  const current = refreshVoices();
+  if (current.length > 0) {
+    return Promise.resolve(current);
+  }
+
+  return new Promise((resolve) => {
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve(refreshVoices());
+    };
+
+    window.speechSynthesis.onvoiceschanged = finish;
+    setTimeout(finish, 800);
+  });
+}
+
+// User-gesture global audio unlocker to prevent browser autoplay blocking
+if (typeof window !== 'undefined') {
+  const unlockAudio = () => {
+    try {
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().catch(() => {});
+      }
+    } catch {}
+    window.removeEventListener('click', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+    window.removeEventListener('touchstart', unlockAudio);
+  };
+  window.addEventListener('click', unlockAudio, { passive: true });
+  window.addEventListener('keydown', unlockAudio, { passive: true });
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+}
+
 export function fallbackBrowserSpeech(
   text: string,
   onEnd?: () => void,
-  rate = 0.95,
+  rate = 0.98,
   voiceId: AiVoiceOption['id'] = 'Kore'
 ): () => void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -733,7 +782,6 @@ export function fallbackBrowserSpeech(
     return () => {};
   }
 
-  // Cancel any currently playing browser speech
   try {
     window.speechSynthesis.cancel();
   } catch (e) {
@@ -749,9 +797,9 @@ export function fallbackBrowserSpeech(
     .replace(/\bvs\.\b/gi, 'versus');
 
   const utterance = new SpeechSynthesisUtterance(humanizedText);
-  // Calibrated natural conversational pitch & pacing (0.93 rate for human breathing room)
+  // Natural conversational pitch & pacing (0.97 for human cadence)
   utterance.pitch = 1.0;
-  utterance.rate = Math.max(0.88, Math.min(1.02, rate || 0.94));
+  utterance.rate = Math.max(0.92, Math.min(1.04, rate || 0.97));
 
   let isFinished = false;
   const finishOnce = () => {
@@ -767,7 +815,8 @@ export function fallbackBrowserSpeech(
   utterance.onend = finishOnce;
   utterance.onerror = finishOnce;
 
-  const executeSpeak = () => {
+  ensureVoicesLoaded().then(() => {
+    if (isFinished) return;
     const matchedVoice = getBestVoiceForPersona(voiceId);
     if (matchedVoice) {
       utterance.voice = matchedVoice;
@@ -778,32 +827,7 @@ export function fallbackBrowserSpeech(
       console.warn('SpeechSynthesis error:', err);
       finishOnce();
     }
-  };
-
-  const voices = refreshVoices();
-  if (voices.length > 0) {
-    executeSpeak();
-  } else {
-    // Voices may still be initializing asynchronously in Chrome/Safari
-    let executed = false;
-    const voiceLoadHandler = () => {
-      if (executed) return;
-      executed = true;
-      refreshVoices();
-      executeSpeak();
-    };
-
-    window.speechSynthesis.onvoiceschanged = voiceLoadHandler;
-
-    // Safety timeout in case onvoiceschanged does not fire
-    setTimeout(() => {
-      if (!executed) {
-        executed = true;
-        refreshVoices();
-        executeSpeak();
-      }
-    }, 200);
-  }
+  });
 
   return () => {
     isFinished = true;

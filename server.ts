@@ -167,21 +167,8 @@ app.post("/api/tts", async (req, res) => {
     }
   }
 
-  // 3. If within quota cooldown, serve studio audio fallback directly without hitting Gemini API
+  // 3. If within quota cooldown, tell client to use neural browser fallback for the actual question
   if (Date.now() < ttsQuotaCooldownUntil) {
-    const sampleFile = path.join(audioCacheDir, `sample_${chosenVoice}.json`);
-    if (fs.existsSync(sampleFile)) {
-      try {
-        const cachedSample = JSON.parse(fs.readFileSync(sampleFile, "utf-8"));
-        return res.json({
-          ...cachedSample,
-          voice: chosenVoice,
-          isStudioFallback: true,
-        });
-      } catch (e) {
-        // continue
-      }
-    }
     return res.json({
       audioUrl: null,
       fallback: true,
@@ -189,18 +176,7 @@ app.post("/api/tts", async (req, res) => {
     });
   }
 
-  // 4. Generate using gemini-3.1-flash-tts-preview with authentic human conversational steering
-  const personaStyles: Record<string, string> = {
-    Kore: "Say in a warm, friendly, natural human conversational voice as a supportive hiring manager, with realistic breathing pauses and empathetic cadence:",
-    Fenrir: "Say in an authoritative, calm, natural human bar-raiser interviewer voice with steady, thoughtful cadence, realistic pauses, and clear inflection:",
-    Puck: "Say in an engaging, dynamic, conversational human interviewer voice with natural conversational rhythm, energetic inflection, and realistic pauses:",
-    Charon: "Say in a calm, analytical, measured human interviewer voice with thoughtful pacing, articulate pronunciation, and natural breathing pauses:",
-    Zephyr: "Say in a polished, balanced, friendly conversational executive interviewer voice with smooth natural inflection and realistic cadence:",
-  };
-
-  const stylePrefix = personaStyles[chosenVoice] || personaStyles.Kore;
-  const promptText = `${stylePrefix}\n"${cleanText}"`;
-
+  // 4. Generate using gemini-3.1-flash-tts-preview with clean, natural conversational text
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-tts-preview",
@@ -208,7 +184,7 @@ app.post("/api/tts", async (req, res) => {
         {
           parts: [
             {
-              text: promptText,
+              text: cleanText,
             },
           ],
         },
