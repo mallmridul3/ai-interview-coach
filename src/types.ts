@@ -26,6 +26,7 @@ export interface InterviewerPersona {
   role: string;
   companyTag: string;
   avatarSeed: string;
+  avatarUrl?: string;
   styleDescription: string;
   tonePrompt: string;
 }

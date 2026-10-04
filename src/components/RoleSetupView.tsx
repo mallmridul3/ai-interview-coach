@@ -464,9 +464,17 @@ export const RoleSetupView: React.FC<RoleSetupViewProps> = ({ onStartInterview, 
                     }`}
                   >
                     <div className="flex items-center space-x-2.5 mb-1.5">
-                      <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center font-bold text-xs text-zinc-700">
-                        {persona.name.charAt(0)}
-                      </div>
+                      {persona.avatarUrl ? (
+                        <img
+                          src={persona.avatarUrl}
+                          alt={persona.name}
+                          className="w-9 h-9 rounded-full object-cover object-top border border-zinc-200 shadow-2xs shrink-0"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-zinc-200 flex items-center justify-center font-bold text-xs text-zinc-700 shrink-0">
+                          {persona.name.charAt(0)}
+                        </div>
+                      )}
                       <div>
                         <div className="text-xs font-semibold text-zinc-900">{persona.name}</div>
                         <div className="text-[10px] text-zinc-500">{persona.role}</div>

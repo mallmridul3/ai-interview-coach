@@ -20,7 +20,8 @@ import {
   X,
   Maximize2,
   CheckCircle2,
-  ScanEye
+  ScanEye,
+  User
 } from 'lucide-react';
 import { 
   InterviewTurn, 
@@ -32,6 +33,12 @@ import {
 import { AudioWaveform } from './AudioWaveform';
 import { captureVideoFrame, analyzeSpeechDelivery } from '../utils/deliveryAnalyzer';
 import { speakText, stopSpeaking } from '../utils/speechUtils';
+
+const PERSONA_AVATARS: Record<string, string> = {
+  'alex-mentor': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
+  'morgan-bar-raiser': 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80',
+  'taylor-exec': 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80',
+};
 
 interface VideoInterviewRoomProps {
   setup: RoleSetup;
@@ -88,6 +95,7 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   isTranscribingAudio,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [imageError, setImageError] = useState(false);
   const [hudFeedback, setHudFeedback] = useState<{
     posture: string;
     eyeContact: string;
@@ -97,6 +105,12 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
     eyeContact: 'Camera Centered',
     composure: 'Composed',
   });
+
+  const avatarSrc = persona.avatarUrl || PERSONA_AVATARS[persona.id] || PERSONA_AVATARS['alex-mentor'];
+
+  useEffect(() => {
+    setImageError(false);
+  }, [persona.id, persona.avatarUrl]);
 
   // Attach video stream to candidate video element
   useEffect(() => {
@@ -159,26 +173,62 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
 
       {/* Main Video Conference Stage */}
       <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-        {/* Tile 1: AI Interviewer Persona */}
-        <div className="relative aspect-video sm:aspect-4/3 md:aspect-auto rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden flex flex-col justify-between p-4 shadow-inner min-h-[260px] sm:min-h-[320px]">
-          {/* Top Status */}
+        {/* Tile 1: AI Interviewer Video Feed (Person in Front Narrating Question) */}
+        <div className={`relative aspect-video sm:aspect-4/3 md:aspect-auto rounded-xl bg-zinc-950 border overflow-hidden flex flex-col justify-between p-4 shadow-inner min-h-[300px] sm:min-h-[360px] transition-all duration-500 ${
+          isSpeakingQuestion 
+            ? 'border-emerald-500/80 ring-2 ring-emerald-500/50 shadow-[0_0_35px_rgba(16,185,129,0.25)]' 
+            : 'border-zinc-800'
+        }`}>
+          {/* Full-bleed realistic Interviewer Video Feed */}
+          <div className="absolute inset-0 overflow-hidden bg-zinc-950">
+            {!imageError ? (
+              <img
+                src={avatarSrc}
+                alt={persona.name}
+                className={`w-full h-full object-cover object-top filter transition-all duration-700 select-none ${
+                  isSpeakingQuestion
+                    ? 'scale-105 brightness-105 contrast-105'
+                    : 'scale-100 brightness-95'
+                }`}
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-zinc-800 to-zinc-950 text-white">
+                <div className="w-24 h-24 rounded-full bg-zinc-700/80 border-2 border-zinc-600 flex items-center justify-center text-3xl font-bold shadow-xl">
+                  {persona.name.charAt(0)}
+                </div>
+              </div>
+            )}
+
+            {/* Cinematic Lighting & Video Call Vignette Overlay */}
+            <div className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${
+              isSpeakingQuestion
+                ? 'bg-gradient-to-t from-black/90 via-black/30 to-black/45'
+                : 'bg-gradient-to-t from-black/85 via-black/25 to-black/35'
+            }`} />
+
+            {/* Subtle Camera Perspective Guide / Frame Grid */}
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_40%,transparent_65%,rgba(0,0,0,0.45)_100%)]" />
+          </div>
+
+          {/* Top Interviewer Status & Voice Controls */}
           <div className="flex items-center justify-between z-10">
             <div className="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-xs">
-              <span className={`w-2 h-2 rounded-full ${isSpeakingQuestion ? 'bg-emerald-400 animate-ping' : 'bg-zinc-400'}`} />
-              <span className="font-semibold text-zinc-200">
-                {isSpeakingQuestion ? 'Interviewer Speaking' : 'Listening to You'}
+              <span className={`w-2 h-2 rounded-full ${isSpeakingQuestion ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
+              <span className="font-semibold text-zinc-100">
+                {isSpeakingQuestion ? 'Interviewer Narrating Question...' : 'Listening to You'}
               </span>
             </div>
 
             <button
               type="button"
               onClick={onTogglePlayQuestion}
-              className={`p-2 rounded-lg border text-xs flex items-center space-x-1.5 transition-all cursor-pointer ${
+              className={`p-2 rounded-lg border text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm ${
                 isSpeakingQuestion
-                  ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg'
-                  : 'bg-zinc-800/80 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
+                  ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-900/50 animate-pulse'
+                  : 'bg-black/60 backdrop-blur-md border-white/15 text-zinc-200 hover:bg-black/80 hover:text-white'
               }`}
-              title={isSpeakingQuestion ? 'Stop speaking' : 'Hear question aloud'}
+              title={isSpeakingQuestion ? 'Stop speaking' : 'Hear interviewer narrate question aloud'}
             >
               {isSpeakingQuestion ? (
                 <>
@@ -187,76 +237,85 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
                 </>
               ) : (
                 <>
-                  <Volume2 className="w-3.5 h-3.5" />
-                  <span className="text-[11px] font-semibold">Repeat Question</span>
+                  <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[11px] font-semibold">Narrate Question</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* Central Persona Avatar & Waveform */}
-          <div className="flex flex-col items-center justify-center my-auto z-10 text-center py-4">
-            <div className="relative">
-              {isSpeakingQuestion && (
-                <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse scale-150" />
-              )}
-              <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-950 border-2 flex items-center justify-center font-bold text-2xl sm:text-3xl text-white shadow-2xl relative transition-transform duration-300 ${
-                isSpeakingQuestion ? 'border-emerald-400 scale-105' : 'border-zinc-700'
-              }`}>
-                {persona.name.charAt(0)}
+          {/* Center Voice Waveform Badge (Active when interviewer speaks) */}
+          {isSpeakingQuestion ? (
+            <div className="z-10 my-auto flex flex-col items-center justify-center animate-in fade-in duration-300 pointer-events-none">
+              <div className="bg-black/60 backdrop-blur-md border border-emerald-500/40 px-3.5 py-1.5 rounded-full flex items-center space-x-2.5 shadow-xl">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-xs font-bold text-emerald-300">Live Voice Narration</span>
+                <div className="flex items-center space-x-1">
+                  {[1, 2, 3, 4, 3, 2, 1].map((n, i) => (
+                    <span
+                      key={i}
+                      className="w-1 bg-emerald-400 rounded-full animate-bounce"
+                      style={{
+                        height: `${n * 3.5 + 4}px`,
+                        animationDelay: `${i * 90}ms`,
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
+          ) : (
+            <div className="my-auto" />
+          )}
 
-            <div className="mt-3">
-              <div className="font-bold text-sm sm:text-base text-white">{persona.name}</div>
-              <div className="text-xs text-zinc-400">{persona.role} &bull; {persona.companyTag}</div>
-            </div>
-
-            {/* Speaking audio wave indicator */}
-            {isSpeakingQuestion && (
-              <div className="mt-3 flex items-center space-x-1">
-                {[1, 2, 3, 4, 5, 4, 3, 2, 1].map((n, i) => (
-                  <span
-                    key={i}
-                    className="w-1 bg-emerald-400 rounded-full animate-bounce"
-                    style={{
-                      height: `${n * 4 + 4}px`,
-                      animationDelay: `${i * 80}ms`,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Bottom Question Transcript Banner */}
-          <div className="z-10 bg-black/80 backdrop-blur-md p-3 rounded-lg border border-white/10 space-y-1">
+          {/* Bottom Overlay: Persona Nameplate & Live Subtitles / Closed Caption */}
+          <div className="z-10 space-y-2">
+            {/* Persona Zoom-Style Nameplate */}
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                Question {currentTurnIndex + 1} of {totalQuestions}
+              <div className="flex items-center space-x-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-xs">
+                <User className="w-3.5 h-3.5 text-zinc-300" />
+                <span className="font-bold text-white">{persona.name}</span>
+                <span className="text-zinc-400 text-[11px]">&bull; {persona.role}</span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 rounded border border-white/5">
+                HD 1080p
               </span>
-              {currentTurn.question.adaptiveContext && (
-                <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 border border-blue-400/40 text-[9px] font-bold shadow-2xs">
-                  <Sparkles className="w-2.5 h-2.5 text-blue-300 animate-pulse" />
-                  <span>Adaptive Question</span>
-                </span>
-              )}
             </div>
 
-            {currentTurn.question.adaptiveContext && (
-              <p className="text-[10px] text-blue-200/90 font-medium leading-tight">
-                💡 {currentTurn.question.adaptiveContext}
-              </p>
-            )}
+            {/* Live Subtitle Transcript Banner */}
+            <div className="bg-black/85 backdrop-blur-md p-3 rounded-lg border border-white/15 space-y-1.5 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[9px] font-bold text-zinc-300 uppercase tracking-wider">
+                    CC
+                  </span>
+                  <span className="text-[10px] font-semibold text-zinc-400">
+                    Question {currentTurnIndex + 1} of {totalQuestions}
+                  </span>
+                </div>
+                {currentTurn.question.adaptiveContext && (
+                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 border border-blue-400/40 text-[9px] font-bold shadow-2xs">
+                    <Sparkles className="w-2.5 h-2.5 text-blue-300 animate-pulse" />
+                    <span>Adaptive Question</span>
+                  </span>
+                )}
+              </div>
 
-            <p className="text-xs sm:text-sm text-zinc-100 font-medium leading-snug line-clamp-3">
-              &ldquo;{currentTurn.question.conversationalLeadIn ? `${currentTurn.question.conversationalLeadIn} ` : ''}{currentTurn.question.question}&rdquo;
-            </p>
+              {currentTurn.question.adaptiveContext && (
+                <p className="text-[10px] text-blue-200/90 font-medium leading-tight">
+                  💡 {currentTurn.question.adaptiveContext}
+                </p>
+              )}
+
+              <p className="text-xs sm:text-sm text-zinc-100 font-medium leading-snug line-clamp-3">
+                &ldquo;{currentTurn.question.conversationalLeadIn ? `${currentTurn.question.conversationalLeadIn} ` : ''}{currentTurn.question.question}&rdquo;
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Tile 2: Candidate Live Video Stream with AI Posture & Body Language HUD */}
-        <div className="relative aspect-video sm:aspect-4/3 md:aspect-auto rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden flex flex-col justify-between p-4 shadow-inner min-h-[260px] sm:min-h-[320px]">
+        <div className="relative aspect-video sm:aspect-4/3 md:aspect-auto rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden flex flex-col justify-between p-4 shadow-inner min-h-[300px] sm:min-h-[360px]">
           {/* Webcam Background or Camera-Off Placeholder */}
           {cameraActive && videoStream ? (
             <video

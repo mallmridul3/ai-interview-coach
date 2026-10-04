@@ -769,9 +769,17 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
               {/* Persona Header */}
               <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-5">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 text-white font-bold text-sm flex items-center justify-center shadow-xs">
-                    {persona.name.charAt(0)}
-                  </div>
+                  {persona.avatarUrl ? (
+                    <img
+                      src={persona.avatarUrl}
+                      alt={persona.name}
+                      className="w-10 h-10 rounded-full object-cover object-top border border-zinc-200 shadow-xs shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-zinc-900 text-white font-bold text-sm flex items-center justify-center shadow-xs shrink-0">
+                      {persona.name.charAt(0)}
+                    </div>
+                  )}
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-bold text-zinc-900">{persona.name}</span>
