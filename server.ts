@@ -189,7 +189,18 @@ app.post("/api/tts", async (req, res) => {
     });
   }
 
-  // 4. Generate using gemini-3.1-flash-tts-preview
+  // 4. Generate using gemini-3.1-flash-tts-preview with authentic human conversational steering
+  const personaStyles: Record<string, string> = {
+    Kore: "Say in a warm, friendly, natural human conversational voice as a supportive hiring manager, with realistic breathing pauses and empathetic cadence:",
+    Fenrir: "Say in an authoritative, calm, natural human bar-raiser interviewer voice with steady, thoughtful cadence, realistic pauses, and clear inflection:",
+    Puck: "Say in an engaging, dynamic, conversational human interviewer voice with natural conversational rhythm, energetic inflection, and realistic pauses:",
+    Charon: "Say in a calm, analytical, measured human interviewer voice with thoughtful pacing, articulate pronunciation, and natural breathing pauses:",
+    Zephyr: "Say in a polished, balanced, friendly conversational executive interviewer voice with smooth natural inflection and realistic cadence:",
+  };
+
+  const stylePrefix = personaStyles[chosenVoice] || personaStyles.Kore;
+  const promptText = `${stylePrefix}\n"${cleanText}"`;
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-tts-preview",
@@ -197,7 +208,7 @@ app.post("/api/tts", async (req, res) => {
         {
           parts: [
             {
-              text: cleanText,
+              text: promptText,
             },
           ],
         },
@@ -246,22 +257,24 @@ app.post("/api/tts", async (req, res) => {
     }
   }
 
-  // 5. Resilient Studio Fallback: If dynamic generation is rate-limited, provide the persona's studio voice
-  const sampleFile = path.join(audioCacheDir, `sample_${chosenVoice}.json`);
-  if (fs.existsSync(sampleFile)) {
-    try {
-      const cachedSample = JSON.parse(fs.readFileSync(sampleFile, "utf-8"));
-      return res.json({
-        ...cachedSample,
-        voice: chosenVoice,
-        isStudioFallback: true,
-      });
-    } catch (e) {
-      // continue to browser fallback
+  // 5. If this is an intro sample, provide the persona's studio sample
+  if (isIntroSample) {
+    const sampleFile = path.join(audioCacheDir, `sample_${chosenVoice}.json`);
+    if (fs.existsSync(sampleFile)) {
+      try {
+        const cachedSample = JSON.parse(fs.readFileSync(sampleFile, "utf-8"));
+        return res.json({
+          ...cachedSample,
+          voice: chosenVoice,
+          isStudioFallback: true,
+        });
+      } catch (e) {
+        // continue
+      }
     }
   }
 
-  // 6. Final fallback to client-side persona-calibrated synthesis
+  // 6. Final fallback to client-side persona-calibrated synthesis of the actual question
   res.json({
     audioUrl: null,
     fallback: true,

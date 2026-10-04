@@ -19,6 +19,7 @@ import {
   AlertCircle,
   X,
   Maximize2,
+  Minimize2,
   CheckCircle2,
   ScanEye,
   User
@@ -31,6 +32,7 @@ import {
   ExecutivePresenceEvaluation 
 } from '../types';
 import { AudioWaveform } from './AudioWaveform';
+import { InterviewerVideoAvatar } from './InterviewerVideoAvatar';
 import { captureVideoFrame, analyzeSpeechDelivery } from '../utils/deliveryAnalyzer';
 import { speakText, stopSpeaking } from '../utils/speechUtils';
 
@@ -95,6 +97,8 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   isTranscribingAudio,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [hudFeedback, setHudFeedback] = useState<{
     posture: string;
@@ -105,6 +109,48 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
     eyeContact: 'Camera Centered',
     composure: 'Composed',
   });
+
+  const toggleFullscreen = () => {
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      if (next) {
+        if (containerRef.current?.requestFullscreen) {
+          containerRef.current.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsFullscreen(false);
+        return;
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        if (document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'INPUT') {
+          return;
+        }
+        toggleFullscreen();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const avatarSrc = persona.avatarUrl || PERSONA_AVATARS[persona.id] || PERSONA_AVATARS['alex-mentor'];
 
@@ -144,7 +190,14 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   };
 
   return (
-    <div className="bg-zinc-950 text-white rounded-2xl border border-zinc-800 shadow-2xl overflow-hidden mb-6 flex flex-col">
+    <div 
+      ref={containerRef}
+      className={`bg-zinc-950 text-white border border-zinc-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+        isFullscreen 
+          ? 'fixed inset-0 z-50 w-screen h-screen rounded-none mb-0 overflow-y-auto' 
+          : 'rounded-2xl mb-6'
+      }`}
+    >
       {/* Top Video Call Bar */}
       <div className="px-5 py-3 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -161,6 +214,28 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
         </div>
 
         <div className="flex items-center space-x-3 text-xs">
+          {/* Full Screen Mode Toggle Button */}
+          <button
+            type="button"
+            id="toggle-fullscreen-btn"
+            onClick={toggleFullscreen}
+            className="px-2.5 py-1 bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 rounded-md transition-all cursor-pointer flex items-center space-x-1.5"
+            title={isFullscreen ? 'Exit Fullscreen Mode (Esc or F)' : 'Enter Professional Fullscreen Mode (F)'}
+            aria-label={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-semibold text-[11px]">Exit Fullscreen</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="font-semibold text-[11px]">Full Screen</span>
+              </>
+            )}
+          </button>
+
           <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-zinc-800/80 rounded-md text-zinc-300 font-mono">
             <Clock className="w-3.5 h-3.5 text-zinc-400" />
             <span>{formatTimer(durationSeconds)}</span>
@@ -172,68 +247,45 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
       </div>
 
       {/* Main Video Conference Stage */}
-      <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-        {/* Tile 1: AI Interviewer Video Feed (Person in Front Narrating Question) */}
-        <div className={`relative aspect-video sm:aspect-4/3 md:aspect-auto rounded-xl bg-zinc-950 border overflow-hidden flex flex-col justify-between p-4 shadow-inner min-h-[300px] sm:min-h-[360px] transition-all duration-500 ${
+      <div className={`p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 ${isFullscreen ? 'flex-1 min-h-[60vh]' : 'flex-1'}`}>
+        {/* Tile 1: AI Interviewer Video Feed (Person in Front Speaking Question) */}
+        <div className={`relative aspect-video sm:aspect-4/3 md:aspect-auto rounded-xl bg-zinc-950 border overflow-hidden flex flex-col justify-between shadow-inner min-h-[320px] sm:min-h-[380px] transition-all duration-500 ${
           isSpeakingQuestion 
             ? 'border-emerald-500/80 ring-2 ring-emerald-500/50 shadow-[0_0_35px_rgba(16,185,129,0.25)]' 
             : 'border-zinc-800'
         }`}>
-          {/* Full-bleed realistic Interviewer Video Feed */}
-          <div className="absolute inset-0 overflow-hidden bg-zinc-950">
-            {!imageError ? (
-              <img
-                src={avatarSrc}
-                alt={persona.name}
-                className={`w-full h-full object-cover object-top filter transition-all duration-700 select-none ${
-                  isSpeakingQuestion
-                    ? 'scale-105 brightness-105 contrast-105'
-                    : 'scale-100 brightness-95'
-                }`}
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-zinc-800 to-zinc-950 text-white">
-                <div className="w-24 h-24 rounded-full bg-zinc-700/80 border-2 border-zinc-600 flex items-center justify-center text-3xl font-bold shadow-xl">
-                  {persona.name.charAt(0)}
-                </div>
-              </div>
-            )}
+          {/* Animated realistic speaking video feed with lip-sync, blinking & breathing */}
+          <InterviewerVideoAvatar
+            persona={persona}
+            isSpeaking={isSpeakingQuestion}
+            isCandidateSpeaking={isRecording}
+            speakingText={currentTurn.question.question}
+            className="absolute inset-0 w-full h-full"
+          />
 
-            {/* Cinematic Lighting & Video Call Vignette Overlay */}
-            <div className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${
-              isSpeakingQuestion
-                ? 'bg-gradient-to-t from-black/90 via-black/30 to-black/45'
-                : 'bg-gradient-to-t from-black/85 via-black/25 to-black/35'
-            }`} />
-
-            {/* Subtle Camera Perspective Guide / Frame Grid */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_40%,transparent_65%,rgba(0,0,0,0.45)_100%)]" />
-          </div>
-
-          {/* Top Interviewer Status & Voice Controls */}
-          <div className="flex items-center justify-between z-10">
+          {/* Top Controls Overlay on Interviewer Video */}
+          <div className="flex items-center justify-between p-4 z-20">
             <div className="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-xs">
-              <span className={`w-2 h-2 rounded-full ${isSpeakingQuestion ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
+              <span className={`w-2 h-2 rounded-full ${isSpeakingQuestion ? 'bg-emerald-400 animate-ping' : isRecording ? 'bg-blue-400 animate-pulse' : 'bg-amber-400'}`} />
               <span className="font-semibold text-zinc-100">
-                {isSpeakingQuestion ? 'Interviewer Narrating Question...' : 'Listening to You'}
+                {isSpeakingQuestion ? 'Interviewer Speaking Question...' : isRecording ? 'Listening to You' : 'Attentive Interviewer'}
               </span>
             </div>
 
             <button
               type="button"
               onClick={onTogglePlayQuestion}
-              className={`p-2 rounded-lg border text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm ${
+              className={`px-3 py-1.5 rounded-lg border text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm ${
                 isSpeakingQuestion
                   ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-900/50 animate-pulse'
-                  : 'bg-black/60 backdrop-blur-md border-white/15 text-zinc-200 hover:bg-black/80 hover:text-white'
+                  : 'bg-black/70 backdrop-blur-md border-white/15 text-zinc-200 hover:bg-black/90 hover:text-white'
               }`}
-              title={isSpeakingQuestion ? 'Stop speaking' : 'Hear interviewer narrate question aloud'}
+              title={isSpeakingQuestion ? 'Stop voice narration' : 'Hear interviewer speak question aloud'}
             >
               {isSpeakingQuestion ? (
                 <>
                   <Square className="w-3.5 h-3.5 fill-current" />
-                  <span className="text-[11px] font-semibold">Speaking...</span>
+                  <span className="text-[11px] font-semibold">Stop Voice</span>
                 </>
               ) : (
                 <>
@@ -244,49 +296,20 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
             </button>
           </div>
 
-          {/* Center Voice Waveform Badge (Active when interviewer speaks) */}
-          {isSpeakingQuestion ? (
-            <div className="z-10 my-auto flex flex-col items-center justify-center animate-in fade-in duration-300 pointer-events-none">
-              <div className="bg-black/60 backdrop-blur-md border border-emerald-500/40 px-3.5 py-1.5 rounded-full flex items-center space-x-2.5 shadow-xl">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-xs font-bold text-emerald-300">Live Voice Narration</span>
-                <div className="flex items-center space-x-1">
-                  {[1, 2, 3, 4, 3, 2, 1].map((n, i) => (
-                    <span
-                      key={i}
-                      className="w-1 bg-emerald-400 rounded-full animate-bounce"
-                      style={{
-                        height: `${n * 3.5 + 4}px`,
-                        animationDelay: `${i * 90}ms`,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="my-auto" />
-          )}
+          <div className="flex-1" />
 
-          {/* Bottom Overlay: Persona Nameplate & Live Subtitles / Closed Caption */}
-          <div className="z-10 space-y-2">
-            {/* Persona Zoom-Style Nameplate */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-xs">
-                <User className="w-3.5 h-3.5 text-zinc-300" />
-                <span className="font-bold text-white">{persona.name}</span>
-                <span className="text-zinc-400 text-[11px]">&bull; {persona.role}</span>
-              </div>
-              <span className="text-[10px] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 rounded border border-white/5">
-                HD 1080p
-              </span>
-            </div>
-
-            {/* Live Subtitle Transcript Banner */}
-            <div className="bg-black/85 backdrop-blur-md p-3 rounded-lg border border-white/15 space-y-1.5 shadow-xl">
-              <div className="flex items-center justify-between">
+          {/* Bottom Live Subtitle Transcript Banner */}
+          <div className="p-3 sm:p-4 z-20">
+            <div className={`backdrop-blur-md p-3 rounded-xl border transition-all duration-300 shadow-xl ${
+              isSpeakingQuestion
+                ? 'bg-black/90 border-emerald-500/40 ring-1 ring-emerald-500/30'
+                : 'bg-black/85 border-white/15'
+            }`}>
+              <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center space-x-1.5">
-                  <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[9px] font-bold text-zinc-300 uppercase tracking-wider">
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                    isSpeakingQuestion ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/30' : 'bg-zinc-800 text-zinc-300'
+                  }`}>
                     CC
                   </span>
                   <span className="text-[10px] font-semibold text-zinc-400">
@@ -302,13 +325,24 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
               </div>
 
               {currentTurn.question.adaptiveContext && (
-                <p className="text-[10px] text-blue-200/90 font-medium leading-tight">
+                <p className="text-[10px] text-blue-200/90 font-medium leading-tight mb-1">
                   💡 {currentTurn.question.adaptiveContext}
                 </p>
               )}
 
-              <p className="text-xs sm:text-sm text-zinc-100 font-medium leading-snug line-clamp-3">
-                &ldquo;{currentTurn.question.conversationalLeadIn ? `${currentTurn.question.conversationalLeadIn} ` : ''}{currentTurn.question.question}&rdquo;
+              <p className={`text-xs sm:text-sm font-medium leading-relaxed transition-colors duration-300 ${
+                isSpeakingQuestion ? 'text-white' : 'text-zinc-200'
+              }`}>
+                &ldquo;
+                {currentTurn.question.conversationalLeadIn && (
+                  <span className={isSpeakingQuestion ? 'text-emerald-300 font-semibold' : 'text-zinc-300'}>
+                    {currentTurn.question.conversationalLeadIn}{' '}
+                  </span>
+                )}
+                <span className={isSpeakingQuestion ? 'text-zinc-100 font-semibold drop-shadow-sm' : ''}>
+                  {currentTurn.question.question}
+                </span>
+                &rdquo;
               </p>
             </div>
           </div>

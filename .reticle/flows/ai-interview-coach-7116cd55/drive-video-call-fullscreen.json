@@ -1,8 +1,6 @@
 {
   "version": 2,
-  "name": "drive-user-navigates-to-the-10-behavioral-question-ban",
-  "intent": "User navigates to the 10 Behavioral question bank from the top navigation",
-  "intentId": "flow:drive-user-navigates-to-the-10-behavioral-question-ban",
+  "name": "drive-video-call-fullscreen",
   "projectId": "ai-interview-coach-7116cd55",
   "startPath": "/",
   "requires": [
@@ -20,7 +18,7 @@
   "author": {
     "agent": "reticle-cli"
   },
-  "createdAt": 1790856468295,
+  "createdAt": 1790934000000,
   "steps": [
     {
       "tool": "reticle_act",
@@ -31,7 +29,7 @@
       },
       "source": {
         "file": "src/components/Header.tsx",
-        "line": 157
+        "line": 158
       },
       "action": "click",
       "args": {},
@@ -54,6 +52,10 @@
       },
       "action": "click",
       "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Practice in Studio"
+      },
       "page": "/"
     },
     {
@@ -61,51 +63,57 @@
       "anchor": {
         "kind": "role",
         "role": "button",
-        "name": "STAR Story Vault ( 2 )"
+        "name": "Practice Conflict & Disagreement in Studio"
       },
       "source": {
         "file": "src/components/BehavioralQuestionsView.tsx",
-        "line": 316
-      },
-      "action": "click",
-      "args": {},
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "10 Core Behavioral Questions"
-      },
-      "source": {
-        "file": "src/components/BehavioralQuestionsView.tsx",
-        "line": 305
+        "line": 386
       },
       "action": "click",
       "args": {},
       "expect": {
-        "kind": "allOf",
-        "predicates": [
-          {
-            "kind": "text",
-            "contains": "Why Hiring Committees Ask This:"
-          },
-          {
-            "kind": "text",
-            "contains": "10 Core Behavioral Questions"
-          }
-        ]
+        "kind": "text",
+        "contains": "Live 1-on-1 Call"
       },
       "page": "/"
-    }
-  ],
-  "learned": [
+    },
     {
-      "kind": "request-never-settled",
-      "step": 0,
-      "state": "open",
-      "cleanRuns": 1
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Full Screen"
+      },
+      "source": {
+        "file": "src/components/VideoInterviewRoom.tsx",
+        "line": 165
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Exit Fullscreen"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Exit Full Screen"
+      },
+      "source": {
+        "file": "src/components/VideoInterviewRoom.tsx",
+        "line": 165
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Full Screen"
+      },
+      "page": "/"
     }
   ]
 }

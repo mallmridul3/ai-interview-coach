@@ -384,6 +384,8 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
                     <div className="flex items-center space-x-2 self-end sm:self-center shrink-0">
                       <button
                         type="button"
+                        id={`practice-question-btn-${item.id}`}
+                        aria-label={`Practice ${item.title} in Studio`}
                         onClick={(e) => {
                           e.stopPropagation();
                           onPracticeQuestion(item.question, item.category);

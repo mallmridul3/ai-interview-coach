@@ -61,6 +61,68 @@ let currentSourceNode: AudioBufferSourceNode | null = null;
 let currentAudioElement: HTMLAudioElement | null = null;
 let activeAbortController: AbortController | null = null;
 
+// Speech Viseme & Articulation for realistic interviewer speaking animation
+export interface SpeechArticulationState {
+  isSpeaking: boolean;
+  volume: number; // 0 to 1
+  mouthOpening: number; // 0 to 1
+  phonemeShape: 'rest' | 'aa' | 'ee' | 'oo' | 'mm';
+}
+
+type ArticulationListener = (state: SpeechArticulationState) => void;
+const articulationListeners = new Set<ArticulationListener>();
+
+export function subscribeSpeechArticulation(listener: ArticulationListener): () => void {
+  articulationListeners.add(listener);
+  return () => {
+    articulationListeners.delete(listener);
+  };
+}
+
+let activeArticulationInterval: any = null;
+
+export function startSpeechArticulationLoop() {
+  if (activeArticulationInterval) return;
+  let phase = 0;
+  activeArticulationInterval = setInterval(() => {
+    phase += 0.42;
+    // Viseme oscillation mimicking human syllable cadence (4-5 Hz)
+    const openAmount = 0.2 + 0.65 * Math.abs(Math.sin(phase) * Math.cos(phase * 0.65));
+    const shapes: ('aa' | 'ee' | 'oo' | 'mm')[] = ['aa', 'ee', 'oo', 'mm'];
+    const shape = shapes[Math.floor((phase * 1.3) % shapes.length)];
+    const state: SpeechArticulationState = {
+      isSpeaking: true,
+      volume: 0.35 + 0.55 * Math.abs(Math.sin(phase * 1.1)),
+      mouthOpening: openAmount,
+      phonemeShape: shape,
+    };
+    articulationListeners.forEach((fn) => {
+      try {
+        fn(state);
+      } catch {}
+    });
+  }, 45);
+}
+
+export function stopSpeechArticulationLoop() {
+  if (activeArticulationInterval) {
+    clearInterval(activeArticulationInterval);
+    activeArticulationInterval = null;
+  }
+  const restState: SpeechArticulationState = {
+    isSpeaking: false,
+    volume: 0,
+    mouthOpening: 0,
+    phonemeShape: 'rest',
+  };
+  articulationListeners.forEach((fn) => {
+    try {
+      fn(restState);
+    } catch {}
+  });
+}
+
+
 export function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!audioContext) {
@@ -105,10 +167,13 @@ function playAudioBuffer(
     source.connect(ctx.destination);
     currentSourceNode = source;
 
+    startSpeechArticulationLoop();
+
     let ended = false;
     const finish = () => {
       if (ended) return;
       ended = true;
+      stopSpeechArticulationLoop();
       if (currentSourceNode === source) {
         currentSourceNode = null;
       }
@@ -120,6 +185,7 @@ function playAudioBuffer(
 
     return () => {
       ended = true;
+      stopSpeechArticulationLoop();
       try {
         source.stop();
       } catch {}
@@ -128,6 +194,7 @@ function playAudioBuffer(
       }
     };
   } catch {
+    stopSpeechArticulationLoop();
     onEnd?.();
     return () => {};
   }
@@ -145,7 +212,10 @@ function playHtmlAudioUrl(
     currentAudioElement = audio;
     audio.playbackRate = speed;
 
+    startSpeechArticulationLoop();
+
     audio.onended = () => {
+      stopSpeechArticulationLoop();
       if (currentAudioElement === audio) {
         currentAudioElement = null;
       }
@@ -153,6 +223,7 @@ function playHtmlAudioUrl(
     };
 
     audio.onerror = () => {
+      stopSpeechArticulationLoop();
       if (currentAudioElement === audio) {
         currentAudioElement = null;
       }
@@ -166,6 +237,7 @@ function playHtmlAudioUrl(
     const playPromise = audio.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
+        stopSpeechArticulationLoop();
         if (currentAudioElement === audio) {
           currentAudioElement = null;
         }
@@ -177,6 +249,7 @@ function playHtmlAudioUrl(
       });
     }
   } catch {
+    stopSpeechArticulationLoop();
     if (fallbackText) {
       fallbackBrowserSpeech(fallbackText, onEnd, speed, voiceId);
     } else {
@@ -185,6 +258,7 @@ function playHtmlAudioUrl(
   }
 
   return () => {
+    stopSpeechArticulationLoop();
     if (currentAudioElement) {
       try {
         currentAudioElement.pause();
@@ -675,17 +749,21 @@ export function fallbackBrowserSpeech(
     .replace(/\bvs\.\b/gi, 'versus');
 
   const utterance = new SpeechSynthesisUtterance(humanizedText);
-  // Keep pitch at 1.0 to avoid the browser's metallic phase-vocoder / robotic distortion
+  // Calibrated natural conversational pitch & pacing (0.93 rate for human breathing room)
   utterance.pitch = 1.0;
-  utterance.rate = 1.0;
+  utterance.rate = Math.max(0.88, Math.min(1.02, rate || 0.94));
 
   let isFinished = false;
   const finishOnce = () => {
     if (isFinished) return;
     isFinished = true;
+    stopSpeechArticulationLoop();
     onEnd?.();
   };
 
+  utterance.onstart = () => {
+    startSpeechArticulationLoop();
+  };
   utterance.onend = finishOnce;
   utterance.onerror = finishOnce;
 
@@ -796,11 +874,6 @@ export function speakText(
         playAudioBuffer(res.buffer, onEnd, speed);
       } else if (res?.audioUrl) {
         playHtmlAudioUrl(res.audioUrl, onEnd, speed, text, voice);
-      } else if (audioBufferCache.has(sampleKey)) {
-        // Fluid transition: use the speaker model's pre-warmed studio sample buffer!
-        playAudioBuffer(audioBufferCache.get(sampleKey)!, onEnd, speed);
-      } else if (audioCache.has(sampleKey)) {
-        playHtmlAudioUrl(audioCache.get(sampleKey)!, onEnd, speed, text, voice);
       } else {
         fallbackBrowserSpeech(text, onEnd, speed, voice);
       }
@@ -845,20 +918,14 @@ export function speakText(
         }
         return { audioUrl: data.audioUrl, buffer: buf || undefined };
       } else {
-        throw new Error('No audioUrl');
+        // Fall back to client synthesis of the actual question
+        fallbackBrowserSpeech(text, onEnd, speed, voice);
+        return null;
       }
     } catch (err: any) {
       if (err.name === 'AbortError' || cancelled) return null;
-      // Resilient voice preservation: When a speaker model like Fenrir is selected,
-      // fluidly transition to the speaker model's pre-warmed studio buffer rather than
-      // abruptly dropping to the browser's robotic synthesis!
-      if (audioBufferCache.has(sampleKey)) {
-        playAudioBuffer(audioBufferCache.get(sampleKey)!, onEnd, speed);
-      } else if (audioCache.has(sampleKey)) {
-        playHtmlAudioUrl(audioCache.get(sampleKey)!, onEnd, speed, text, voice);
-      } else {
-        fallbackBrowserSpeech(text, onEnd, speed, voice);
-      }
+      // Resilient voice preservation: Speak the actual question using calibrated browser synthesis
+      fallbackBrowserSpeech(text, onEnd, speed, voice);
       return null;
     } finally {
       inFlightFetches.delete(cacheKey);
@@ -877,6 +944,7 @@ export function speakText(
 }
 
 export function stopSpeaking(): void {
+  stopSpeechArticulationLoop();
   if (activeAbortController) {
     activeAbortController.abort();
     activeAbortController = null;
