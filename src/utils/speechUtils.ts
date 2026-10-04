@@ -389,58 +389,57 @@ interface PersonaVocalProfile {
 }
 
 const BANNED_ROBOTIC_PATTERNS = [
-  'desktop', 'david', 'zira', 'mark', 'george', 'espeak', 'robot', 'klatt',
-  'microsoft david', 'microsoft zira', 'sapi'
+  'espeak', 'robot', 'klatt'
 ];
 
 const PERSONA_VOCAL_PROFILES: Record<AiVoiceOption['id'], PersonaVocalProfile> = {
   Puck: {
     targetGender: 'male',
-    pitch: 1.0,
-    rateMultiplier: 0.98,
+    pitch: 0.94,
+    rateMultiplier: 0.96,
     namePreferences: [
-      'natural', 'neural', 'online', 'ryan', 'guy', 'steffan', 'eric', 'kevin',
-      'google uk english male', 'google us english', 'daniel', 'nathan'
+      'natural', 'neural', 'online', 'ryan', 'guy', 'david', 'mark', 'steffan', 'eric', 'kevin',
+      'google uk english male', 'daniel', 'nathan'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Charon: {
     targetGender: 'male',
-    pitch: 1.0,
-    rateMultiplier: 0.96,
+    pitch: 0.93,
+    rateMultiplier: 0.95,
     namePreferences: [
-      'natural', 'neural', 'online', 'steffan', 'guy', 'ryan', 'brian', 'christopher',
+      'natural', 'neural', 'online', 'david', 'mark', 'steffan', 'guy', 'ryan', 'brian', 'christopher',
       'google uk english male', 'daniel', 'oliver'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Fenrir: {
     targetGender: 'male',
-    pitch: 1.0,
-    rateMultiplier: 0.95,
+    pitch: 0.92,
+    rateMultiplier: 0.94,
     namePreferences: [
-      'natural', 'neural', 'online', 'christopher', 'guy', 'ryan', 'brian', 'steffan',
+      'natural', 'neural', 'online', 'david', 'mark', 'christopher', 'guy', 'ryan', 'brian', 'steffan',
       'google uk english male', 'daniel', 'oliver'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Zephyr: {
     targetGender: 'female',
-    pitch: 1.0,
+    pitch: 1.02,
     rateMultiplier: 0.98,
     namePreferences: [
       'natural', 'neural', 'online', 'jenny', 'aria', 'michelle', 'serena', 'sonia',
-      'google uk english female', 'google us english', 'samantha', 'victoria'
+      'google uk english female', 'google us english', 'zira', 'samantha', 'victoria'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Kore: {
     targetGender: 'female',
-    pitch: 1.0,
-    rateMultiplier: 0.97,
+    pitch: 1.02,
+    rateMultiplier: 0.98,
     namePreferences: [
       'natural', 'neural', 'online', 'jenny', 'aria', 'ava', 'emma', 'sonia',
-      'google us english', 'google uk english female', 'samantha', 'victoria'
+      'google us english', 'google uk english female', 'zira', 'samantha', 'victoria'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
@@ -460,7 +459,7 @@ function scoreVoiceForProfile(v: SpeechSynthesisVoice, profile: PersonaVocalProf
     return -999999;
   }
 
-  // 2. Strictly reject legacy robotic synthesizers (Windows desktop SAPI, etc.)
+  // 2. Reject only broken synthesizers (espeak, klatt, etc.)
   if (profile.disallowedPatterns.some((dis) => name.includes(dis))) {
     return -999999;
   }
@@ -479,7 +478,12 @@ function scoreVoiceForProfile(v: SpeechSynthesisVoice, profile: PersonaVocalProf
     score += 3000;
   }
 
-  // 4. Target Gender Matching (+800 pts if matched, -1200 pts if mismatched)
+  // Slight penalty for legacy desktop SAPI voices so cloud neural voices take precedence if available
+  if (name.includes('desktop') || name.includes('sapi')) {
+    score -= 300;
+  }
+
+  // 4. Decisive Target Gender Matching (+4000 pts if matched, -8000 pts if mismatched)
   const isMaleName =
     name.includes('male') ||
     name.includes('guy') ||
@@ -491,6 +495,10 @@ function scoreVoiceForProfile(v: SpeechSynthesisVoice, profile: PersonaVocalProf
     name.includes('george') ||
     name.includes('brian') ||
     name.includes('oliver') ||
+    name.includes('david') ||
+    name.includes('mark') ||
+    name.includes('kevin') ||
+    name.includes('nathan') ||
     name.includes('james');
 
   const isFemaleName =
@@ -502,14 +510,16 @@ function scoreVoiceForProfile(v: SpeechSynthesisVoice, profile: PersonaVocalProf
     name.includes('ava') ||
     name.includes('emma') ||
     name.includes('serena') ||
-    name.includes('sonia');
+    name.includes('sonia') ||
+    name.includes('zira') ||
+    name === 'google us english';
 
   if (profile.targetGender === 'male') {
-    if (isMaleName) score += 800;
-    else if (isFemaleName) score -= 1200;
+    if (isMaleName) score += 4000;
+    else if (isFemaleName) score -= 8000;
   } else if (profile.targetGender === 'female') {
-    if (isFemaleName) score += 800;
-    else if (isMaleName) score -= 1200;
+    if (isFemaleName) score += 4000;
+    else if (isMaleName) score -= 8000;
   }
 
   // 5. Persona-specific keyword affinity
@@ -796,10 +806,15 @@ export function fallbackBrowserSpeech(
     .replace(/\bi\.e\.\b/gi, 'that is')
     .replace(/\bvs\.\b/gi, 'versus');
 
+  const profile = PERSONA_VOCAL_PROFILES[voiceId] || PERSONA_VOCAL_PROFILES.Kore;
+  const isMale = profile.targetGender === 'male';
+
   const utterance = new SpeechSynthesisUtterance(humanizedText);
-  // Natural conversational pitch & pacing (0.97 for human cadence)
-  utterance.pitch = 1.0;
-  utterance.rate = Math.max(0.92, Math.min(1.04, rate || 0.97));
+  // Human vocal tract calibration:
+  // Male interviewers: deep, warm, confident resonance (pitch 0.94, rate 0.96)
+  // Female interviewers: clear, articulate, dynamic cadence (pitch 1.02, rate 0.98)
+  utterance.pitch = profile.pitch || (isMale ? 0.94 : 1.02);
+  utterance.rate = Math.max(0.92, Math.min(1.04, rate || profile.rateMultiplier || (isMale ? 0.96 : 0.98)));
 
   let isFinished = false;
   const finishOnce = () => {

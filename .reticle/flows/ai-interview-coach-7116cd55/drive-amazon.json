@@ -80,6 +80,11 @@
       "step": 2,
       "state": "open",
       "cleanRuns": 0
+    },
+    {
+      "kind": "request-never-settled",
+      "step": 0,
+      "state": "open"
     }
   ]
 }

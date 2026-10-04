@@ -26,7 +26,7 @@ import {
 } from './types';
 import { INTERVIEWER_PERSONAS } from './data/mockData';
 import { initAuth, getAccessToken } from './utils/firebaseAuth';
-import { stopSpeaking, preloadSpeech } from './utils/speechUtils';
+import { stopSpeaking, preloadSpeech, getVoiceForPersonaId } from './utils/speechUtils';
 import { recordTurnInMemory, recordSessionCompletedInMemory, loadCandidateMemory } from './utils/candidateMemory';
 
 export default function App() {
@@ -203,9 +203,13 @@ export default function App() {
       setInterviewState('active');
 
       // Pre-fetch question voice audio buffers in background for fluid transitions
+      const personaVoice = getVoiceForPersonaId(setup.interviewerPersonaId);
       newTurns.forEach((t) => {
         if (t.question?.question) {
-          preloadSpeech(t.question.question);
+          const spoken = t.question.conversationalLeadIn
+            ? `${t.question.conversationalLeadIn} ${t.question.question}`
+            : t.question.question;
+          preloadSpeech(spoken, personaVoice);
         }
       });
     } catch (err: any) {
@@ -259,7 +263,8 @@ export default function App() {
     setCurrentTab('mock');
 
     if (newTurns[0]?.question?.question) {
-      preloadSpeech(newTurns[0].question.question);
+      const personaVoice = getVoiceForPersonaId(stageSetup.interviewerPersonaId);
+      preloadSpeech(newTurns[0].question.question, personaVoice);
     }
   };
 
@@ -299,7 +304,7 @@ export default function App() {
     setIsSavedSession(false);
     setInterviewState('active');
     setCurrentTab('mock');
-    preloadSpeech(questionText);
+    preloadSpeech(questionText, getVoiceForPersonaId(singleSetup.interviewerPersonaId));
   };
 
   // 3. Evaluate Answer for Current Turn with Speech Delivery, Video Presence, and Cross-Turn Progression

@@ -177,59 +177,54 @@ app.post("/api/tts", async (req, res) => {
   }
 
   // 4. Generate using gemini-3.1-flash-tts-preview with clean, natural conversational text
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-tts-preview",
-      contents: [
-        {
-          parts: [
-            {
-              text: cleanText,
+  const ttsModels = ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview"];
+  for (const model of ttsModels) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: [
+          {
+            parts: [
+              {
+                text: cleanText,
+              },
+            ],
+          },
+        ],
+        config: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: chosenVoice },
             },
-          ],
-        },
-      ],
-      config: {
-        responseModalities: ["AUDIO"],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: chosenVoice },
           },
         },
-      },
-    });
+      });
 
-    const audioPart = response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-    if (audioPart?.data) {
-      const rawPcm = Buffer.from(audioPart.data, "base64");
-      const wavBuffer = pcmToWav(rawPcm, 24000, 1, 16);
-      const base64Wav = wavBuffer.toString("base64");
+      const audioPart = response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+      if (audioPart?.data) {
+        const rawPcm = Buffer.from(audioPart.data, "base64");
+        const wavBuffer = pcmToWav(rawPcm, 24000, 1, 16);
+        const base64Wav = wavBuffer.toString("base64");
 
-      const resultPayload = {
-        audioUrl: `data:audio/wav;base64,${base64Wav}`,
-        mimeType: "audio/wav",
-        voice: chosenVoice,
-      };
+        const resultPayload = {
+          audioUrl: `data:audio/wav;base64,${base64Wav}`,
+          mimeType: "audio/wav",
+          voice: chosenVoice,
+        };
 
-      // Save to persistent disk cache
-      try {
-        fs.writeFileSync(cacheFilePath, JSON.stringify(resultPayload));
-      } catch (saveErr) {
-        // non-blocking cache write
+        // Save to persistent disk cache
+        try {
+          fs.writeFileSync(cacheFilePath, JSON.stringify(resultPayload));
+        } catch (saveErr) {
+          // non-blocking cache write
+        }
+
+        return res.json(resultPayload);
       }
-
-      return res.json(resultPayload);
-    }
-  } catch (err: any) {
-    const isQuota =
-      err?.status === 429 ||
-      err?.message?.includes("429") ||
-      err?.message?.includes("Quota exceeded") ||
-      err?.message?.includes("RESOURCE_EXHAUSTED");
-
-    if (isQuota) {
-      // Engage a 60s cooldown silently to prevent unneeded API hits and noise
-      ttsQuotaCooldownUntil = Date.now() + 60 * 1000;
+    } catch (err: any) {
+      // Continue to next model if quota exceeded or failed
+      continue;
     }
   }
 

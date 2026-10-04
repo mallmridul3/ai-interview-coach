@@ -176,7 +176,7 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
       ref={containerRef}
       className={`bg-zinc-950 text-white border border-zinc-800 shadow-2xl flex flex-col transition-all duration-300 ${
         isFullscreen 
-          ? 'fixed inset-0 z-50 w-screen h-screen rounded-none mb-0 overflow-y-auto' 
+          ? 'fixed inset-0 z-50 w-screen h-screen rounded-none mb-0 overflow-hidden' 
           : 'rounded-2xl mb-6 overflow-hidden'
       }`}
     >
@@ -229,12 +229,14 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
       </div>
 
       {/* Main Conference Stage */}
-      <div className={`relative p-3 sm:p-5 flex flex-col justify-center items-center ${
-        isFullscreen ? 'flex-1 min-h-[70vh]' : 'flex-1'
+      <div className={`relative p-2 sm:p-4 flex flex-col justify-center items-center ${
+        isFullscreen ? 'flex-1 min-h-0' : 'flex-1'
       }`}>
         {layoutMode === 'pip' ? (
           /* Mode 1: Clean PiP Stage (Interviewer is the full hero; candidate camera in corner) */
-          <div className="relative w-full aspect-16/10 sm:aspect-16/9 max-h-[68vh] rounded-2xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-2xl flex items-center justify-center">
+          <div className={`relative w-full rounded-2xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-2xl flex items-center justify-center ${
+            isFullscreen ? 'h-full max-h-[calc(100vh-210px)] max-w-7xl mx-auto' : 'aspect-16/10 sm:aspect-16/9 max-h-[68vh]'
+          }`}>
             {/* Hero Interviewer Video Feed */}
             <InterviewerVideoAvatar
               persona={persona}
@@ -270,7 +272,7 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
 
             {/* Sleek Live Subtitles (CC) Floating Pill at the Bottom Edge */}
             {showCaptions && (
-              <div className="absolute bottom-4 left-6 right-44 sm:right-56 z-10 flex justify-center pointer-events-none">
+              <div className="absolute bottom-4 left-6 right-44 sm:right-56 z-20 flex justify-center pointer-events-none">
                 <div className={`backdrop-blur-md px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl border max-w-xl text-center shadow-2xl transition-all duration-300 pointer-events-auto ${
                   isSpeakingQuestion 
                     ? 'bg-black/85 border-emerald-500/50 ring-1 ring-emerald-500/40 text-white' 
@@ -288,7 +290,9 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
           </div>
         ) : (
           /* Mode 2: Clean Side-by-Side Grid Stage */
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[68vh]">
+          <div className={`w-full grid grid-cols-1 md:grid-cols-2 gap-4 ${
+            isFullscreen ? 'h-full max-h-[calc(100vh-210px)] max-w-7xl mx-auto' : 'max-h-[68vh]'
+          }`}>
             {/* Interviewer Tile */}
             <div className="relative aspect-video rounded-2xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-xl">
               <InterviewerVideoAvatar

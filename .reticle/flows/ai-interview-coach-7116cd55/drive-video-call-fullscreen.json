@@ -120,12 +120,14 @@
     {
       "kind": "request-never-settled",
       "step": 2,
-      "state": "open"
+      "state": "open",
+      "cleanRuns": 1
     },
     {
       "kind": "duplicate-request",
       "step": -1,
-      "state": "open"
+      "state": "open",
+      "cleanRuns": 1
     }
   ]
 }
