@@ -677,6 +677,7 @@ export default function App() {
         onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
         onOpenVoiceSettings={() => setIsVoiceSettingsOpen(true)}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        isAuthModalOpen={isAuthModalOpen}
         onLogout={handleLogout}
       />
 

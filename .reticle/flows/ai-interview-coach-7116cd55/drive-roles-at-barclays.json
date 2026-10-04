@@ -2,37 +2,6 @@
   "version": 2,
   "name": "drive-roles-at-barclays",
   "projectId": "ai-interview-coach-7116cd55",
-  "createdAt": 1790922009179,
-  "steps": [
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Hiring Process"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "textbox",
-        "name": "e.g. JPMorgan Chase, Barclays, Google, Amazon..."
-      },
-      "args": {
-        "value": "Barclays"
-      },
-      "action": "fill",
-      "expect": {
-        "kind": "text",
-        "contains": "Roles at Barclays:"
-      },
-      "page": "/"
-    }
-  ],
   "startPath": "/",
   "requires": [
     {
@@ -48,5 +17,51 @@
   ],
   "author": {
     "agent": "reticle-cli"
-  }
+  },
+  "createdAt": 1790922009179,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Hiring Process"
+      },
+      "source": {
+        "file": "src/components/Header.tsx",
+        "line": 178
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "e.g. JPMorgan Chase, Barclays, Google, Amazon, Nvidia..."
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 355
+      },
+      "action": "fill",
+      "args": {
+        "value": "Barclays"
+      },
+      "expect": {
+        "kind": "text",
+        "contains": "Roles at Barclays:"
+      },
+      "page": "/"
+    }
+  ],
+  "learned": [
+    {
+      "kind": "request-never-settled",
+      "step": 0,
+      "state": "guarded"
+    }
+  ]
 }

@@ -2,91 +2,6 @@
   "version": 2,
   "name": "drive-sign-in-to-your-account",
   "projectId": "ai-interview-coach-7116cd55",
-  "createdAt": 1790861239491,
-  "steps": [
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Sign In"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Sign In to Your Account"
-      },
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "textbox",
-        "name": "e.g. name@example.com or username"
-      },
-      "args": {
-        "value": "mallmridul3"
-      },
-      "action": "fill",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "textbox",
-        "name": "••••••••"
-      },
-      "args": {
-        "value": "admin2026"
-      },
-      "action": "fill",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Sign In"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Admin: mallmridul3"
-      },
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Hiring Process"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Targeted Company Hiring Process"
-      },
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Google"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    }
-  ],
   "startPath": "/",
   "requires": [
     {
@@ -102,5 +17,114 @@
   ],
   "author": {
     "agent": "reticle-cli"
-  }
+  },
+  "createdAt": 1790861239491,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign In"
+      },
+      "source": {
+        "file": "src/components/PostInterviewAuthModal.tsx",
+        "line": 296
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Sign In to Your Account"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "e.g. name@example.com or username"
+      },
+      "source": {
+        "file": "src/components/PostInterviewAuthModal.tsx",
+        "line": 263
+      },
+      "action": "fill",
+      "args": {
+        "value": "mallmridul3"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "••••••••"
+      },
+      "source": {
+        "file": "src/components/PostInterviewAuthModal.tsx",
+        "line": 278
+      },
+      "action": "fill",
+      "args": {
+        "value": "admin2026"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign In"
+      },
+      "source": {
+        "file": "src/components/PostInterviewAuthModal.tsx",
+        "line": 296
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Admin: mallmridul3"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Hiring Process"
+      },
+      "source": {
+        "file": "src/components/Header.tsx",
+        "line": 180
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Targeted Company Hiring Process"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Google"
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 561
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    }
+  ]
 }

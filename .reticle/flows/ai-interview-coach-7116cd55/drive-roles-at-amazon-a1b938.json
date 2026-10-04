@@ -2,61 +2,6 @@
   "version": 2,
   "name": "drive-roles-at-amazon-a1b938",
   "projectId": "ai-interview-coach-7116cd55",
-  "createdAt": 1790862739832,
-  "steps": [
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Hiring Process"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Roles at Amazon:"
-      },
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Google"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Roles at Google:"
-      },
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Nvidia"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Goldman Sachs"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    }
-  ],
   "startPath": "/",
   "requires": [
     {
@@ -72,5 +17,76 @@
   ],
   "author": {
     "agent": "reticle-cli"
-  }
+  },
+  "createdAt": 1790862739832,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Hiring Process"
+      },
+      "source": {
+        "file": "src/components/Header.tsx",
+        "line": 178
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Roles at Amazon:"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Google"
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 561
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Roles at Google:"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Nvidia"
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 561
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Goldman Sachs"
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 561
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    }
+  ]
 }

@@ -39,7 +39,7 @@ interface HiringProcessViewProps {
 
 const CURATED_CATEGORY_COMPANIES: Record<string, string[]> = {
   all: [
-    'Amazon', 'Google', 'Meta', 'Microsoft', 'Apple', 'Nvidia', 'Tesla', 'JPMorgan Chase'
+    'Amazon', 'Google', 'Meta', 'Microsoft', 'Apple', 'Nvidia', 'Goldman Sachs', 'Tesla', 'JPMorgan Chase'
   ],
   tech: [
     'Google', 'Meta', 'Microsoft', 'Apple', 'Netflix', 'Nvidia'
@@ -496,7 +496,8 @@ export const HiringProcessView: React.FC<HiringProcessViewProps> = ({
                   <div className="flex items-start space-x-2.5 text-rose-800">
                     <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                     <div className="flex-1 text-xs sm:text-sm">
-                      <p className="font-semibold">{companyError}</p>
+                      <p className="font-bold text-xs uppercase tracking-wider text-rose-700">Verification Failed</p>
+                      <p className="font-semibold text-rose-900 mt-0.5">{companyError}</p>
                     </div>
                   </div>
 

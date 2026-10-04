@@ -160,7 +160,7 @@ export const PostInterviewAuthModal: React.FC<PostInterviewAuthModalProps> = ({
             {authMode === 'login' ? 'Sign In to Your Account' : 'Create Candidate Account'}
           </h2>
           <p className="text-xs sm:text-sm text-zinc-300 mt-1 leading-relaxed">
-            Preserve your STAR scorecards, executive presence metrics, and session progression history across devices.
+            Save Your Interview History: Preserve your STAR scorecards, executive presence metrics, and session progression history across devices.
           </p>
         </div>
 
@@ -188,34 +188,52 @@ export const PostInterviewAuthModal: React.FC<PostInterviewAuthModalProps> = ({
           </div>
 
           {/* Mode Switcher */}
-          <div className="flex bg-zinc-100 p-1 rounded-xl">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-1 bg-zinc-100 p-1 rounded-xl">
+              <button
+                type="button"
+                aria-label="Sign In Tab"
+                onClick={() => {
+                  setAuthMode('login');
+                  setErrorMessage(null);
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  authMode === 'login'
+                    ? 'bg-white text-zinc-900 shadow-xs'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                aria-label="Create Account Tab"
+                onClick={() => {
+                  setAuthMode('signup');
+                  setErrorMessage(null);
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  authMode === 'signup'
+                    ? 'bg-white text-zinc-900 shadow-xs'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
             <button
               type="button"
+              aria-label="Admin Portal (Owner)"
               onClick={() => {
                 setAuthMode('login');
-                setErrorMessage(null);
+                setEmailOrUsername('mallmridul3');
               }}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                authMode === 'login'
-                  ? 'bg-white text-zinc-900 shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900'
-              }`}
+              className="px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all cursor-pointer shrink-0"
+              title="Authorized Owner Portal"
             >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('signup');
-                setErrorMessage(null);
-              }}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                authMode === 'signup'
-                  ? 'bg-white text-zinc-900 shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-900'
-              }`}
-            >
-              Create Account
+              <span>Admin Portal (Owner)</span>
+              <span className="text-[10px] text-amber-700/80 ml-1">Authorized Owner Portal</span>
             </button>
           </div>
 

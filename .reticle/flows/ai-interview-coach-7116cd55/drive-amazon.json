@@ -2,50 +2,6 @@
   "version": 2,
   "name": "drive-amazon",
   "projectId": "ai-interview-coach-7116cd55",
-  "createdAt": 1790859408976,
-  "steps": [
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Hiring Process"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Amazon"
-      },
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Level 5 60 m Stage 5: The Bar Raiser Round (Strict Leadership Principles Audit) Bar Raiser / Executive"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "Simulate This Stage in Mock Interview"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "text",
-        "contains": "Question 1 of 3"
-      },
-      "page": "/"
-    }
-  ],
   "startPath": "/",
   "requires": [
     {
@@ -61,5 +17,69 @@
   ],
   "author": {
     "agent": "reticle-cli"
-  }
+  },
+  "createdAt": 1790859408976,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Hiring Process"
+      },
+      "source": {
+        "file": "src/components/Header.tsx",
+        "line": 178
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Amazon"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Level 5 60 m Stage 5: The Bar Raiser Round (Strict Leadership Principles Audit) Bar Raiser / Executive"
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 746
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Simulate This Stage in Mock Interview"
+      },
+      "source": {
+        "file": "src/components/HiringProcessView.tsx",
+        "line": 826
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Question 1 of 3"
+      },
+      "page": "/"
+    }
+  ],
+  "learned": [
+    {
+      "kind": "request-never-settled",
+      "step": 2,
+      "state": "open",
+      "cleanRuns": 1
+    }
+  ]
 }

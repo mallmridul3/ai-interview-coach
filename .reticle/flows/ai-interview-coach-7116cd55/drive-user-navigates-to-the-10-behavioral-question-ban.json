@@ -1,58 +1,10 @@
 {
   "version": 2,
   "name": "drive-user-navigates-to-the-10-behavioral-question-ban",
-  "projectId": "ai-interview-coach-7116cd55",
-  "createdAt": 1790856468295,
-  "steps": [
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "10 Behavioral"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "STAR Story Vault ( 2 )"
-      },
-      "args": {},
-      "action": "click",
-      "page": "/"
-    },
-    {
-      "tool": "reticle_act",
-      "anchor": {
-        "kind": "role",
-        "role": "button",
-        "name": "10 Core Behavioral Questions"
-      },
-      "args": {},
-      "action": "click",
-      "expect": {
-        "kind": "allOf",
-        "predicates": [
-          {
-            "kind": "text",
-            "contains": "Why Hiring Committees Ask This:"
-          },
-          {
-            "kind": "text",
-            "contains": "10 Core Behavioral Questions"
-          }
-        ]
-      },
-      "page": "/"
-    }
-  ],
-  "startPath": "/",
   "intent": "User navigates to the 10 Behavioral question bank from the top navigation",
+  "intentId": "flow:drive-user-navigates-to-the-10-behavioral-question-ban",
+  "projectId": "ai-interview-coach-7116cd55",
+  "startPath": "/",
   "requires": [
     {
       "kind": "route",
@@ -68,5 +20,84 @@
   "author": {
     "agent": "reticle-cli"
   },
-  "intentId": "flow:drive-user-navigates-to-the-10-behavioral-question-ban"
+  "createdAt": 1790856468295,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Menu"
+      },
+      "source": {
+        "file": "src/components/Header.tsx",
+        "line": 157
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "text",
+        "contains": "Navigation Menu"
+      },
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "10 Behavioral"
+      },
+      "source": {
+        "file": "src/components/Header.tsx",
+        "line": 379
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "STAR Story Vault ( 2 )"
+      },
+      "source": {
+        "file": "src/components/BehavioralQuestionsView.tsx",
+        "line": 316
+      },
+      "action": "click",
+      "args": {},
+      "page": "/"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "10 Core Behavioral Questions"
+      },
+      "source": {
+        "file": "src/components/BehavioralQuestionsView.tsx",
+        "line": 305
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Why Hiring Committees Ask This:"
+          },
+          {
+            "kind": "text",
+            "contains": "10 Core Behavioral Questions"
+          }
+        ]
+      },
+      "page": "/"
+    }
+  ]
 }

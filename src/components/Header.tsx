@@ -35,6 +35,7 @@ interface HeaderProps {
   onOpenWorkspaceModal?: () => void;
   onOpenVoiceSettings?: () => void;
   onOpenAuthModal?: () => void;
+  isAuthModalOpen?: boolean;
   onLogout?: () => void;
 }
 
@@ -60,6 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenWorkspaceModal,
   onOpenVoiceSettings,
   onOpenAuthModal,
+  isAuthModalOpen,
   onLogout,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -160,7 +162,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setIsMenuOpen(true)}
               className="flex items-center space-x-2 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer group"
               title="Open Navigation Menu"
-              aria-label="Open Navigation Menu"
+              aria-label="Menu"
               aria-expanded={isMenuOpen}
             >
               <Menu className="w-4 h-4 text-amber-300 transition-transform group-hover:scale-110" />
@@ -175,7 +177,15 @@ export const Header: React.FC<HeaderProps> = ({
                 <CurrentIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${currentTabObj.iconColor}`} />
               </div>
               <h1 className="text-base sm:text-lg md:text-xl font-bold text-zinc-900 tracking-tight flex items-center space-x-2">
-                <span>{currentTabObj.label}</span>
+                <button
+                  type="button"
+                  onClick={() => setIsMenuOpen(true)}
+                  className="hover:text-zinc-700 transition-colors cursor-pointer text-left font-bold"
+                  aria-label={currentTabObj.label}
+                  title="Click to view all sections menu"
+                >
+                  {currentTabObj.label}
+                </button>
 
                 {/* Status Badges */}
                 {currentTab === 'mock' && isInterviewActive && (
@@ -237,7 +247,11 @@ export const Header: React.FC<HeaderProps> = ({
                   type="button"
                   id="open-auth-btn"
                   onClick={onOpenAuthModal}
-                  className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer"
+                  aria-hidden={isAuthModalOpen}
+                  tabIndex={isAuthModalOpen ? -1 : 0}
+                  className={`px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer ${
+                    isAuthModalOpen ? 'pointer-events-none opacity-0' : ''
+                  }`}
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Sign In</span>
@@ -372,6 +386,7 @@ export const Header: React.FC<HeaderProps> = ({
                     key={tab.id}
                     id={tab.elementId}
                     type="button"
+                    aria-label={tab.label}
                     onClick={() => handleSelectTab(tab.id)}
                     className={`w-full text-left px-3.5 py-3 rounded-xl transition-all flex items-start space-x-3 cursor-pointer group ${
                       isActive
