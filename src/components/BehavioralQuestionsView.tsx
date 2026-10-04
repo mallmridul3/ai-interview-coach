@@ -8,7 +8,6 @@ import {
   Award, 
   BookOpen,
   Mic,
-  Search,
   Plus,
   Trash2,
   Edit3,
@@ -213,7 +212,6 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
 }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'vault'>('questions');
   const [expandedId, setExpandedId] = useState<number | null>(1);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   // STAR Story Vault state
@@ -248,12 +246,7 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
   ];
 
   const filteredQuestions = TEN_COMMON_BEHAVIORAL_QUESTIONS.filter((item) => {
-    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.whyAsked.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return selectedCategory === 'All' || item.category === selectedCategory;
   });
 
   const handleSaveStory = (e: React.FormEvent) => {
@@ -339,35 +332,22 @@ export const BehavioralQuestionsView: React.FC<BehavioralQuestionsViewProps> = (
       {/* TAB 1: 10 Core Questions */}
       {activeTab === 'questions' && (
         <>
-          {/* Search & Filter Bar */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search questions or competencies..."
-                className="w-full pl-9 pr-3.5 py-2 bg-white border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              />
-            </div>
-
-            <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-              {categories.slice(0, 5).map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                    selectedCategory === cat
-                      ? 'bg-zinc-900 text-white'
-                      : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+          {/* Category Filter Bar */}
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            {categories.slice(0, 5).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                  selectedCategory === cat
+                    ? 'bg-zinc-900 text-white shadow-2xs'
+                    : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
 
           {/* Question List */}
