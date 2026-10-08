@@ -113,33 +113,33 @@ interface NeuralVoiceProfile {
 
 const NEURAL_VOICE_CONFIGS: Record<string, NeuralVoiceProfile> = {
   Puck: {
-    voice: "en-US-GuyNeural",
-    pitch: "+0Hz",
-    rate: "+2%",
+    voice: "en-US-AndrewMultilingualNeural",
+    pitch: "default",
+    rate: "default",
     sampleText: "Hey there! I'm Alex. I'll be your interviewer today. Let's collaborate through a challenging technical problem you solved recently.",
   },
   Fenrir: {
-    voice: "en-US-ChristopherNeural",
-    pitch: "-6Hz",
-    rate: "-4%",
+    voice: "en-US-BrianMultilingualNeural",
+    pitch: "default",
+    rate: "default",
     sampleText: "Greetings. I will be conducting your bar-raiser evaluation today. Walk me through a critical system architecture decision where you took full ownership.",
   },
   Charon: {
     voice: "en-GB-RyanNeural",
-    pitch: "-2Hz",
-    rate: "+0%",
+    pitch: "default",
+    rate: "default",
     sampleText: "Welcome. Today we will assess your depth in system design, scale, and engineering trade-offs. Tell me about a technical bottleneck you resolved.",
   },
   Kore: {
-    voice: "en-US-JennyNeural",
-    pitch: "+0Hz",
-    rate: "+0%",
+    voice: "en-US-AvaMultilingualNeural",
+    pitch: "default",
+    rate: "default",
     sampleText: "Hi, I'm Morgan! I'll be leading our interview session today. Tell me about a time you led a project through ambiguity to deliver measurable impact.",
   },
   Zephyr: {
     voice: "en-GB-SoniaNeural",
-    pitch: "+0Hz",
-    rate: "-2%",
+    pitch: "default",
+    rate: "default",
     sampleText: "Good day. I am Taylor Rivera. In this session, we will focus on high-level strategic alignment, cross-functional execution, and business outcomes.",
   },
 };
@@ -149,25 +149,35 @@ async function prewarmVoiceSamples() {
   for (const [voiceKey, cfg] of Object.entries(NEURAL_VOICE_CONFIGS)) {
     const sampleFile = path.join(audioCacheDir, `sample_${voiceKey}.json`);
     if (!fs.existsSync(sampleFile)) {
-      try {
-        const tts = new EdgeTTS({ voice: cfg.voice, pitch: cfg.pitch, rate: cfg.rate });
-        const tempFile = path.join(audioCacheDir, `init_sample_${voiceKey}_${Date.now()}.mp3`);
-        await tts.ttsPromise(cfg.sampleText, tempFile);
-        if (fs.existsSync(tempFile)) {
-          const audioBuf = fs.readFileSync(tempFile);
-          fs.unlinkSync(tempFile);
-          const base64Mp3 = audioBuf.toString("base64");
-          const payload = {
-            audioUrl: `data:audio/mp3;base64,${base64Mp3}`,
-            mimeType: "audio/mp3",
-            voice: voiceKey,
-          };
-          fs.writeFileSync(sampleFile, JSON.stringify(payload));
-          console.log(`[NeuralTTS] Pre-warmed distinct sample for ${voiceKey} (${cfg.voice})`);
+      let success = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const tts = new EdgeTTS({ voice: cfg.voice, pitch: cfg.pitch, rate: cfg.rate });
+          const tempFile = path.join(audioCacheDir, `init_sample_${voiceKey}_${Date.now()}.mp3`);
+          await tts.ttsPromise(cfg.sampleText, tempFile);
+          if (fs.existsSync(tempFile)) {
+            const audioBuf = fs.readFileSync(tempFile);
+            fs.unlinkSync(tempFile);
+            const base64Mp3 = audioBuf.toString("base64");
+            const payload = {
+              audioUrl: `data:audio/mp3;base64,${base64Mp3}`,
+              mimeType: "audio/mp3",
+              voice: voiceKey,
+            };
+            fs.writeFileSync(sampleFile, JSON.stringify(payload));
+            console.log(`[NeuralTTS] Pre-warmed distinct sample for ${voiceKey} (${cfg.voice})`);
+            success = true;
+            break;
+          }
+        } catch (err: any) {
+          if (attempt === 3) {
+            console.warn(`[NeuralTTS] Warning: Could not pre-warm sample for ${voiceKey}:`, err?.message);
+          } else {
+            await new Promise((r) => setTimeout(r, 600));
+          }
         }
-      } catch (err: any) {
-        console.warn(`[NeuralTTS] Warning: Could not pre-warm sample for ${voiceKey}:`, err?.message);
       }
+      await new Promise((r) => setTimeout(r, 200));
     }
   }
 }

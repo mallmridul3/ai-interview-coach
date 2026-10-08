@@ -211,13 +211,18 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
 
       // Speak question if voiceEnabled and not evaluated yet
       if (voiceEnabled && !currentTurn.evaluation) {
-        setIsSpeakingQuestion(true);
+        setIsSpeakingQuestion(false);
         speakText(
           spokenQuestion,
           () => {
             setIsSpeakingQuestion(false);
           },
-          { voice: personaVoice }
+          {
+            voice: personaVoice,
+            onStart: () => {
+              setIsSpeakingQuestion(true);
+            },
+          }
         );
       }
     }
@@ -269,13 +274,18 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
       ? `${currentTurn.question.conversationalLeadIn} ${currentTurn.question.question}`
       : currentTurn.question.question;
 
-    setIsSpeakingQuestion(true);
+    setIsSpeakingQuestion(false);
     speakText(
       spokenQuestion,
       () => {
         setIsSpeakingQuestion(false);
       },
-      { voice: getVoiceForPersonaId(persona.id) }
+      {
+        voice: getVoiceForPersonaId(persona.id),
+        onStart: () => {
+          setIsSpeakingQuestion(true);
+        },
+      }
     );
   };
 

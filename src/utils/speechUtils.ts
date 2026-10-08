@@ -11,37 +11,37 @@ export interface AiVoiceOption {
 
 export const AI_VOICES: AiVoiceOption[] = [
   {
+    id: 'Puck',
+    name: 'Alex Vance (Dynamic Tech Lead)',
+    tone: 'US English • Andrew Multilingual (Natural, Conversational)',
+    description: 'Authentic conversational dialogue with natural breathing, cadence, and peer engineering warmth',
+    gender: 'male',
+  },
+  {
     id: 'Kore',
-    name: 'Kore (Warm & Articulate)',
-    tone: 'US English • Warm, articulate, empathetic',
-    description: 'Natural, supportive interviewer cadence with authentic conversational warmth — recommended for behavioral and tech interviews',
+    name: 'Morgan Chen (Principal Bar-Raiser)',
+    tone: 'US English • Ava Multilingual (Expressive, Articulate)',
+    description: 'Exceptionally natural, expressive female interviewer voice with genuine human warmth and clarity',
     gender: 'female',
   },
   {
     id: 'Fenrir',
-    name: 'Fenrir (Deep & Authoritative)',
-    tone: 'US English • Resonant deep baritone, steady',
-    description: 'Deep, deliberate bar-raiser presence for senior engineering leadership and executive mock interviews',
-    gender: 'male',
-  },
-  {
-    id: 'Puck',
-    name: 'Puck (Dynamic Tech Lead)',
-    tone: 'US English • Upbeat, collaborative, conversational',
-    description: 'Fast-paced, modern, and engaging collaborative style modeled after agile tech lead peers',
+    name: 'Fenrir (Executive Bar-Raiser)',
+    tone: 'US English • Brian Multilingual (Deep, Grounded)',
+    description: 'Deep, resonant, authoritative bar-raiser presence for senior leadership and executive mock interviews',
     gender: 'male',
   },
   {
     id: 'Charon',
     name: 'Charon (British System Architect)',
-    tone: 'British English • Sharp, analytical, measured',
-    description: 'Distinguished British bar-raiser style with crisp, analytical pauses for system architecture & deep-dives',
+    tone: 'British English • Ryan Neural (Crisp, Analytical)',
+    description: 'Distinguished British bar-raiser style with crisp, analytical pauses for system design & scale trade-offs',
     gender: 'male',
   },
   {
     id: 'Zephyr',
-    name: 'Zephyr (British Executive VP)',
-    tone: 'British English • Sophisticated, polished, crisp',
+    name: 'Taylor Rivera (Executive VP)',
+    tone: 'British English • Sonia Neural (Polished Executive)',
     description: 'Polished British executive tone focused on high-level strategic alignment and business leadership',
     gender: 'female',
   },
@@ -80,6 +80,62 @@ export function subscribeSpeechArticulation(listener: ArticulationListener): () 
 }
 
 let activeArticulationInterval: any = null;
+let activeAnalysisAnimationId: number | null = null;
+
+export function startRealtimeAudioAnalysis(analyser: AnalyserNode) {
+  stopRealtimeAudioAnalysis();
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  const tick = () => {
+    analyser.getByteFrequencyData(dataArray);
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      sum += dataArray[i];
+    }
+    const avg = sum / dataArray.length;
+    // Map raw average (0-128) to normalized volume (0-1)
+    const vol = Math.min(1, avg / 45);
+    const isActuallyVoicing = vol > 0.04;
+    const mouth = isActuallyVoicing ? Math.min(1, vol * 1.5) : 0;
+    const shapes: ('aa' | 'ee' | 'oo' | 'mm')[] = ['aa', 'ee', 'oo', 'mm'];
+    const shape = isActuallyVoicing ? shapes[Math.floor((vol * 10) % shapes.length)] : 'rest';
+
+    const state: SpeechArticulationState = {
+      isSpeaking: isActuallyVoicing,
+      volume: vol,
+      mouthOpening: mouth,
+      phonemeShape: shape,
+    };
+
+    articulationListeners.forEach((fn) => {
+      try {
+        fn(state);
+      } catch {}
+    });
+
+    activeAnalysisAnimationId = requestAnimationFrame(tick);
+  };
+
+  activeAnalysisAnimationId = requestAnimationFrame(tick);
+}
+
+export function stopRealtimeAudioAnalysis() {
+  if (activeAnalysisAnimationId !== null) {
+    cancelAnimationFrame(activeAnalysisAnimationId);
+    activeAnalysisAnimationId = null;
+  }
+  const restState: SpeechArticulationState = {
+    isSpeaking: false,
+    volume: 0,
+    mouthOpening: 0,
+    phonemeShape: 'rest',
+  };
+  articulationListeners.forEach((fn) => {
+    try {
+      fn(restState);
+    } catch {}
+  });
+}
 
 export function startSpeechArticulationLoop() {
   if (activeArticulationInterval) return;
@@ -105,6 +161,7 @@ export function startSpeechArticulationLoop() {
 }
 
 export function stopSpeechArticulationLoop() {
+  stopRealtimeAudioAnalysis();
   if (activeArticulationInterval) {
     clearInterval(activeArticulationInterval);
     activeArticulationInterval = null;
@@ -121,7 +178,6 @@ export function stopSpeechArticulationLoop() {
     } catch {}
   });
 }
-
 
 export function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -152,7 +208,8 @@ export async function decodeAudioDataUrl(dataUrl: string): Promise<AudioBuffer |
 function playAudioBuffer(
   buffer: AudioBuffer,
   onEnd?: () => void,
-  speed = 1.0
+  speed = 1.0,
+  onStart?: () => void
 ): () => void {
   const ctx = getAudioContext();
   if (!ctx) {
@@ -161,19 +218,28 @@ function playAudioBuffer(
   }
 
   try {
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.playbackRate.value = speed;
-    source.connect(ctx.destination);
+
+    // Connect to real-time Web Audio AnalyserNode for frame-accurate vocal sync
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 128;
+    source.connect(analyser);
+    analyser.connect(ctx.destination);
     currentSourceNode = source;
 
-    startSpeechArticulationLoop();
+    startRealtimeAudioAnalysis(analyser);
 
     let ended = false;
     const finish = () => {
       if (ended) return;
       ended = true;
-      stopSpeechArticulationLoop();
+      stopRealtimeAudioAnalysis();
       if (currentSourceNode === source) {
         currentSourceNode = null;
       }
@@ -183,9 +249,12 @@ function playAudioBuffer(
     source.onended = finish;
     source.start(0);
 
+    // Audio has officially begun outputting sound to speakers
+    onStart?.();
+
     return () => {
       ended = true;
-      stopSpeechArticulationLoop();
+      stopRealtimeAudioAnalysis();
       try {
         source.stop();
       } catch {}
@@ -194,7 +263,7 @@ function playAudioBuffer(
       }
     };
   } catch {
-    stopSpeechArticulationLoop();
+    stopRealtimeAudioAnalysis();
     onEnd?.();
     return () => {};
   }
@@ -204,15 +273,21 @@ function playHtmlAudioUrl(
   audioUrl: string,
   onEnd?: () => void,
   speed = 1.0,
-  fallbackText?: string,
-  voiceId?: AiVoiceOption['id']
+  onStart?: () => void
 ): () => void {
   try {
     const audio = new Audio(audioUrl);
     currentAudioElement = audio;
     audio.playbackRate = speed;
 
-    startSpeechArticulationLoop();
+    let hasStarted = false;
+    audio.onplay = () => {
+      if (!hasStarted) {
+        hasStarted = true;
+        onStart?.();
+        startSpeechArticulationLoop();
+      }
+    };
 
     audio.onended = () => {
       stopSpeechArticulationLoop();
@@ -227,34 +302,37 @@ function playHtmlAudioUrl(
       if (currentAudioElement === audio) {
         currentAudioElement = null;
       }
-      if (fallbackText) {
-        fallbackBrowserSpeech(fallbackText, onEnd, speed, voiceId);
-      } else {
-        onEnd?.();
-      }
+      // If HTMLAudio failed, try decoding to AudioBuffer via Web Audio API
+      decodeAudioDataUrl(audioUrl).then((buf) => {
+        if (buf) {
+          playAudioBuffer(buf, onEnd, speed, onStart);
+        } else {
+          onEnd?.();
+        }
+      });
     };
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        stopSpeechArticulationLoop();
-        if (currentAudioElement === audio) {
-          currentAudioElement = null;
-        }
-        if (fallbackText) {
-          fallbackBrowserSpeech(fallbackText, onEnd, speed, voiceId);
-        } else {
-          onEnd?.();
-        }
+        // Autoplay blocked on HTMLAudio: try Web Audio API AudioBuffer
+        decodeAudioDataUrl(audioUrl).then((buf) => {
+          if (buf) {
+            playAudioBuffer(buf, onEnd, speed, onStart);
+          } else {
+            onEnd?.();
+          }
+        });
       });
     }
   } catch {
-    stopSpeechArticulationLoop();
-    if (fallbackText) {
-      fallbackBrowserSpeech(fallbackText, onEnd, speed, voiceId);
-    } else {
-      onEnd?.();
-    }
+    decodeAudioDataUrl(audioUrl).then((buf) => {
+      if (buf) {
+        playAudioBuffer(buf, onEnd, speed, onStart);
+      } else {
+        onEnd?.();
+      }
+    });
   }
 
   return () => {
@@ -651,7 +729,8 @@ export async function preloadSpeech(
 export function playVoiceSample(
   voiceId: AiVoiceOption['id'],
   onEnd?: () => void,
-  speed = 1.0
+  speed = 1.0,
+  onStart?: () => void
 ): () => void {
   stopSpeaking();
   let cancelled = false;
@@ -659,7 +738,7 @@ export function playVoiceSample(
 
   // 1. Instant AudioBuffer playback if pre-warmed in memory
   if (audioBufferCache.has(sampleKey)) {
-    return playAudioBuffer(audioBufferCache.get(sampleKey)!, onEnd, speed);
+    return playAudioBuffer(audioBufferCache.get(sampleKey)!, onEnd, speed, onStart);
   }
 
   // 2. If dataUrl cached, play via HTMLAudio and decode for next time
@@ -668,7 +747,7 @@ export function playVoiceSample(
     decodeAudioDataUrl(url).then((buf) => {
       if (buf) audioBufferCache.set(sampleKey, buf);
     });
-    return playHtmlAudioUrl(url, onEnd, speed, undefined, voiceId);
+    return playHtmlAudioUrl(url, onEnd, speed, onStart);
   }
 
   // 3. If pre-warm fetch is in-flight, await it smoothly
@@ -676,16 +755,11 @@ export function playVoiceSample(
     inFlightFetches.get(sampleKey)!.then((res) => {
       if (cancelled) return;
       if (res?.buffer) {
-        playAudioBuffer(res.buffer, onEnd, speed);
+        playAudioBuffer(res.buffer, onEnd, speed, onStart);
       } else if (res?.audioUrl) {
-        playHtmlAudioUrl(res.audioUrl, onEnd, speed, undefined, voiceId);
+        playHtmlAudioUrl(res.audioUrl, onEnd, speed, onStart);
       } else {
-        fallbackBrowserSpeech(
-          "Hello, I will be your interviewer today. Walk me through a challenging problem you solved.",
-          onEnd,
-          speed,
-          voiceId
-        );
+        onEnd?.();
       }
     });
 
@@ -708,9 +782,9 @@ export function playVoiceSample(
         if (buf) audioBufferCache.set(sampleKey, buf);
         if (!cancelled) {
           if (buf) {
-            playAudioBuffer(buf, onEnd, speed);
+            playAudioBuffer(buf, onEnd, speed, onStart);
           } else {
-            playHtmlAudioUrl(data.audioUrl, onEnd, speed, undefined, voiceId);
+            playHtmlAudioUrl(data.audioUrl, onEnd, speed, onStart);
           }
         }
         return { audioUrl: data.audioUrl, buffer: buf || undefined };
@@ -719,12 +793,7 @@ export function playVoiceSample(
       }
     } catch {
       if (!cancelled) {
-        fallbackBrowserSpeech(
-          "Hello, I will be your interviewer today. Walk me through a challenging problem you solved.",
-          onEnd,
-          speed,
-          voiceId
-        );
+        onEnd?.();
       }
       return null;
     } finally {
@@ -878,7 +947,7 @@ export function testPersonaSpeech(
 export function speakText(
   text: string,
   onEnd?: () => void,
-  options?: { voice?: AiVoiceOption['id']; rate?: number }
+  options?: { voice?: AiVoiceOption['id']; rate?: number; onStart?: () => void }
 ): () => void {
   // Stop any existing speech or playback immediately
   stopSpeaking();
@@ -890,14 +959,14 @@ export function speakText(
 
   const voice = options?.voice || getSelectedVoiceId();
   const speed = options?.rate || getSpeechSpeed();
+  const onStart = options?.onStart;
   const cacheKey = `${voice}:${text.trim()}`;
-  const sampleKey = `sample:${voice}`;
 
   let cancelled = false;
 
   // 1. Instant playback from pre-decoded AudioBuffer (zero latency, zero buffering)
   if (audioBufferCache.has(cacheKey)) {
-    return playAudioBuffer(audioBufferCache.get(cacheKey)!, onEnd, speed);
+    return playAudioBuffer(audioBufferCache.get(cacheKey)!, onEnd, speed, onStart);
   }
 
   // 2. Play from cached dataUrl while decoding into AudioBuffer in background
@@ -906,7 +975,7 @@ export function speakText(
     decodeAudioDataUrl(url).then((buf) => {
       if (buf) audioBufferCache.set(cacheKey, buf);
     });
-    return playHtmlAudioUrl(url, onEnd, speed, text, voice);
+    return playHtmlAudioUrl(url, onEnd, speed, onStart);
   }
 
   // 3. If pre-fetch for this question is in-flight, await it for a fluid audio transition
@@ -914,11 +983,11 @@ export function speakText(
     inFlightFetches.get(cacheKey)!.then((res) => {
       if (cancelled) return;
       if (res?.buffer) {
-        playAudioBuffer(res.buffer, onEnd, speed);
+        playAudioBuffer(res.buffer, onEnd, speed, onStart);
       } else if (res?.audioUrl) {
-        playHtmlAudioUrl(res.audioUrl, onEnd, speed, text, voice);
+        playHtmlAudioUrl(res.audioUrl, onEnd, speed, onStart);
       } else {
-        fallbackBrowserSpeech(text, onEnd, speed, voice);
+        onEnd?.();
       }
     });
 
@@ -928,7 +997,7 @@ export function speakText(
     };
   }
 
-  // 4. Fetch dynamic studio speech from Gemini TTS backend with quota resilience
+  // 4. Fetch dynamic studio speech from neural backend
   const controller = new AbortController();
   activeAbortController = controller;
 
@@ -954,21 +1023,20 @@ export function speakText(
 
         if (!cancelled) {
           if (buf) {
-            playAudioBuffer(buf, onEnd, speed);
+            playAudioBuffer(buf, onEnd, speed, onStart);
           } else {
-            playHtmlAudioUrl(data.audioUrl, onEnd, speed, text, voice);
+            playHtmlAudioUrl(data.audioUrl, onEnd, speed, onStart);
           }
         }
         return { audioUrl: data.audioUrl, buffer: buf || undefined };
       } else {
-        // Fall back to client synthesis of the actual question
-        fallbackBrowserSpeech(text, onEnd, speed, voice);
+        onEnd?.();
         return null;
       }
     } catch (err: any) {
       if (err.name === 'AbortError' || cancelled) return null;
-      // Resilient voice preservation: Speak the actual question using calibrated browser synthesis
-      fallbackBrowserSpeech(text, onEnd, speed, voice);
+      console.warn("TTS fetch error:", err?.message);
+      onEnd?.();
       return null;
     } finally {
       inFlightFetches.delete(cacheKey);

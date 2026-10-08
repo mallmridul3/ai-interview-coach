@@ -77,16 +77,33 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
     if (!vid) return;
 
     if (isSpeaking) {
-      vid.playbackRate = 1.05; // Lively speaking cadence
+      // Sync video start at frame 0 with exact millisecond of audio start
+      vid.currentTime = 0;
+      vid.playbackRate = 1.0;
       vid.play().catch(() => {});
     } else if (isCandidateSpeaking) {
       vid.playbackRate = 0.95; // Attentive listening cadence
       vid.play().catch(() => {});
     } else {
-      vid.playbackRate = 0.9; // Calm ambient presence
+      vid.playbackRate = 0.88; // Calm ambient presence
       vid.play().catch(() => {});
     }
   }, [isSpeaking, isCandidateSpeaking]);
+
+  // Audio-reactive frame-accurate lip sync:
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !isSpeaking) return;
+
+    if (articulation.volume > 0.04) {
+      // Audio is actively vocalizing words: play forward
+      vid.playbackRate = 1.05;
+      if (vid.paused) vid.play().catch(() => {});
+    } else {
+      // Audio is in a breath or punctuation pause: gentle slow-motion so mouth naturally rests
+      vid.playbackRate = 0.25;
+    }
+  }, [isSpeaking, articulation.volume]);
 
   return (
     <div className={`relative w-full h-full overflow-hidden select-none bg-zinc-950 ${className}`}>
