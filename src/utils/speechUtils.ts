@@ -12,38 +12,38 @@ export interface AiVoiceOption {
 export const AI_VOICES: AiVoiceOption[] = [
   {
     id: 'Kore',
-    name: 'Kore (Warm & Professional)',
-    tone: 'Warm, natural, supportive',
-    description: 'Empathetic, clear, and reassuring interviewer cadence — recommended for behavioral and tech interviews',
+    name: 'Kore (Warm & Articulate)',
+    tone: 'US English • Warm, articulate, empathetic',
+    description: 'Natural, supportive interviewer cadence with authentic conversational warmth — recommended for behavioral and tech interviews',
     gender: 'female',
   },
   {
     id: 'Fenrir',
-    name: 'Fenrir (Executive & Deep)',
-    tone: 'Resonant, authoritative, steady',
-    description: 'Deep, deliberate bar-raiser presence for senior leadership and executive mock interviews',
+    name: 'Fenrir (Deep & Authoritative)',
+    tone: 'US English • Resonant deep baritone, steady',
+    description: 'Deep, deliberate bar-raiser presence for senior engineering leadership and executive mock interviews',
     gender: 'male',
   },
   {
     id: 'Puck',
-    name: 'Puck (Dynamic & Engaging)',
-    tone: 'Conversational, spirited',
-    description: 'Fast-paced, modern, and engaging collaborative style',
-    gender: 'neutral',
+    name: 'Puck (Dynamic Tech Lead)',
+    tone: 'US English • Upbeat, collaborative, conversational',
+    description: 'Fast-paced, modern, and engaging collaborative style modeled after agile tech lead peers',
+    gender: 'male',
   },
   {
     id: 'Charon',
-    name: 'Charon (Analytical & Composed)',
-    tone: 'Thoughtful, measured, precise',
-    description: 'System-architect style with calm, analytical pauses',
+    name: 'Charon (British System Architect)',
+    tone: 'British English • Sharp, analytical, measured',
+    description: 'Distinguished British bar-raiser style with crisp, analytical pauses for system architecture & deep-dives',
     gender: 'male',
   },
   {
     id: 'Zephyr',
-    name: 'Zephyr (Modern & Balanced)',
-    tone: 'Smooth, polished, crisp',
-    description: 'Clean, neutral, contemporary interviewer voice',
-    gender: 'neutral',
+    name: 'Zephyr (British Executive VP)',
+    tone: 'British English • Sophisticated, polished, crisp',
+    description: 'Polished British executive tone focused on high-level strategic alignment and business leadership',
+    gender: 'female',
   },
 ];
 
@@ -297,10 +297,15 @@ export function getSelectedVoiceId(): AiVoiceOption['id'] {
 }
 
 export function getVoiceForPersonaId(personaId?: string): AiVoiceOption['id'] {
+  const isCustomExplicit = typeof window !== 'undefined' && localStorage.getItem('ai_coach_voice_id_explicit') === 'true';
+  const customVoice = getSelectedVoiceId();
+  if (isCustomExplicit && customVoice) {
+    return customVoice;
+  }
   if (personaId === 'alex-mentor') return 'Puck';
   if (personaId === 'morgan-bar-raiser') return 'Kore';
   if (personaId === 'taylor-exec') return 'Zephyr';
-  return getSelectedVoiceId();
+  return customVoice || 'Kore';
 }
 
 /**
@@ -354,6 +359,7 @@ export async function prewarmVoiceBuffers(voiceId?: AiVoiceOption['id']): Promis
 export function setSelectedVoiceId(voiceId: AiVoiceOption['id']): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem('ai_coach_voice_id', voiceId);
+    localStorage.setItem('ai_coach_voice_id_explicit', 'true');
     // Pre-warm the voice audio buffers immediately for fluid transition
     prewarmVoiceBuffers(voiceId);
   }
@@ -377,8 +383,9 @@ export function setSpeechSpeed(speed: number): void {
 
 /**
  * Persona acoustic and vocal profiles.
- * Pitch is strictly constrained between 0.94 and 1.02 to preserve human vocal tract resonance
- * and prevent metallic ring-modulator or robotic artifacts.
+ * Pitch is calibrated with noticeable, realistic distinction between personas:
+ * Fenrir is a deep, resonant baritone (0.80); Puck is a youthful, energetic tech lead (1.08);
+ * Charon is measured British (0.92); Kore is warm & clear (1.06); Zephyr is executive British (0.92).
  */
 interface PersonaVocalProfile {
   targetGender: 'male' | 'female' | 'neutral';
@@ -395,51 +402,48 @@ const BANNED_ROBOTIC_PATTERNS = [
 const PERSONA_VOCAL_PROFILES: Record<AiVoiceOption['id'], PersonaVocalProfile> = {
   Puck: {
     targetGender: 'male',
-    pitch: 0.94,
-    rateMultiplier: 0.96,
+    pitch: 1.08,
+    rateMultiplier: 1.04,
     namePreferences: [
-      'natural', 'neural', 'online', 'ryan', 'guy', 'david', 'mark', 'steffan', 'eric', 'kevin',
+      'guy', 'ryan', 'natural', 'neural', 'online', 'david', 'mark', 'steffan', 'eric', 'kevin',
       'google uk english male', 'daniel', 'nathan'
-    ],
-    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
-  },
-  Charon: {
-    targetGender: 'male',
-    pitch: 0.93,
-    rateMultiplier: 0.95,
-    namePreferences: [
-      'natural', 'neural', 'online', 'david', 'mark', 'steffan', 'guy', 'ryan', 'brian', 'christopher',
-      'google uk english male', 'daniel', 'oliver'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Fenrir: {
     targetGender: 'male',
-    pitch: 0.92,
-    rateMultiplier: 0.94,
+    pitch: 0.80,
+    rateMultiplier: 0.88,
     namePreferences: [
-      'natural', 'neural', 'online', 'david', 'mark', 'christopher', 'guy', 'ryan', 'brian', 'steffan',
+      'christopher', 'brian', 'steffan', 'george', 'natural', 'neural', 'online', 'david', 'mark',
       'google uk english male', 'daniel', 'oliver'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
-  Zephyr: {
-    targetGender: 'female',
-    pitch: 1.02,
-    rateMultiplier: 0.98,
+  Charon: {
+    targetGender: 'male',
+    pitch: 0.92,
+    rateMultiplier: 0.95,
     namePreferences: [
-      'natural', 'neural', 'online', 'jenny', 'aria', 'michelle', 'serena', 'sonia',
-      'google uk english female', 'google us english', 'zira', 'samantha', 'victoria'
+      'ryan', 'daniel', 'oliver', 'george', 'uk english male', 'natural', 'neural', 'online', 'brian'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },
   Kore: {
     targetGender: 'female',
-    pitch: 1.02,
-    rateMultiplier: 0.98,
+    pitch: 1.06,
+    rateMultiplier: 1.00,
     namePreferences: [
-      'natural', 'neural', 'online', 'jenny', 'aria', 'ava', 'emma', 'sonia',
-      'google us english', 'google uk english female', 'zira', 'samantha', 'victoria'
+      'jenny', 'ava', 'emma', 'google us english', 'natural', 'neural', 'online', 'zira', 'samantha'
+    ],
+    disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
+  },
+  Zephyr: {
+    targetGender: 'female',
+    pitch: 0.92,
+    rateMultiplier: 0.92,
+    namePreferences: [
+      'sonia', 'serena', 'google uk english female', 'michelle', 'aria', 'natural', 'neural', 'online', 'zira'
     ],
     disallowedPatterns: BANNED_ROBOTIC_PATTERNS,
   },

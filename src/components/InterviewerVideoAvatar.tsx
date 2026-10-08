@@ -43,30 +43,67 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
     return () => unsubscribe();
   }, []);
 
-  // Control video playback based on isSpeaking state
+  const avatarSrc = persona.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80';
+  const videoSrc = PERSONA_VIDEOS[persona.id] || PERSONA_VIDEOS['alex-mentor'];
+
+  // Ensure continuous live playback - never freeze on speech end
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    vid.muted = true;
+    const playVideo = () => {
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          // If browser requires user gesture, unlock on first interaction
+          const unlock = () => {
+            vid.play().catch(() => {});
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('keydown', unlock);
+          };
+          window.addEventListener('click', unlock, { once: true });
+          window.addEventListener('keydown', unlock, { once: true });
+        });
+      }
+    };
+
+    playVideo();
+  }, [videoSrc]);
+
+  // Modulate video playback rate and presence dynamically based on call state
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
     if (isSpeaking) {
-      vid.currentTime = 0;
-      const playPromise = vid.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Handled gracefully if browser restricts autoplay
-        });
-      }
+      vid.playbackRate = 1.05; // Lively speaking cadence
+      vid.play().catch(() => {});
+    } else if (isCandidateSpeaking) {
+      vid.playbackRate = 0.95; // Attentive listening cadence
+      vid.play().catch(() => {});
     } else {
-      vid.pause();
-      vid.currentTime = 0;
+      vid.playbackRate = 0.9; // Calm ambient presence
+      vid.play().catch(() => {});
     }
-  }, [isSpeaking]);
-
-  const avatarSrc = persona.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80';
-  const videoSrc = PERSONA_VIDEOS[persona.id] || PERSONA_VIDEOS['alex-mentor'];
+  }, [isSpeaking, isCandidateSpeaking]);
 
   return (
     <div className={`relative w-full h-full overflow-hidden select-none bg-zinc-950 ${className}`}>
+      {/* Subtle Interviewer Head Nodding Animation during Candidate Responses */}
+      <style>{`
+        @keyframes interviewerListeningNod {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          15% { transform: translateY(3.5px) rotate(0.35deg); }
+          28% { transform: translateY(0px) rotate(0deg); }
+          45% { transform: translateY(2.8px) rotate(-0.25deg); }
+          58% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-interviewer-nod {
+          animation: interviewerListeningNod 4.2s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* High-Definition Interviewer Camera Stage */}
       <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-zinc-950">
         {/* Ambient Blurred Studio Backdrop (Fills widescreen displays seamlessly without harsh black cutoffs) */}
@@ -80,7 +117,9 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
 
         {/* Video / Avatar Container - Full Head & Face 100% in Frame (NEVER cut in half) */}
         {!videoError ? (
-          <div className="relative z-10 w-full h-full flex items-center justify-center">
+          <div className={`relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 ${
+            isCandidateSpeaking ? 'animate-interviewer-nod' : ''
+          }`}>
             <video
               ref={videoRef}
               src={videoSrc}
@@ -88,18 +127,27 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
               muted
               playsInline
               loop
+              autoPlay
+              onEnded={() => {
+                if (videoRef.current) {
+                  videoRef.current.currentTime = 0;
+                  videoRef.current.play().catch(() => {});
+                }
+              }}
               onError={() => setVideoError(true)}
               className={`max-h-full max-w-full w-auto h-auto object-contain mx-auto transition-all duration-300 drop-shadow-2xl ${
                 isSpeaking
-                  ? 'brightness-105 contrast-102'
+                  ? 'brightness-105 contrast-102 scale-[1.01]'
                   : isCandidateSpeaking
-                  ? 'brightness-100'
+                  ? 'brightness-102 contrast-100'
                   : 'brightness-95'
               }`}
             />
           </div>
         ) : !imageError ? (
-          <div className="relative z-10 w-full h-full flex items-center justify-center">
+          <div className={`relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 ${
+            isCandidateSpeaking ? 'animate-interviewer-nod' : ''
+          }`}>
             <img
               src={avatarSrc}
               alt={persona.name}
@@ -128,7 +176,7 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
             isSpeaking
               ? 'ring-2 ring-inset ring-emerald-500/70 shadow-[inset_0_0_40px_rgba(16,185,129,0.2)]'
               : isCandidateSpeaking
-              ? 'ring-2 ring-inset ring-blue-500/60 shadow-[inset_0_0_30px_rgba(59,130,246,0.15)]'
+              ? 'ring-2 ring-inset ring-blue-500/70 shadow-[inset_0_0_35px_rgba(59,130,246,0.2)]'
               : 'ring-1 ring-inset ring-white/10'
           }`}
         />
@@ -142,7 +190,7 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
               isSpeaking
                 ? 'bg-emerald-400 animate-pulse'
                 : isCandidateSpeaking
-                ? 'bg-blue-400'
+                ? 'bg-blue-400 animate-pulse'
                 : 'bg-zinc-400'
             }`}
           />
@@ -164,14 +212,22 @@ export const InterviewerVideoAvatar: React.FC<InterviewerVideoAvatarProps> = ({
               ))}
             </div>
           )}
+
+          {/* Responsive Listening Indicator when Candidate Speaks */}
+          {isCandidateSpeaking && !isSpeaking && (
+            <div className="flex items-center space-x-1 ml-1.5 pl-1.5 border-l border-white/20 text-blue-300 text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
+              <span className="font-medium hidden md:inline">Listening &amp; Observing</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Sleek Live Indicator Badge in Upper-Right Corner */}
       <div className="absolute top-3 right-3 z-20 pointer-events-none">
-        <div className="flex items-center space-x-1.5 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md border border-white/10 text-[10px] text-zinc-300 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span>HD 1080p</span>
+        <div className="flex items-center space-x-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-[10px] text-zinc-300 font-medium">
+          <span className={`w-1.5 h-1.5 rounded-full ${isSpeaking ? 'bg-emerald-400 animate-pulse' : isCandidateSpeaking ? 'bg-blue-400' : 'bg-emerald-500'}`} />
+          <span>{isSpeaking ? 'Speaking' : isCandidateSpeaking ? 'Attentive' : 'Live HD'}</span>
         </div>
       </div>
     </div>
