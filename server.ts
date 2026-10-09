@@ -231,9 +231,10 @@ app.post("/api/tts", async (req, res) => {
     return res.status(400).json({ error: "Text is required" });
   }
 
-  // Clean Markdown, tags, and asterisks for natural vocalization
+  // Clean Markdown, tags, parentheses, bullets, and asterisks for natural vocalization
   const cleanText = text
-    .replace(/[*_#`~[\]]/g, "")
+    .replace(/[*_#`~[\]()]/g, "")
+    .replace(/^[-•*]\s+/gm, "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -704,6 +705,13 @@ app.post("/api/interview/questions", async (req, res) => {
   // 3. For custom Job Description / Resume, attempt Gemini generation with a strict 3-second safeguard
   try {
     const prompt = `You are an elite interview creator for premier tech companies.
+
+CRITICAL AUDIO DIRECTIVES:
+- You are speaking aloud in a real-time interview. Never use markdown, bullet points, asterisks, or parentheses in the question text.
+- Keep each spoken question under 2 to 3 short sentences.
+- Add frequent commas and ellipses (...) to force natural breath pauses for neural audio synthesis.
+- Never list multiple questions at once. Ask exactly one question, then pause for the candidate.
+
 Create exactly ${questionCount} realistic, deeply relevant interview questions tailored to:
 - Role: ${roleTitle}
 - Experience Level: ${level}
@@ -1075,7 +1083,13 @@ Gaps / Weaknesses: ${(t.evaluation?.areasForImprovement || []).join("; ")}
       )
       .join("\n---\n");
 
-    const prompt = `You are the Lead Interviewer at ${targetCompany} conducting an interview for ${level} ${roleTitle} (${track}).
+    const prompt = `You are the Lead Interviewer at ${targetCompany} conducting a real-time spoken interview for ${level} ${roleTitle} (${track}).
+
+CRITICAL AUDIO DIRECTIVES:
+- You are speaking aloud in a real-time interview. Never use markdown, bullet points, asterisks, or parentheses.
+- Keep every spoken response under 2 to 3 short sentences.
+- Add frequent commas and ellipses (...) to force natural breath pauses for neural text-to-speech.
+- Never list multiple questions at once. Ask exactly one question, then pause for the candidate.
 
 You have carefully listened to the candidate's previous responses in this session:
 ${turnsSummary}
@@ -1086,9 +1100,9 @@ Category: "${upcomingQuestion.category}"
 Competency Focus: "${upcomingQuestion.competencyFocus}"
 
 TASK: Adapt and customize this upcoming question to directly learn from and build upon the candidate's previous answers:
-1. Connect Naturally: If the candidate mentioned specific projects, technologies, architectures, or company challenges in previous answers, frame this new question around that context (e.g. "Earlier you mentioned the Kafka microservices migration at Acme. In that same system, tell me about a time you encountered...").
-2. Probe Critical Gaps: If previous answers lacked metrics, lacked conflict resolution, or omitted trade-offs, shape this question and its focus points to evaluate that exact competency.
-3. Conversational Lead-In: Provide a natural 1-2 sentence spoken lead-in (conversationalLeadIn) that the interviewer speaks before the question, making the dialogue feel cohesive and attentive.
+1. Connect Naturally: Frame this question around the candidate's previous answers in 1-2 natural spoken sentences.
+2. Probe Critical Gaps: Shape this question to evaluate missing metrics or trade-offs.
+3. Conversational Lead-In: Provide a natural 1-sentence spoken lead-in (conversationalLeadIn) with commas and ellipses (...) for breath pauses.
 4. Adaptive Context: A concise 1-sentence note for the UI badge explaining how this question was adapted.
 5. Return the full question object in JSON.`;
 
@@ -1170,10 +1184,11 @@ The current interview question you asked:
 The candidate just asked you this clarifying question before answering:
 "${candidateClarification}"
 
-Provide a realistic, helpful, in-character interviewer response.
-- Answer their question directly, giving realistic constraints, user scale, or business context.
-- Encourage structured thinking.
-- Keep your response under 55 words so it sounds natural in a live spoken conversation.`;
+CRITICAL AUDIO DIRECTIVES:
+- You are speaking aloud in a real-time interview. Never use markdown, bullet points, asterisks, or parentheses.
+- Keep every response under 2 to 3 short sentences.
+- Add frequent commas and ellipses (...) to force natural breath pauses for neural text-to-speech.
+- Answer their question directly with constraints or scale, then pause for the candidate.`;
 
     const response = await callGeminiWithRetry({
       contents: prompt,
@@ -1416,9 +1431,12 @@ app.post("/api/interview/followup", async (req, res) => {
 Original Question: "${question}"
 Candidate Answer: "${userAnswer}"
 
-Ask ONE sharp, natural, conversational follow-up question.
-Probe an ambiguous claim, missing metric, technical trade-off, or conflict resolution detail in their answer.
-Keep the question under 30 words, direct and authentic.`;
+CRITICAL AUDIO DIRECTIVES:
+- You are speaking aloud in a real-time interview. Never use markdown, bullet points, asterisks, or parentheses.
+- Keep your response under 2 to 3 short sentences.
+- Add frequent commas and ellipses (...) to force natural breath pauses for neural text-to-speech.
+- Ask exactly ONE sharp, natural, conversational follow-up question, then pause for the candidate.
+Probe an ambiguous claim, missing metric, technical trade-off, or conflict resolution detail in their answer.`;
 
     const response = await callGeminiWithRetry({
       contents: prompt,
@@ -1668,6 +1686,12 @@ app.post("/api/interview/quick-drill", async (req, res) => {
     const prompt = `Create one fresh, high-impact interview question for:
 Category: ${category}
 Difficulty: ${difficulty}
+
+CRITICAL AUDIO DIRECTIVES:
+- Spoken aloud in real time. Never use markdown, bullet points, asterisks, or parentheses in the question.
+- Keep the question under 2 to 3 short sentences.
+- Add commas and ellipses (...) to force natural breath pauses for neural audio synthesis.
+- Exactly one question, then pause for the candidate.
 
 Include:
 - question text

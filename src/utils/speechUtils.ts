@@ -960,7 +960,15 @@ export function speakText(
   const voice = options?.voice || getSelectedVoiceId();
   const speed = options?.rate || getSpeechSpeed();
   const onStart = options?.onStart;
-  const cacheKey = `${voice}:${text.trim()}`;
+
+  // Clean Markdown, tags, parentheses, bullets, and asterisks for natural vocalization
+  const cleanText = text
+    .replace(/[*_#`~[\]()]/g, '')
+    .replace(/^[-•*]\s+/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const cacheKey = `${voice}:${cleanText}`;
 
   let cancelled = false;
 
@@ -1006,7 +1014,7 @@ export function speakText(
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voice }),
+        body: JSON.stringify({ text: cleanText, voice }),
         signal: controller.signal,
       });
 
