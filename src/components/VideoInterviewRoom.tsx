@@ -27,7 +27,10 @@ import {
   ArrowRight,
   Award,
   ThumbsUp,
-  Target
+  Target,
+  TrendingUp,
+  TrendingDown,
+  Minus
 } from 'lucide-react';
 import { 
   InterviewTurn, 
@@ -71,6 +74,7 @@ interface VideoInterviewRoomProps {
   onTakeFollowUp?: (followUpQuestionText: string) => void;
   onFinishEarly?: () => void;
   isLastQuestion?: boolean;
+  turns?: InterviewTurn[];
 }
 
 export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
@@ -104,9 +108,11 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   onTakeFollowUp,
   onFinishEarly,
   isLastQuestion,
+  turns,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const chimePlayedRef = useRef<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showCaptions, setShowCaptions] = useState(true);
   const [layoutMode, setLayoutMode] = useState<'pip' | 'grid'>('pip');
@@ -120,6 +126,35 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
       setShowScorecardDrawer(true);
     }
   }, [evaluation]);
+
+  // Reset pacing chime for each new turn
+  useEffect(() => {
+    chimePlayedRef.current = false;
+  }, [currentTurn.id]);
+
+  // Gentle soft chime once candidate hits 150s (2m 30s) to encourage wrapping up with results
+  useEffect(() => {
+    if (isRecording && durationSeconds >= 150 && !chimePlayedRef.current) {
+      chimePlayedRef.current = true;
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+          gain.gain.setValueAtTime(0.04, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.36);
+        }
+      } catch (e) {}
+    }
+  }, [isRecording, durationSeconds]);
 
   const toggleFullscreen = () => {
     setIsFullscreen((prev) => {
@@ -244,9 +279,26 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
             )}
           </button>
 
-          <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-zinc-800/80 rounded-md text-zinc-300 font-mono">
-            <Clock className="w-3.5 h-3.5 text-zinc-400" />
+          {/* Dynamic Response Budget & Pacing Indicator */}
+          <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md font-mono text-xs transition-colors ${
+            durationSeconds > 150 
+              ? 'bg-amber-950/80 text-amber-300 border border-amber-600/60 animate-pulse' 
+              : durationSeconds >= 90
+              ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-600/50'
+              : 'bg-zinc-800/80 text-zinc-300'
+          }`}>
+            <Clock className={`w-3.5 h-3.5 ${durationSeconds > 150 ? 'text-amber-400' : durationSeconds >= 90 ? 'text-emerald-400' : 'text-zinc-400'}`} />
             <span>{formatTimer(durationSeconds)}</span>
+            {isRecording && durationSeconds > 150 && (
+              <span className="text-[10px] font-sans font-semibold text-amber-200 hidden md:inline ml-1">
+                Wrap up soon
+              </span>
+            )}
+            {isRecording && durationSeconds >= 90 && durationSeconds <= 150 && (
+              <span className="text-[10px] font-sans font-semibold text-emerald-300 hidden md:inline ml-1">
+                Optimal length
+              </span>
+            )}
           </div>
           <span className="text-[11px] font-semibold text-zinc-400">
             Q {currentTurnIndex + 1} of {totalQuestions}
@@ -463,6 +515,98 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
               </div>
             </div>
 
+            {/* Interview Progression & Round Trajectory Track */}
+            {turns && turns.length > 1 && (() => {
+              const priorTurnIndex = currentTurnIndex > 0 ? currentTurnIndex - 1 : null;
+              const priorTurn = priorTurnIndex !== null && turns ? turns[priorTurnIndex] : null;
+              const scoreDelta = priorTurn?.evaluation ? evaluation.overallScore - priorTurn.evaluation.overallScore : null;
+
+              return (
+                <div className="my-2.5 p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-1.5 font-bold text-zinc-200">
+                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Round Trajectory & Progression</span>
+                    </div>
+                    {scoreDelta !== null && (
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center space-x-1 ${
+                        scoreDelta > 0 
+                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-700/60' 
+                          : scoreDelta < 0
+                          ? 'bg-amber-950/80 text-amber-300 border border-amber-700/60'
+                          : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                      }`}>
+                        {scoreDelta > 0 ? (
+                          <>
+                            <TrendingUp className="w-3 h-3 text-emerald-400" />
+                            <span>+{scoreDelta} pts vs Prior Turn</span>
+                          </>
+                        ) : scoreDelta < 0 ? (
+                          <>
+                            <TrendingDown className="w-3 h-3 text-amber-400" />
+                            <span>{scoreDelta} pts vs Prior Turn</span>
+                          </>
+                        ) : (
+                          <>
+                            <Minus className="w-3 h-3 text-zinc-400" />
+                            <span>Even with Prior Turn</span>
+                          </>
+                        )}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Horizontal Question Stepper with Scores */}
+                  <div className="flex items-center space-x-2 text-[11px] overflow-x-auto py-0.5">
+                    {turns.map((t, idx) => {
+                      const isCurrent = idx === currentTurnIndex;
+                      const score = t.evaluation?.overallScore;
+                      return (
+                        <div 
+                          key={t.id || idx}
+                          className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border transition-all ${
+                            isCurrent 
+                              ? 'bg-zinc-800 border-emerald-500/80 text-white shadow-xs' 
+                              : score !== undefined
+                              ? 'bg-zinc-900/90 border-zinc-750 text-zinc-300'
+                              : 'bg-zinc-950/50 border-zinc-800 text-zinc-500'
+                          }`}
+                        >
+                          <span className="font-semibold text-zinc-400">Q{idx + 1}</span>
+                          {score !== undefined ? (
+                            <span className={`font-bold ${score >= 80 ? 'text-emerald-400' : score >= 65 ? 'text-blue-400' : 'text-amber-400'}`}>
+                              {score}
+                            </span>
+                          ) : (
+                            <span className="text-zinc-600 font-mono">-</span>
+                          )}
+                          {isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Progression Insights Details from Gemini (if available) */}
+                  {evaluation.progressionInsights && (
+                    <div className="text-[11px] text-zinc-300 bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-2 space-y-1">
+                      {evaluation.progressionInsights.improvedAreas?.length > 0 && (
+                        <div className="flex items-start space-x-1.5">
+                          <span className="text-emerald-400 font-semibold shrink-0">✓ Growth Noticed:</span>
+                          <span className="text-zinc-300">{evaluation.progressionInsights.improvedAreas.join('; ')}</span>
+                        </div>
+                      )}
+                      {evaluation.progressionInsights.continuityNotes && (
+                        <div className="flex items-start space-x-1.5">
+                          <span className="text-blue-400 font-semibold shrink-0">ℹ Continuity:</span>
+                          <span className="text-zinc-400">{evaluation.progressionInsights.continuityNotes}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* STAR Pillars Quick Grid */}
             {evaluation.starBreakdown && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 my-3">
@@ -616,6 +760,40 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
               }
               className="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg p-2.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 resize-none font-sans leading-relaxed"
             />
+          )}
+
+          {/* Live Response Pacing Visualizer */}
+          {isRecording && (
+            <div className="mt-2 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px]">
+              <div className="flex items-center space-x-2">
+                <span className="text-zinc-400">Target: 90s - 150s (~2m)</span>
+                <div className="w-24 sm:w-36 h-1.5 bg-zinc-800 rounded-full overflow-hidden flex">
+                  <div 
+                    className={`h-full transition-all duration-300 ${
+                      durationSeconds > 150 
+                        ? 'bg-amber-400' 
+                        : durationSeconds >= 90 
+                        ? 'bg-emerald-400' 
+                        : 'bg-blue-400'
+                    }`}
+                    style={{ width: `${Math.min(100, Math.round((durationSeconds / 150) * 100))}%` }}
+                  />
+                </div>
+              </div>
+              <span className={`font-semibold ${
+                durationSeconds > 150 
+                  ? 'text-amber-400 animate-pulse' 
+                  : durationSeconds >= 90 
+                  ? 'text-emerald-400' 
+                  : 'text-zinc-400'
+              }`}>
+                {durationSeconds > 150 
+                  ? 'Wrap up with results' 
+                  : durationSeconds >= 90 
+                  ? 'Ideal pacing' 
+                  : `${Math.max(0, 90 - durationSeconds)}s to target`}
+              </span>
+            </div>
           )}
         </div>
       </div>

@@ -106,6 +106,55 @@ Within three weeks, our throughput increased from 800 QPS to over 14,000 QPS wit
   console.log(`   ✓ Growth Areas: ${(evaluation?.areasForImprovement || []).join('; ')}`);
   console.log(`   ✓ Follow-Up Probe Generated: "${evaluation?.potentialFollowUp || evaluation?.followUpQuestion}"`);
 
+  // Step 4b: Candidate Answer Turn 2 with Multi-Turn Progression & Trajectory
+  console.log('\n4️⃣b Testing Turn 2 Answer Evaluation with Multi-Turn Progression...');
+  const sampleAnswer2 = `When architecting our stateful payment service to handle 100,000 QPS, I partitioned our database across 32 shards using consistent hashing by merchant ID. To eliminate replication lag anomalies, we implemented Redis as a write-through cache and routed all read-after-write operations to the primary database within a 2-second window.
+
+For trade-offs, we accepted eventual consistency on non-critical audit analytics while strictly enforcing serializable isolation on financial transactions via optimistic concurrency tokens. In production load tests, this kept p99 latency at 38ms with zero double-charge race conditions.`;
+
+  const evalPayload2 = {
+    question: questions[1]?.question || 'When architecting a stateful service, how do you handle data consistency?',
+    userAnswer: sampleAnswer2,
+    roleTitle: 'Senior Software Engineer',
+    level: 'Senior',
+    track: 'System Design & Architecture',
+    personaName: 'Alex Rivera',
+    personaTone: 'Rigorous and constructive',
+    deliveryMetrics: {
+      wpm: 148,
+      durationSeconds: 110,
+      fillerWordCount: 0,
+      fillerWords: [],
+      clarityScore: 95,
+      pacingAssessment: 'Optimal',
+    },
+    previousTurns: [
+      {
+        question: questions[0] || { question: 'Initial question' },
+        userAnswer: sampleAnswer,
+        evaluation,
+      },
+    ],
+  };
+
+  const evalRes2 = await fetch(`${BASE_URL}/api/interview/evaluate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(evalPayload2),
+  });
+  const evalData2 = await evalRes2.json();
+  const evaluation2 = evalData2.evaluation;
+
+  console.log(`   ✓ Turn 2 Composite Score: ${evaluation2?.overallScore}/100 (Prior: ${evaluation?.overallScore}/100)`);
+  if (evaluation2?.overallScore && evaluation?.overallScore) {
+    const delta = evaluation2.overallScore - evaluation.overallScore;
+    console.log(`   ✓ Trajectory Delta: ${delta >= 0 ? `+${delta}` : delta} pts (${delta >= 0 ? 'Trending Up 🚀' : 'Trending Down'})`);
+  }
+  if (evaluation2?.progressionInsights) {
+    console.log(`   ✓ Progression Insights: Consistency="${evaluation2.progressionInsights.consistencyVerdict}"`);
+    console.log(`   ✓ Growth Noticed: ${(evaluation2.progressionInsights.improvedAreas || []).join('; ')}`);
+  }
+
   // Step 5: In-Call Clarification Inquiry
   console.log('\n5️⃣ Testing In-Call Clarification...');
   const clarifyRes = await fetch(`${BASE_URL}/api/interview/clarify`, {

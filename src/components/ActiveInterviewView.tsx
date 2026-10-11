@@ -784,6 +784,7 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
           onTakeFollowUp={onTakeFollowUpQuestion}
           onFinishEarly={onFinishEarly}
           isLastQuestion={isLastQuestion}
+          turns={turns}
         />
       ) : !currentTurn.evaluation ? (
         /* Mode 2: Classic Question Card Layout */

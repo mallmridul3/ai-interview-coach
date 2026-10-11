@@ -83,8 +83,7 @@
     {
       "kind": "request-never-settled",
       "step": 1,
-      "state": "open",
-      "cleanRuns": 1
+      "state": "guarded"
     }
   ]
 }
