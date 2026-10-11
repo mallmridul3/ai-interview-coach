@@ -41,6 +41,7 @@ import {
 import { AudioWaveform } from './AudioWaveform';
 import { InterviewerVideoAvatar } from './InterviewerVideoAvatar';
 import { captureVideoFrame } from '../utils/deliveryAnalyzer';
+import { subscribeAutoplayBlocked, triggerPendingAutoplay, unlockAudioContext } from '../utils/speechUtils';
 
 interface VideoInterviewRoomProps {
   setup: RoleSetup;
@@ -119,6 +120,15 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   const [showTranscriptInput, setShowTranscriptInput] = useState(true);
   const [isLocalSubmitting, setIsLocalSubmitting] = useState(false);
   const [showScorecardDrawer, setShowScorecardDrawer] = useState(true);
+  const [isAudioBlocked, setIsAudioBlocked] = useState(false);
+
+  // Subscribe to browser autoplay blocked alerts
+  useEffect(() => {
+    const unsub = subscribeAutoplayBlocked((blocked) => {
+      setIsAudioBlocked(blocked);
+    });
+    return unsub;
+  }, []);
 
   // Auto-expand scorecard drawer whenever new evaluation lands
   useEffect(() => {
@@ -235,6 +245,11 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   return (
     <div 
       ref={containerRef}
+      onClick={() => {
+        if (isAudioBlocked) {
+          triggerPendingAutoplay();
+        }
+      }}
       className={`bg-zinc-950 text-white border border-zinc-800 shadow-2xl flex flex-col transition-all duration-300 ${
         isFullscreen 
           ? 'fixed inset-0 z-50 w-screen h-screen rounded-none mb-0 overflow-hidden' 
@@ -310,6 +325,23 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
       <div className={`relative p-2 sm:p-4 flex flex-col justify-center items-center ${
         isFullscreen ? 'flex-1 min-h-0' : 'flex-1'
       }`}>
+        {/* Autoplay Blocked Floating Banner */}
+        {isAudioBlocked && (
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerPendingAutoplay();
+              }}
+              className="px-4 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs flex items-center space-x-2 shadow-2xl border-2 border-white/80 cursor-pointer"
+              title="Click to unmute and hear interviewer speak"
+            >
+              <Volume2 className="w-4 h-4 text-zinc-950 animate-pulse" />
+              <span>Interviewer Speaking • Click Anywhere to Unmute</span>
+            </button>
+          </div>
+        )}
         {layoutMode === 'pip' ? (
           /* Mode 1: Clean PiP Stage (Interviewer is the full hero; candidate camera in corner) */
           <div className={`relative w-full rounded-2xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-2xl flex items-center justify-center ${

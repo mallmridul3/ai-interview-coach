@@ -22,6 +22,7 @@ import {
   testPersonaSpeech,
   getMatchedVoiceDetails,
   stopSpeaking,
+  unlockAudioContext,
 } from '../utils/speechUtils';
 
 interface VoiceSettingsModalProps {
@@ -48,6 +49,7 @@ export const VoiceSettingsModal: React.FC<VoiceSettingsModalProps> = ({ isOpen, 
   };
 
   const handlePlaySample = (voice: AiVoiceOption) => {
+    unlockAudioContext();
     if (playingVoiceId === voice.id && playingMode === 'sample') {
       stopSpeaking();
       setPlayingVoiceId(null);
@@ -70,6 +72,7 @@ export const VoiceSettingsModal: React.FC<VoiceSettingsModalProps> = ({ isOpen, 
   };
 
   const handleTestQuestionSpeech = (voice: AiVoiceOption) => {
+    unlockAudioContext();
     if (playingVoiceId === voice.id && playingMode === 'question') {
       stopSpeaking();
       setPlayingVoiceId(null);

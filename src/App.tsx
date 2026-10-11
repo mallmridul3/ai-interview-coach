@@ -26,7 +26,7 @@ import {
 } from './types';
 import { INTERVIEWER_PERSONAS } from './data/mockData';
 import { initAuth, getAccessToken } from './utils/firebaseAuth';
-import { stopSpeaking, preloadSpeech, getVoiceForPersonaId } from './utils/speechUtils';
+import { stopSpeaking, preloadSpeech, getVoiceForPersonaId, unlockAudioContext } from './utils/speechUtils';
 import { recordTurnInMemory, recordSessionCompletedInMemory, loadCandidateMemory } from './utils/candidateMemory';
 
 export default function App() {
@@ -164,6 +164,7 @@ export default function App() {
 
   // 1. Start Mock Interview
   const handleStartInterview = async (setup: RoleSetup) => {
+    unlockAudioContext();
     setIsLoadingQuestions(true);
     setCurrentSetup(setup);
     setIsSavedSession(false);
@@ -226,6 +227,7 @@ export default function App() {
     stage: HiringStage,
     roleTitle: string
   ) => {
+    unlockAudioContext();
     const matchedPersona = 
       INTERVIEWER_PERSONAS.find((p) => p.id === stage.recommendedPersonaId) || 
       (stage.levelType === 'Bar Raiser / Executive' ? INTERVIEWER_PERSONAS[1] : INTERVIEWER_PERSONAS[0]);
@@ -270,6 +272,7 @@ export default function App() {
 
   // 2. Practice a specific behavioral question from the 10 common list
   const handlePracticeBehavioralQuestion = (questionText: string, category: string) => {
+    unlockAudioContext();
     const singleSetup: RoleSetup = {
       roleTitle: 'Engineering & Leadership Candidate',
       level: 'Senior',

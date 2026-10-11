@@ -179,6 +179,47 @@ export function stopSpeechArticulationLoop() {
   });
 }
 
+type AutoplayBlockedListener = (blocked: boolean) => void;
+const autoplayBlockedListeners = new Set<AutoplayBlockedListener>();
+let isAutoplayCurrentlyBlocked = false;
+let pendingAutoplayAction: (() => void) | null = null;
+
+export function isAutoplayBlocked(): boolean {
+  return isAutoplayCurrentlyBlocked;
+}
+
+export function subscribeAutoplayBlocked(listener: AutoplayBlockedListener): () => void {
+  autoplayBlockedListeners.add(listener);
+  listener(isAutoplayCurrentlyBlocked);
+  return () => {
+    autoplayBlockedListeners.delete(listener);
+  };
+}
+
+function setAutoplayBlockedState(blocked: boolean) {
+  if (isAutoplayCurrentlyBlocked !== blocked) {
+    isAutoplayCurrentlyBlocked = blocked;
+    autoplayBlockedListeners.forEach((fn) => {
+      try {
+        fn(blocked);
+      } catch {}
+    });
+  }
+}
+
+export function triggerPendingAutoplay(): void {
+  unlockAudioContext().then(() => {
+    setAutoplayBlockedState(false);
+    if (pendingAutoplayAction) {
+      const action = pendingAutoplayAction;
+      pendingAutoplayAction = null;
+      try {
+        action();
+      } catch {}
+    }
+  });
+}
+
 export function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!audioContext) {
@@ -187,10 +228,49 @@ export function getAudioContext(): AudioContext | null {
       audioContext = new AudioCtx();
     }
   }
-  if (audioContext && audioContext.state === 'suspended') {
-    audioContext.resume().catch(() => {});
-  }
   return audioContext;
+}
+
+export function unlockAudioContext(): Promise<boolean> {
+  if (typeof window === 'undefined') return Promise.resolve(false);
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return Promise.resolve(false);
+    if (ctx.state === 'suspended') {
+      return ctx.resume().then(() => {
+        if (ctx.state === 'running') {
+          try {
+            const buf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.connect(ctx.destination);
+            src.start(0);
+          } catch {}
+          return true;
+        }
+        return false;
+      }).catch(() => false);
+    }
+    return Promise.resolve(ctx.state === 'running');
+  } catch {
+    return Promise.resolve(false);
+  }
+}
+
+// Persistent user-gesture global audio unlocker
+if (typeof window !== 'undefined') {
+  const handleUserGesture = () => {
+    unlockAudioContext().then((unlocked) => {
+      if (unlocked && pendingAutoplayAction) {
+        triggerPendingAutoplay();
+      }
+    });
+  };
+
+  window.addEventListener('click', handleUserGesture, { capture: true, passive: true });
+  window.addEventListener('keydown', handleUserGesture, { capture: true, passive: true });
+  window.addEventListener('touchstart', handleUserGesture, { capture: true, passive: true });
+  window.addEventListener('pointerdown', handleUserGesture, { capture: true, passive: true });
 }
 
 export async function decodeAudioDataUrl(dataUrl: string): Promise<AudioBuffer | null> {
@@ -212,16 +292,11 @@ function playAudioBuffer(
   onStart?: () => void
 ): () => void {
   const ctx = getAudioContext();
-  if (!ctx) {
-    onEnd?.();
+  if (!ctx || ctx.state !== 'running') {
     return () => {};
   }
 
   try {
-    if (ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
-    }
-
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.playbackRate.value = speed;
@@ -249,6 +324,7 @@ function playAudioBuffer(
     source.onended = finish;
     source.start(0);
 
+    setAutoplayBlockedState(false);
     // Audio has officially begun outputting sound to speakers
     onStart?.();
 
@@ -262,7 +338,8 @@ function playAudioBuffer(
         currentSourceNode = null;
       }
     };
-  } catch {
+  } catch (err) {
+    console.warn('playAudioBuffer error:', err);
     stopRealtimeAudioAnalysis();
     onEnd?.();
     return () => {};
@@ -273,23 +350,32 @@ function playHtmlAudioUrl(
   audioUrl: string,
   onEnd?: () => void,
   speed = 1.0,
-  onStart?: () => void
+  onStart?: () => void,
+  fallbackText?: string,
+  fallbackVoice?: AiVoiceOption['id']
 ): () => void {
+  let ended = false;
   try {
-    const audio = new Audio(audioUrl);
-    currentAudioElement = audio;
+    const audio = new Audio();
+    audio.src = audioUrl;
+    audio.preload = 'auto';
+    audio.volume = 1.0;
     audio.playbackRate = speed;
+    currentAudioElement = audio;
 
     let hasStarted = false;
     audio.onplay = () => {
       if (!hasStarted) {
         hasStarted = true;
+        setAutoplayBlockedState(false);
         onStart?.();
         startSpeechArticulationLoop();
       }
     };
 
     audio.onended = () => {
+      if (ended) return;
+      ended = true;
       stopSpeechArticulationLoop();
       if (currentAudioElement === audio) {
         currentAudioElement = null;
@@ -297,53 +383,77 @@ function playHtmlAudioUrl(
       onEnd?.();
     };
 
-    audio.onerror = () => {
+    audio.onerror = (e) => {
+      if (ended) return;
+      ended = true;
       stopSpeechArticulationLoop();
       if (currentAudioElement === audio) {
         currentAudioElement = null;
       }
-      // If HTMLAudio failed, try decoding to AudioBuffer via Web Audio API
-      decodeAudioDataUrl(audioUrl).then((buf) => {
-        if (buf) {
-          playAudioBuffer(buf, onEnd, speed, onStart);
-        } else {
-          onEnd?.();
-        }
-      });
+      console.warn('HTMLAudioElement error event:', e);
+      if (fallbackText) {
+        fallbackBrowserSpeech(fallbackText, onEnd, speed, fallbackVoice || 'Kore');
+      } else {
+        onEnd?.();
+      }
     };
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Autoplay blocked on HTMLAudio: try Web Audio API AudioBuffer
-        decodeAudioDataUrl(audioUrl).then((buf) => {
-          if (buf) {
-            playAudioBuffer(buf, onEnd, speed, onStart);
+      playPromise
+        .then(() => {
+          setAutoplayBlockedState(false);
+        })
+        .catch((err: any) => {
+          console.warn('HTMLAudioElement play() blocked or rejected:', err?.name, err?.message);
+          if (err?.name === 'NotAllowedError') {
+            setAutoplayBlockedState(true);
+            pendingAutoplayAction = () => {
+              playHtmlAudioUrl(audioUrl, onEnd, speed, onStart, fallbackText, fallbackVoice);
+            };
+          } else if (fallbackText) {
+            fallbackBrowserSpeech(fallbackText, onEnd, speed, fallbackVoice || 'Kore');
           } else {
             onEnd?.();
           }
         });
-      });
     }
-  } catch {
-    decodeAudioDataUrl(audioUrl).then((buf) => {
-      if (buf) {
-        playAudioBuffer(buf, onEnd, speed, onStart);
-      } else {
-        onEnd?.();
-      }
-    });
+  } catch (err) {
+    console.warn('HTMLAudio creation error:', err);
+    if (fallbackText) {
+      fallbackBrowserSpeech(fallbackText, onEnd, speed, fallbackVoice || 'Kore');
+    } else {
+      onEnd?.();
+    }
   }
 
   return () => {
+    ended = true;
     stopSpeechArticulationLoop();
     if (currentAudioElement) {
       try {
         currentAudioElement.pause();
+        currentAudioElement.currentTime = 0;
       } catch {}
       currentAudioElement = null;
     }
   };
+}
+
+function playBestAudio(
+  audioUrl: string,
+  buffer: AudioBuffer | null | undefined,
+  onEnd?: () => void,
+  speed = 1.0,
+  onStart?: () => void,
+  fallbackText?: string,
+  fallbackVoice?: AiVoiceOption['id']
+): () => void {
+  const ctx = getAudioContext();
+  if (buffer && ctx && ctx.state === 'running') {
+    return playAudioBuffer(buffer, onEnd, speed, onStart);
+  }
+  return playHtmlAudioUrl(audioUrl, onEnd, speed, onStart, fallbackText, fallbackVoice);
 }
 
 // Module-level cached browser voices to ensure immediate availability
@@ -736,30 +846,26 @@ export function playVoiceSample(
   let cancelled = false;
   const sampleKey = `sample:${voiceId}`;
 
-  // 1. Instant AudioBuffer playback if pre-warmed in memory
-  if (audioBufferCache.has(sampleKey)) {
+  // 1. Instant AudioBuffer playback if pre-warmed in memory and ctx is running
+  if (audioBufferCache.has(sampleKey) && audioContext && audioContext.state === 'running') {
     return playAudioBuffer(audioBufferCache.get(sampleKey)!, onEnd, speed, onStart);
   }
 
-  // 2. If dataUrl cached, play via HTMLAudio and decode for next time
+  // 2. If dataUrl cached, play via best available audio transport
   if (audioCache.has(sampleKey)) {
     const url = audioCache.get(sampleKey)!;
-    decodeAudioDataUrl(url).then((buf) => {
-      if (buf) audioBufferCache.set(sampleKey, buf);
-    });
-    return playHtmlAudioUrl(url, onEnd, speed, onStart);
+    const buf = audioBufferCache.get(sampleKey);
+    return playBestAudio(url, buf, onEnd, speed, onStart, 'Hello, I am ready to conduct your interview simulation today.', voiceId);
   }
 
   // 3. If pre-warm fetch is in-flight, await it smoothly
   if (inFlightFetches.has(sampleKey)) {
     inFlightFetches.get(sampleKey)!.then((res) => {
       if (cancelled) return;
-      if (res?.buffer) {
-        playAudioBuffer(res.buffer, onEnd, speed, onStart);
-      } else if (res?.audioUrl) {
-        playHtmlAudioUrl(res.audioUrl, onEnd, speed, onStart);
+      if (res?.audioUrl) {
+        playBestAudio(res.audioUrl, res.buffer, onEnd, speed, onStart, 'Hello, I am ready to conduct your interview simulation today.', voiceId);
       } else {
-        onEnd?.();
+        fallbackBrowserSpeech('Hello, I am ready to conduct your interview simulation today.', onEnd, speed, voiceId);
       }
     });
 
@@ -781,11 +887,7 @@ export function playVoiceSample(
         const buf = await decodeAudioDataUrl(data.audioUrl);
         if (buf) audioBufferCache.set(sampleKey, buf);
         if (!cancelled) {
-          if (buf) {
-            playAudioBuffer(buf, onEnd, speed, onStart);
-          } else {
-            playHtmlAudioUrl(data.audioUrl, onEnd, speed, onStart);
-          }
+          playBestAudio(data.audioUrl, buf, onEnd, speed, onStart, 'Hello, I am ready to conduct your interview simulation today.', voiceId);
         }
         return { audioUrl: data.audioUrl, buffer: buf || undefined };
       } else {
@@ -793,7 +895,7 @@ export function playVoiceSample(
       }
     } catch {
       if (!cancelled) {
-        onEnd?.();
+        fallbackBrowserSpeech('Hello, I am ready to conduct your interview simulation today.', onEnd, speed, voiceId);
       }
       return null;
     } finally {
@@ -835,23 +937,6 @@ export function ensureVoicesLoaded(): Promise<SpeechSynthesisVoice[]> {
     window.speechSynthesis.onvoiceschanged = finish;
     setTimeout(finish, 800);
   });
-}
-
-// User-gesture global audio unlocker to prevent browser autoplay blocking
-if (typeof window !== 'undefined') {
-  const unlockAudio = () => {
-    try {
-      if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume().catch(() => {});
-      }
-    } catch {}
-    window.removeEventListener('click', unlockAudio);
-    window.removeEventListener('keydown', unlockAudio);
-    window.removeEventListener('touchstart', unlockAudio);
-  };
-  window.addEventListener('click', unlockAudio, { passive: true });
-  window.addEventListener('keydown', unlockAudio, { passive: true });
-  window.addEventListener('touchstart', unlockAudio, { passive: true });
 }
 
 export function fallbackBrowserSpeech(
@@ -972,30 +1057,26 @@ export function speakText(
 
   let cancelled = false;
 
-  // 1. Instant playback from pre-decoded AudioBuffer (zero latency, zero buffering)
-  if (audioBufferCache.has(cacheKey)) {
+  // 1. Instant playback from pre-decoded AudioBuffer if audio context is running
+  if (audioBufferCache.has(cacheKey) && audioContext && audioContext.state === 'running') {
     return playAudioBuffer(audioBufferCache.get(cacheKey)!, onEnd, speed, onStart);
   }
 
-  // 2. Play from cached dataUrl while decoding into AudioBuffer in background
+  // 2. Play from cached dataUrl via best available audio transport
   if (audioCache.has(cacheKey)) {
     const url = audioCache.get(cacheKey)!;
-    decodeAudioDataUrl(url).then((buf) => {
-      if (buf) audioBufferCache.set(cacheKey, buf);
-    });
-    return playHtmlAudioUrl(url, onEnd, speed, onStart);
+    const buf = audioBufferCache.get(cacheKey);
+    return playBestAudio(url, buf, onEnd, speed, onStart, cleanText, voice);
   }
 
   // 3. If pre-fetch for this question is in-flight, await it for a fluid audio transition
   if (inFlightFetches.has(cacheKey)) {
     inFlightFetches.get(cacheKey)!.then((res) => {
       if (cancelled) return;
-      if (res?.buffer) {
-        playAudioBuffer(res.buffer, onEnd, speed, onStart);
-      } else if (res?.audioUrl) {
-        playHtmlAudioUrl(res.audioUrl, onEnd, speed, onStart);
+      if (res?.audioUrl) {
+        playBestAudio(res.audioUrl, res.buffer, onEnd, speed, onStart, cleanText, voice);
       } else {
-        onEnd?.();
+        fallbackBrowserSpeech(cleanText, onEnd, speed, voice);
       }
     });
 
@@ -1030,21 +1111,21 @@ export function speakText(
         if (buf) audioBufferCache.set(cacheKey, buf);
 
         if (!cancelled) {
-          if (buf) {
-            playAudioBuffer(buf, onEnd, speed, onStart);
-          } else {
-            playHtmlAudioUrl(data.audioUrl, onEnd, speed, onStart);
-          }
+          playBestAudio(data.audioUrl, buf || undefined, onEnd, speed, onStart, cleanText, voice);
         }
         return { audioUrl: data.audioUrl, buffer: buf || undefined };
       } else {
-        onEnd?.();
+        if (!cancelled) {
+          fallbackBrowserSpeech(cleanText, onEnd, speed, voice);
+        }
         return null;
       }
     } catch (err: any) {
       if (err.name === 'AbortError' || cancelled) return null;
-      console.warn("TTS fetch error:", err?.message);
-      onEnd?.();
+      console.warn("TTS fetch failed, falling back to calibrated browser speech:", err?.message);
+      if (!cancelled) {
+        fallbackBrowserSpeech(cleanText, onEnd, speed, voice);
+      }
       return null;
     } finally {
       inFlightFetches.delete(cacheKey);

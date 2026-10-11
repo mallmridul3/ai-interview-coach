@@ -21,6 +21,7 @@ import {
 import { RoleSetup, ExperienceLevel, InterviewTrack, CandidateLearningMemory } from '../types';
 import { INTERVIEWER_PERSONAS, PRESET_ROLES } from '../data/mockData';
 import { loadCandidateMemory, resetCandidateMemory } from '../utils/candidateMemory';
+import { unlockAudioContext } from '../utils/speechUtils';
 
 interface RoleSetupViewProps {
   onStartInterview: (setup: RoleSetup) => void;
@@ -225,6 +226,8 @@ export const RoleSetupView: React.FC<RoleSetupViewProps> = ({ onStartInterview, 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!roleTitle.trim()) return;
+
+    unlockAudioContext();
 
     onStartInterview({
       roleTitle: roleTitle.trim(),

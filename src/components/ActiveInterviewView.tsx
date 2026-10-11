@@ -36,7 +36,7 @@ import { VideoInterviewRoom } from './VideoInterviewRoom';
 import { AudioWaveform } from './AudioWaveform';
 import { ClarificationModal } from './ClarificationModal';
 import { CandidateScratchpad } from './CandidateScratchpad';
-import { speakText, stopSpeaking, preloadSpeech, isSpeechRecognitionSupported, getVoiceForPersonaId } from '../utils/speechUtils';
+import { speakText, stopSpeaking, preloadSpeech, isSpeechRecognitionSupported, getVoiceForPersonaId, unlockAudioContext } from '../utils/speechUtils';
 import { analyzeSpeechDelivery, captureVideoFrame } from '../utils/deliveryAnalyzer';
 import { VoiceSettingsModal } from './VoiceSettingsModal';
 import { ProTipDrawer } from './ProTipDrawer';
@@ -264,6 +264,7 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
   };
 
   const handlePlayQuestionAudio = () => {
+    unlockAudioContext();
     if (!currentTurn) return;
     if (isSpeakingQuestion) {
       stopSpeaking();
