@@ -460,12 +460,13 @@ function getTailoredQuestionsForTrack(
   count = 3
 ) {
   const company = targetCompany || "top industry leaders";
+  const cleanRole = (roleTitle || "Software Engineer").replace(/\s*\([^)]*\)/g, "").trim();
 
   if (track.includes("System Design") || track.includes("Architecture")) {
     return [
       {
         id: `q-sys-1-${Date.now()}`,
-        question: `How would you design a distributed, fault-tolerant service at ${company} (e.g. real-time event streaming, payment ledger, or notification pipeline) capable of handling 100,000 requests per second with sub-50ms p99 latency?`,
+        question: `How would you design a distributed, fault-tolerant service at ${company}, such as real-time event streaming, a payment ledger, or a notification pipeline, capable of handling 100,000 requests per second with sub-50ms p99 latency?`,
         category: "System Design & Architecture",
         competencyFocus: "Scalability, Partitioning & Availability",
         whyItMatters: "Tests your mastery of microservices decomposition, caching tiers, data partitioning (sharding), and fault tolerance.",
@@ -506,7 +507,7 @@ function getTailoredQuestionsForTrack(
     return [
       {
         id: `q-tech-1-${Date.now()}`,
-        question: `Describe a challenging algorithmic or technical bottleneck you diagnosed and resolved in your code as a ${level} ${roleTitle}. What profiling tools or analytical approaches did you use?`,
+        question: `Describe a challenging algorithmic or technical bottleneck you diagnosed and resolved in your code as a ${level} ${cleanRole}. What profiling tools or analytical approaches did you use?`,
         category: "Technical Depth & Optimization",
         competencyFocus: "Computational Complexity & Profiling",
         whyItMatters: "Assesses how methodically you isolate latency hotspots (CPU, memory leak, I/O bound) rather than guessing.",
@@ -629,7 +630,7 @@ function getTailoredQuestionsForTrack(
   return [
     {
       id: `q-gen-1-${Date.now()}`,
-      question: `Tell me about a high-impact project you spearheaded as a ${level} ${roleTitle} at ${company} where you had to balance technical excellence with aggressive business deadlines. What trade-offs did you make?`,
+      question: `Tell me about a high-impact project you spearheaded as a ${level} ${cleanRole} at ${company} where you had to balance technical excellence with aggressive business deadlines. What trade-offs did you make?`,
       category: "Ownership & Execution",
       competencyFocus: "Technical Pragmatism & Project Delivery",
       whyItMatters: "Evaluates whether you drive measurable business outcomes while maintaining high architectural and code standards.",
@@ -666,6 +667,25 @@ function getTailoredQuestionsForTrack(
   ].slice(0, count);
 }
 
+function cleanSpokenQuestion(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/\s*\(\s*e\.g\.\s*([^)]+)\)/gi, ", such as $1,")
+    .replace(/\s*\(\s*i\.e\.\s*([^)]+)\)/gi, ", meaning $1,")
+    .replace(/\s*\(([^)]+)\)/g, ", $1,")
+    .replace(/[*_#`~]/g, "")
+    .replace(/\s*,\s*,+/g, ",")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function sanitizeQuestionList(list: any[]): any[] {
+  return (list || []).map((q: any) => ({
+    ...q,
+    question: cleanSpokenQuestion(q.question),
+  }));
+}
+
 // 1. Generate tailored interview questions with zero-lag delivery
 app.post("/api/interview/questions", async (req, res) => {
   const {
@@ -679,27 +699,29 @@ app.post("/api/interview/questions", async (req, res) => {
     candidateMemory,
   } = req.body;
 
+  const cleanRole = (roleTitle || "Software Engineer").replace(/\s*\([^)]*\)/g, "").trim();
   const hasMemory = candidateMemory && (candidateMemory.recurringGaps?.length > 0 || candidateMemory.totalAnswersAnalyzed > 0);
-  const cacheKey = `${roleTitle}:${level}:${track}:${targetCompany}:${questionCount}`.toLowerCase();
+  const cacheKey = `${cleanRole}:${level}:${track}:${targetCompany}:${questionCount}`.toLowerCase();
   
   // 1. Fast Cache Check (only if no memory and no JD/resume)
   if (!jobDescription && !resumeSummary && !hasMemory && questionsCache.has(cacheKey)) {
-    return res.json({ questions: questionsCache.get(cacheKey) });
+    return res.json({ questions: sanitizeQuestionList(questionsCache.get(cacheKey) || []) });
   }
 
   // 2. If standard setup without custom JD/Resume, return instantly from calibrated track synthesizer (<30ms)
   if (!jobDescription.trim() && !resumeSummary.trim()) {
-    const tailored: any[] = getTailoredQuestionsForTrack(roleTitle, level, track, targetCompany, questionCount);
+    const tailored: any[] = getTailoredQuestionsForTrack(cleanRole, level, track, targetCompany, questionCount);
     if (candidateMemory?.recurringGaps?.length) {
       const topGap = candidateMemory.recurringGaps[0];
       tailored[0].hintOrFocusPoints.unshift(`Targeted Growth Area: Address prior gap — ${topGap}`);
       tailored[0].adaptiveContext = `Calibrated to test your recurring growth area: ${topGap}`;
       tailored[0].isAdapted = true;
     }
+    const sanitized = sanitizeQuestionList(tailored);
     if (!hasMemory) {
-      questionsCache.set(cacheKey, tailored);
+      questionsCache.set(cacheKey, sanitized);
     }
-    return res.json({ questions: tailored });
+    return res.json({ questions: sanitized });
   }
 
   // 3. For custom Job Description / Resume, attempt Gemini generation with a strict 3-second safeguard
@@ -713,7 +735,7 @@ CRITICAL AUDIO DIRECTIVES:
 - Never list multiple questions at once. Ask exactly one question, then pause for the candidate.
 
 Create exactly ${questionCount} realistic, deeply relevant interview questions tailored to:
-- Role: ${roleTitle}
+- Role: ${cleanRole}
 - Experience Level: ${level}
 - Interview Track: ${track}
 - Target Company / Style: ${targetCompany}
@@ -741,14 +763,14 @@ Design questions that genuinely test real-world capabilities. Return an array of
     const questions = JSON.parse(cleanedText);
 
     if (Array.isArray(questions) && questions.length > 0) {
-      return res.json({ questions });
+      return res.json({ questions: sanitizeQuestionList(questions) });
     }
   } catch (error: any) {
     console.warn("Fast fallback engaged for questions:", error?.message || error);
   }
 
   // Resilient instant fallback tailored to role & track
-  const fallbackQuestions = getTailoredQuestionsForTrack(roleTitle, level, track, targetCompany, questionCount);
+  const fallbackQuestions = sanitizeQuestionList(getTailoredQuestionsForTrack(cleanRole, level, track, targetCompany, questionCount));
   res.json({ questions: fallbackQuestions });
 });
 

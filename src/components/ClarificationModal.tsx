@@ -76,11 +76,12 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
       onClarificationReceived(newClarification);
       setCandidateQuery('');
 
-      // Speak interviewer's clarification in character
-      setIsSpeakingResponse(true);
-      speakText(data.interviewerResponse, () => {
-        setIsSpeakingResponse(false);
-      });
+      // Speak interviewer's clarification in character (sync speaking indicator to exact audio start)
+      speakText(
+        data.interviewerResponse,
+        () => setIsSpeakingResponse(false),
+        { onStart: () => setIsSpeakingResponse(true) }
+      );
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err?.message || 'Could not connect with interviewer');
@@ -94,10 +95,11 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
       stopSpeaking();
       setIsSpeakingResponse(false);
     } else {
-      setIsSpeakingResponse(true);
-      speakText(text, () => {
-        setIsSpeakingResponse(false);
-      });
+      speakText(
+        text,
+        () => setIsSpeakingResponse(false),
+        { onStart: () => setIsSpeakingResponse(true) }
+      );
     }
   };
 

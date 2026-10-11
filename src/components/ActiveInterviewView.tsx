@@ -746,7 +746,7 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
       </div>
 
       {/* Mode 1: 1-on-1 Voice & Video Call Studio (Active Turn) */}
-      {!currentTurn.evaluation && interviewMode === 'video' ? (
+      {interviewMode === 'video' ? (
         <VideoInterviewRoom
           setup={setup}
           persona={persona}
@@ -778,6 +778,12 @@ export const ActiveInterviewView: React.FC<ActiveInterviewViewProps> = ({
           onToggleCamera={handleToggleCamera}
           speechError={speechError}
           isTranscribingAudio={isTranscribingAudio}
+          evaluation={currentTurn.evaluation}
+          onNextQuestion={onNextQuestion}
+          onRetryQuestion={() => onRetryQuestion(currentTurn.id)}
+          onTakeFollowUp={onTakeFollowUpQuestion}
+          onFinishEarly={onFinishEarly}
+          isLastQuestion={isLastQuestion}
         />
       ) : !currentTurn.evaluation ? (
         /* Mode 2: Classic Question Card Layout */

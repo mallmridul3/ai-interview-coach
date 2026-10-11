@@ -105,6 +105,11 @@
       "kind": "request-never-settled",
       "step": 0,
       "state": "guarded"
+    },
+    {
+      "kind": "request-never-settled",
+      "step": 3,
+      "state": "guarded"
     }
   ]
 }

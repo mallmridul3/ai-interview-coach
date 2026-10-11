@@ -22,12 +22,18 @@ import {
   Pipette,
   CheckCircle2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  RotateCcw,
+  ArrowRight,
+  Award,
+  ThumbsUp,
+  Target
 } from 'lucide-react';
 import { 
   InterviewTurn, 
   InterviewerPersona, 
   RoleSetup, 
+  AnswerEvaluation,
 } from '../types';
 import { AudioWaveform } from './AudioWaveform';
 import { InterviewerVideoAvatar } from './InterviewerVideoAvatar';
@@ -59,6 +65,12 @@ interface VideoInterviewRoomProps {
   onToggleCamera: () => void;
   speechError?: string | null;
   isTranscribingAudio?: boolean;
+  evaluation?: AnswerEvaluation;
+  onNextQuestion?: () => void;
+  onRetryQuestion?: () => void;
+  onTakeFollowUp?: (followUpQuestionText: string) => void;
+  onFinishEarly?: () => void;
+  isLastQuestion?: boolean;
 }
 
 export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
@@ -86,6 +98,12 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   onToggleCamera,
   speechError,
   isTranscribingAudio,
+  evaluation,
+  onNextQuestion,
+  onRetryQuestion,
+  onTakeFollowUp,
+  onFinishEarly,
+  isLastQuestion,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +112,14 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
   const [layoutMode, setLayoutMode] = useState<'pip' | 'grid'>('pip');
   const [showTranscriptInput, setShowTranscriptInput] = useState(true);
   const [isLocalSubmitting, setIsLocalSubmitting] = useState(false);
+  const [showScorecardDrawer, setShowScorecardDrawer] = useState(true);
+
+  // Auto-expand scorecard drawer whenever new evaluation lands
+  useEffect(() => {
+    if (evaluation) {
+      setShowScorecardDrawer(true);
+    }
+  }, [evaluation]);
 
   const toggleFullscreen = () => {
     setIsFullscreen((prev) => {
@@ -263,10 +289,23 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
                 </div>
               )}
 
-              {/* PiP Candidate Name Tag */}
-              <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between bg-black/70 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] text-zinc-200">
+              {/* PiP Candidate Name Tag with Live Mic Indicator */}
+              <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between bg-black/75 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] text-zinc-200 border border-white/5">
                 <span className="font-medium truncate">You</span>
-                <span className={`w-1.5 h-1.5 rounded-full ${cameraActive ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+                <div className="flex items-center space-x-1">
+                  {isRecording ? (
+                    <span className="flex items-center space-x-0.5 text-emerald-400 font-mono text-[9px]" title="Microphone Live">
+                      <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="flex items-end space-x-0.5 h-2">
+                        <span className="w-0.5 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite_100ms] h-full" />
+                        <span className="w-0.5 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite_300ms] h-2/3" />
+                        <span className="w-0.5 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite_200ms] h-4/5" />
+                      </span>
+                    </span>
+                  ) : (
+                    <span className={`w-1.5 h-1.5 rounded-full ${cameraActive ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+                  )}
+                </div>
               </div>
             </div>
 
@@ -328,9 +367,20 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
                 </div>
               )}
 
-              {/* Tag */}
-              <div className="absolute bottom-3 left-3 bg-black/65 backdrop-blur-md px-2.5 py-1 rounded-md text-xs text-white border border-white/10">
+              {/* Tag with live mic audio level */}
+              <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-xs text-white border border-white/10 flex items-center space-x-2">
                 <span>You (Candidate)</span>
+                {isRecording && (
+                  <span className="flex items-center space-x-1 text-emerald-400 font-mono text-[10px]" title="Microphone Live">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Mic Live</span>
+                    <span className="flex items-end space-x-0.5 h-2.5 ml-0.5">
+                      <span className="w-0.5 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite_100ms] h-full" />
+                      <span className="w-0.5 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite_300ms] h-2/3" />
+                      <span className="w-0.5 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite_200ms] h-4/5" />
+                    </span>
+                  </span>
+                )}
               </div>
             </div>
 
@@ -350,6 +400,152 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
               </div>
             )}
           </div>
+        )}
+
+        {/* In-Room Live Feedback & Scorecard Overlay (Keeps candidate immersed in video studio) */}
+        {evaluation && showScorecardDrawer && (
+          <div className="absolute inset-x-2 sm:inset-x-8 bottom-3 sm:bottom-6 z-30 max-h-[75%] overflow-y-auto rounded-2xl bg-zinc-950/95 backdrop-blur-xl border border-zinc-700/80 p-4 sm:p-5 shadow-2xl text-white transition-all animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {/* Top Bar with Score, Verdict, and Primary Actions */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 font-extrabold text-xl shadow-lg shadow-emerald-500/20 shrink-0">
+                  {evaluation.overallScore}
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">STAR Evaluation</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      evaluation.verdict === 'Exceptional' || evaluation.verdict === 'Strong'
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        : evaluation.verdict === 'Competent'
+                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    }`}>
+                      {evaluation.verdict}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 mt-0.5 font-medium line-clamp-1">
+                    {evaluation.coachAdvice || "Answer analyzed against premier bar-raiser criteria."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 shrink-0">
+                {onRetryQuestion && (
+                  <button
+                    type="button"
+                    onClick={onRetryQuestion}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center space-x-1 transition-colors cursor-pointer"
+                    title="Practice this question again"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Retry</span>
+                  </button>
+                )}
+                {onNextQuestion && (
+                  <button
+                    type="button"
+                    onClick={onNextQuestion}
+                    className="px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold flex items-center space-x-1.5 transition-all shadow-md cursor-pointer"
+                  >
+                    <span>{isLastQuestion ? 'View Final Debrief' : 'Next Question'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowScorecardDrawer(false)}
+                  className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  title="Minimize scorecard to view video"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* STAR Pillars Quick Grid */}
+            {evaluation.starBreakdown && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 my-3">
+                {(['situation', 'task', 'action', 'result'] as const).map((key) => {
+                  const pillar = evaluation.starBreakdown[key];
+                  const labels = { situation: 'Situation', task: 'Task', action: 'Action', result: 'Result' };
+                  return (
+                    <div key={key} className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800/80">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-300">
+                        <span>{labels[key]}</span>
+                        <span className={pillar.score >= 8 ? 'text-emerald-400 font-bold' : pillar.score >= 6 ? 'text-blue-400 font-bold' : 'text-amber-400 font-bold'}>
+                          {pillar.score}/10
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-1 line-clamp-2 leading-tight">
+                        {pillar.feedback}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Follow-Up Probe Callout (The signature feature!) */}
+            {evaluation.potentialFollowUp && onTakeFollowUp && (
+              <div className="my-3 p-3 rounded-xl bg-gradient-to-r from-amber-950/40 via-amber-900/25 to-zinc-900 border border-amber-600/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-1.5 text-amber-300 font-bold text-xs uppercase tracking-wider mb-0.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Interviewer Follow-Up Probe Available</span>
+                  </div>
+                  <p className="text-xs text-zinc-200 italic">
+                    &ldquo;{evaluation.potentialFollowUp}&rdquo;
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onTakeFollowUp(evaluation.potentialFollowUp!)}
+                  className="shrink-0 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold flex items-center space-x-1.5 shadow-md transition-all cursor-pointer"
+                >
+                  <span>🎙️ Take Follow-Up Probe</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Strengths & Improvement Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+              {evaluation.strengths && evaluation.strengths.length > 0 && (
+                <div className="p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                  <span className="font-semibold text-emerald-400 block mb-1">Key Strengths</span>
+                  <ul className="space-y-1 text-zinc-300 list-disc list-inside text-[11px]">
+                    {evaluation.strengths.slice(0, 2).map((s, idx) => (
+                      <li key={idx} className="line-clamp-2">{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {evaluation.areasForImprovement && evaluation.areasForImprovement.length > 0 && (
+                <div className="p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                  <span className="font-semibold text-amber-400 block mb-1">Growth Areas</span>
+                  <ul className="space-y-1 text-zinc-300 list-disc list-inside text-[11px]">
+                    {evaluation.areasForImprovement.slice(0, 2).map((g, idx) => (
+                      <li key={idx} className="line-clamp-2">{g}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Minimized Scorecard Floating Pill */}
+        {evaluation && !showScorecardDrawer && (
+          <button
+            type="button"
+            onClick={() => setShowScorecardDrawer(true)}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border border-zinc-700 backdrop-blur-md text-white text-xs font-semibold flex items-center space-x-2 shadow-2xl cursor-pointer animate-in fade-in"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>Score: {evaluation.overallScore}/100 ({evaluation.verdict}) • View Scorecard</span>
+            <ChevronUp className="w-4 h-4 text-zinc-400" />
+          </button>
         )}
       </div>
 
@@ -557,25 +753,63 @@ export const VideoInterviewRoom: React.FC<VideoInterviewRoomProps> = ({
             <Sliders className="w-4 h-4" />
           </button>
 
-          {/* Submit Answer */}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={(!userAnswer.trim() && !isRecording) || isEvaluating || isLocalSubmitting || isTranscribingAudio}
-            className="px-4 sm:px-5 py-2 bg-white hover:bg-zinc-200 disabled:opacity-40 text-zinc-950 text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center space-x-1.5 transition-all cursor-pointer ml-1"
-          >
-            {isEvaluating || isLocalSubmitting || isTranscribingAudio ? (
-              <>
-                <div className="w-3.5 h-3.5 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
-                <span>Evaluating...</span>
-              </>
-            ) : (
-              <>
-                <span>Submit Answer</span>
-                <Send className="w-3.5 h-3.5" />
-              </>
-            )}
-          </button>
+          {/* Action Area: Submit OR Post-Evaluation Actions */}
+          {evaluation ? (
+            <div className="flex items-center space-x-2 ml-1">
+              {onRetryQuestion && (
+                <button
+                  type="button"
+                  onClick={onRetryQuestion}
+                  className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+                  title="Practice this question again"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retry</span>
+                </button>
+              )}
+              {evaluation.potentialFollowUp && onTakeFollowUp && (
+                <button
+                  type="button"
+                  onClick={() => onTakeFollowUp(evaluation.potentialFollowUp!)}
+                  className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold text-xs rounded-xl shadow-lg flex items-center space-x-1.5 transition-all cursor-pointer"
+                  title="Answer the interviewer's probing follow-up live"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Take Follow-Up</span>
+                </button>
+              )}
+              {onNextQuestion && (
+                <button
+                  type="button"
+                  onClick={onNextQuestion}
+                  className="px-4 sm:px-5 py-2 bg-white hover:bg-zinc-200 text-zinc-950 text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center space-x-1.5 transition-all cursor-pointer"
+                >
+                  <span>{isLastQuestion ? 'View Final Debrief' : 'Next Question'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          ) : (
+            /* Submit Answer */
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={(!userAnswer.trim() && !isRecording) || isEvaluating || isLocalSubmitting || isTranscribingAudio}
+              className="px-4 sm:px-5 py-2 bg-white hover:bg-zinc-200 disabled:opacity-40 text-zinc-950 text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center space-x-1.5 transition-all cursor-pointer ml-1"
+            >
+              {isEvaluating || isLocalSubmitting || isTranscribingAudio ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+                  <span>Evaluating...</span>
+                </>
+              ) : (
+                <>
+                  <span>Submit Answer</span>
+                  <Send className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
