@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { RoleSetupView } from './components/RoleSetupView';
 import { ActiveInterviewView } from './components/ActiveInterviewView';
@@ -835,6 +836,9 @@ export default function App() {
         currentUser={currentUser}
         score={finalReport?.overallScore}
       />
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
